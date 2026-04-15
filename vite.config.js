@@ -42,6 +42,8 @@ export default defineConfig({
       workbox: {
         // Biar aset tailwind dan react ter-cache dengan baik
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+        cacheId: 'duitku-v2', // Ganti ID-nya biar cache lama dibuang
+        cleanupOutdatedCaches: true,
       }
     })
   ],
