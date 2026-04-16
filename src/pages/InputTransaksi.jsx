@@ -13,7 +13,6 @@ export default function InputTransaksi({ session, setCurrentPage, type: initialT
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState('');
 
-  // Source of truth untuk tab (Pemasukan/Pengeluaran)
   const [activeTab, setActiveTab] = useState(initialType === 'pemasukan' ? 'pemasukan' : 'pengeluaran');
 
   const [formData, setFormData] = useState({
@@ -26,10 +25,8 @@ export default function InputTransaksi({ session, setCurrentPage, type: initialT
 
   const [showAlert, setShowAlert] = useState({ show: false, title: '', message: '' });
 
-  // 1. Logic Load Data untuk EDIT atau RESET saat pindah tab
   useEffect(() => {
     if (editData) {
-      // Jika mode EDIT
       setFormData({
         amount: editData.amount,
         category_id: editData.category_id,
@@ -40,7 +37,6 @@ export default function InputTransaksi({ session, setCurrentPage, type: initialT
       setDisplayAmount(formatRupiah(editData.amount.toString()));
       setActiveTab(editData.type);
     } else {
-      // Jika mode INPUT BARU
       setFormData(prev => ({ ...prev, category_id: '' }));
       setCategoryFilter('');
     }
@@ -122,14 +118,12 @@ export default function InputTransaksi({ session, setCurrentPage, type: initialT
 
     let error;
     if (editData) {
-      // MODE UPDATE
       const { error: updateError } = await supabase
         .from('transaction')
         .update({ ...payload, updated_at: new Date() })
         .eq('id', editData.id);
       error = updateError;
     } else {
-      // MODE INSERT
       const { error: insertError } = await supabase.from('transaction').insert([payload]);
       error = insertError;
     }
@@ -137,9 +131,7 @@ export default function InputTransaksi({ session, setCurrentPage, type: initialT
     if (error) {
       alert('Gagal simpan: ' + error.message);
     } else {
-      // Bersihkan state editData di App.jsx
       if (setEditData) setEditData(null);
-      // Balik ke halaman sebelumnya (Laporan kalau abis edit, Dashboard kalau abis input)
       setCurrentPage(editData ? 'laporan' : 'dashboard');
     }
     setLoading(false);
@@ -157,7 +149,6 @@ export default function InputTransaksi({ session, setCurrentPage, type: initialT
   return (
     <>
       <div className="min-h-screen pb-10 font-sans bg-white">
-        {/* Header Dinamis */}
         <div className={`p-6 pt-12 text-white rounded-b-[2.5rem] shadow-lg transition-colors duration-500 ${activeTab === 'pemasukan' ? 'bg-green-500 shadow-green-200' : 'bg-red-500 shadow-red-200'}`}>
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
@@ -173,7 +164,6 @@ export default function InputTransaksi({ session, setCurrentPage, type: initialT
                 </h1>
             </div>
 
-            {/* TAB SWITCHER (Hanya muncul jika TIDAK sedang edit) */}
             {!editData && (
               <div className="relative flex h-10 p-1 overflow-hidden bg-white/20 backdrop-blur-md rounded-2xl w-44">
                   <div
@@ -215,7 +205,6 @@ export default function InputTransaksi({ session, setCurrentPage, type: initialT
         </div>
 
         <form onSubmit={handleSave} className="p-8 space-y-8">
-          {/* CATEGORY SELECTOR */}
           <div className="space-y-3">
             <div className="flex items-center justify-between px-1">
               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Pilih Kategori</label>
@@ -231,26 +220,46 @@ export default function InputTransaksi({ session, setCurrentPage, type: initialT
             </div>
 
             <div
-              className="grid grid-cols-4 gap-3 p-1 overflow-y-auto max-h-64 custom-scrollbar"
+              className={`grid ${categories.length > 0 ? 'grid-cols-4' : 'grid-cols-1'} gap-3 p-1 overflow-y-auto max-h-64 custom-scrollbar`}
               style={isShaking ? { animation: 'shake 0.1s ease-in-out 0s 10' } : {}}
             >
-              {filteredCategories.map((cat) => (
+              {categories.length > 0 ? (
+                filteredCategories.length > 0 ? (
+                  filteredCategories.map((cat) => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setFormData({...formData, category_id: cat.id})}
+                      className={`flex flex-col items-center gap-2 py-4 rounded-[1.5rem] transition-all border-2 ${
+                        formData.category_id === cat.id
+                        ? (activeTab === 'pemasukan' ? 'border-green-500 bg-green-50 shadow-md shadow-green-100' : 'border-red-500 bg-red-50 shadow-md shadow-red-100') + ' scale-[1.05]'
+                        : 'border-transparent bg-gray-50'
+                      }`}
+                    >
+                      <span className="text-2xl">{cat.icon}</span>
+                      <span className={`text-[8px] font-black uppercase truncate w-full px-2 text-center ${formData.category_id === cat.id ? (activeTab === 'pemasukan' ? 'text-green-600' : 'text-red-600') : 'text-gray-500'}`}>
+                        {cat.name}
+                      </span>
+                    </button>
+                  ))
+                ) : (
+                  <div className="col-span-4 p-8 text-center bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-200 font-black text-[10px] text-gray-400 uppercase">
+                    Kategori tidak ditemukan ges 🔎
+                  </div>
+                )
+              ) : (
+                /* TOMBOL JALAN TOL KE SETTING KATEGORI */
                 <button
-                  key={cat.id}
                   type="button"
-                  onClick={() => setFormData({...formData, category_id: cat.id})}
-                  className={`flex flex-col items-center gap-2 py-4 rounded-[1.5rem] transition-all border-2 ${
-                    formData.category_id === cat.id
-                    ? (activeTab === 'pemasukan' ? 'border-green-500 bg-green-50 shadow-md shadow-green-100' : 'border-red-500 bg-red-50 shadow-md shadow-red-100') + ' scale-[1.05]'
-                    : 'border-transparent bg-gray-50'
-                  }`}
+                  onClick={() => setCurrentPage('kategori')}
+                  className="p-8 text-center bg-blue-50 border-2 border-dashed border-blue-200 rounded-[2rem] group active:scale-95 transition-all"
                 >
-                  <span className="text-2xl">{cat.icon}</span>
-                  <span className={`text-[8px] font-black uppercase truncate w-full px-2 text-center ${formData.category_id === cat.id ? (activeTab === 'pemasukan' ? 'text-green-600' : 'text-red-600') : 'text-gray-500'}`}>
-                    {cat.name}
-                  </span>
+                  <div className="mb-2 text-3xl transition-transform group-hover:scale-110">📂</div>
+                  <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">
+                    Belum ada kategori {activeTab}.<br/>Klik di sini untuk buat dulu!
+                  </p>
                 </button>
-              ))}
+              )}
             </div>
           </div>
 

@@ -17,7 +17,9 @@ export default function Kategori({ session, setCurrentPage }) {
   const [displayBudget, setDisplayBudget] = useState('');
   const [displayRecAmount, setDisplayRecAmount] = useState('');
 
-  // State baru untuk cari kategori di modal rutin
+  // State pencarian untuk list kategori utama
+  const [catListSearch, setCatListSearch] = useState('');
+  // State cari kategori di modal rutin
   const [recCatSearch, setRecCatSearch] = useState('');
 
   const [formData, setFormData] = useState({
@@ -102,9 +104,14 @@ export default function Kategori({ session, setCurrentPage }) {
       payment_method: rec.payment_method
     });
     setDisplayRecAmount(formatRupiah(rec.amount.toString()));
-    setRecCatSearch(''); // Reset search saat buka
+    setRecCatSearch('');
     setIsRecModalOpen(true);
   };
+
+  // Filter list kategori utama berdasarkan search term
+  const filteredCategoryList = categories.filter(cat =>
+    cat.name.toLowerCase().includes(catListSearch.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen pb-24 font-sans text-gray-900 bg-gray-50">
@@ -126,6 +133,20 @@ export default function Kategori({ session, setCurrentPage }) {
           </button>
         </div>
 
+        {/* Searching Input untuk List Utama */}
+        {activeTab === 'list' && (
+          <div className="relative mb-4">
+            <input
+              type="text"
+              placeholder="Cari kategori..."
+              value={catListSearch}
+              onChange={(e) => setCatListSearch(e.target.value)}
+              className="w-full p-4 pl-12 text-sm font-bold transition-all bg-gray-100 border-none outline-none rounded-2xl focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400"
+            />
+            <span className="absolute text-lg -translate-y-1/2 left-4 top-1/2 opacity-30">🔍</span>
+          </div>
+        )}
+
         <div className="flex p-1.5 bg-gray-100 rounded-2xl">
           <button onClick={() => setActiveTab('list')} className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all ${activeTab === 'list' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400'}`}>📂 Kategori</button>
           <button onClick={() => setActiveTab('recurring')} className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all ${activeTab === 'recurring' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400'}`}>🔄 Rutin</button>
@@ -135,38 +156,50 @@ export default function Kategori({ session, setCurrentPage }) {
       <div className="p-5">
         {activeTab === 'list' ? (
           <div className="space-y-4">
-            {categories.map((cat) => {
-              const used = transactions.filter(t => t.category_id === cat.id).reduce((sum, item) => sum + item.amount, 0);
-              const percent = cat.budget > 0 ? Math.min((used / cat.budget) * 100, 100) : 0;
-              return (
-                <div key={cat.id} className="p-5 bg-white border border-gray-100 shadow-sm rounded-[2rem] relative overflow-hidden">
-                  <div className="relative z-10 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center justify-center w-12 h-12 text-2xl rounded-2xl" style={{ backgroundColor: `${cat.color}15`, color: cat.color }}>{cat.icon}</div>
-                      <div>
-                        <h4 className="text-sm font-black tracking-tight">{cat.name}</h4>
-                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{cat.type}</p>
+            {filteredCategoryList.length === 0 ? (
+               <div className="py-20 text-center bg-white rounded-[2rem] border-2 border-dashed border-gray-100 font-black text-[10px] text-gray-400 uppercase">Kategori tidak ditemukan ges 🕵️‍♂️</div>
+            ) : (
+              filteredCategoryList.map((cat) => {
+                const used = transactions.filter(t => t.category_id === cat.id).reduce((sum, item) => sum + item.amount, 0);
+                const percent = cat.budget > 0 ? Math.min((used / cat.budget) * 100, 100) : 0;
+                return (
+                  <div key={cat.id} className="p-5 bg-white border border-gray-100 shadow-sm rounded-[2rem] relative overflow-hidden">
+                    <div className="relative z-10 flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center justify-center w-12 h-12 text-2xl rounded-2xl" style={{ backgroundColor: `${cat.color}15`, color: cat.color }}>{cat.icon}</div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="text-sm font-black tracking-tight">{cat.name}</h4>
+                            {/* BADGE TIPE KATEGORI */}
+                            <span className={`text-[7px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-tighter ${
+                              cat.type === 'pemasukan' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                            }`}>
+                              {cat.type === 'pemasukan' ? 'Masuk' : 'Keluar'}
+                            </span>
+                          </div>
+                          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">Limit: Rp {cat.budget?.toLocaleString('id-ID') || 0}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-1">
+                        <button onClick={() => openEditModal(cat)} className="p-2 text-gray-400 transition-colors hover:text-blue-500">✏️</button>
+                        <button onClick={() => setDeleteId(cat.id)} className="p-2 text-gray-400 transition-colors hover:text-red-500">🗑️</button>
                       </div>
                     </div>
-                    <div className="flex gap-1">
-                      <button onClick={() => openEditModal(cat)} className="p-2 text-gray-400 transition-colors hover:text-blue-500">✏️</button>
-                      <button onClick={() => setDeleteId(cat.id)} className="p-2 text-gray-400 transition-colors hover:text-red-500">🗑️</button>
-                    </div>
+                    {cat.type === 'pengeluaran' && cat.budget > 0 && (
+                      <div className="mt-4 space-y-2">
+                        <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                          <div className="h-full transition-all duration-700" style={{ width: `${percent}%`, backgroundColor: cat.color }} />
+                        </div>
+                        <div className="flex justify-between text-[9px] font-black uppercase text-gray-400">
+                          <span>Pake: Rp {used.toLocaleString('id-ID')}</span>
+                          <span>{percent.toFixed(0)}%</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  {cat.type === 'pengeluaran' && cat.budget > 0 && (
-                    <div className="mt-4 space-y-2">
-                      <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                        <div className="h-full transition-all duration-700" style={{ width: `${percent}%`, backgroundColor: cat.color }} />
-                      </div>
-                      <div className="flex justify-between text-[9px] font-black uppercase text-gray-400">
-                        <span>Pake: Rp {used.toLocaleString('id-ID')}</span>
-                        <span>Limit: Rp {cat.budget.toLocaleString('id-ID')}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         ) : (
           <div className="space-y-4">
@@ -202,7 +235,7 @@ export default function Kategori({ session, setCurrentPage }) {
         )}
       </div>
 
-      {/* MODAL KATEGORI */}
+      {/* MODAL KATEGORI (TETAP SAMA) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center p-0 transition-all sm:items-center bg-black/40 backdrop-blur-sm sm:p-4">
           <div className="bg-white w-full max-w-md rounded-t-[2.5rem] sm:rounded-3xl p-8 shadow-2xl animate-slide-up">
@@ -283,7 +316,6 @@ export default function Kategori({ session, setCurrentPage }) {
                 </div>
               </div>
 
-              {/* SEARCHABLE CATEGORY PICKER */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between px-1">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Pilih Kategori</label>
@@ -321,11 +353,6 @@ export default function Kategori({ session, setCurrentPage }) {
                         </div>
                       </button>
                     ))}
-                  {categories.filter(c => c.name.toLowerCase().includes(recCatSearch.toLowerCase())).length === 0 && (
-                    <div className="col-span-2 py-8 text-center bg-gray-50 rounded-2xl">
-                       <p className="text-[10px] font-bold text-gray-400 italic">Kategori nggak ketemu, Puh! 🕵️‍♂️</p>
-                    </div>
-                  )}
                 </div>
               </div>
 
