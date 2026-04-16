@@ -8,18 +8,17 @@ export default function Kategori({ session, setCurrentPage }) {
   const [recurringData, setRecurringData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // State UI
-  const [activeTab, setActiveTab] = useState('list'); // 'list' atau 'recurring'
+  const [activeTab, setActiveTab] = useState('list');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRecModalOpen, setIsRecModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const [deleteRecId, setDeleteRecId] = useState(null);
-  const [showAlert, setShowAlert] = useState({ show: false, title: '', message: '' });
   const [displayBudget, setDisplayBudget] = useState('');
   const [displayRecAmount, setDisplayRecAmount] = useState('');
 
-  const nameInputRef = useRef(null);
+  // State baru untuk cari kategori di modal rutin
+  const [recCatSearch, setRecCatSearch] = useState('');
 
   const [formData, setFormData] = useState({
     name: '', type: 'pengeluaran', icon: '🍔', color: '#3B82F6', budget: 0,
@@ -34,15 +33,9 @@ export default function Kategori({ session, setCurrentPage }) {
   const fetchData = async () => {
     setLoading(true);
     const firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
-
-    // Fetch Kategori
     const { data: catData } = await supabase.from('category').select('*').is('deleted_at', null).order('created_at', { ascending: false });
-
-    // Fetch Transaksi (buat hitung budget)
     const { data: transData } = await supabase.from('transaction').select('amount, category_id').is('deleted_at', null).gte('date', firstDay);
-
-    // Fetch Recurring
-    const { data: recData } = await supabase.from('recurring_transactions').select('*, category(name, icon)').order('billing_date', { ascending: true });
+    const { data: recData } = await supabase.from('recurring_transactions').select('*, category(*)').order('billing_date', { ascending: true });
 
     setCategories(catData || []);
     setTransactions(transData || []);
@@ -54,15 +47,19 @@ export default function Kategori({ session, setCurrentPage }) {
     fetchData();
   }, []);
 
-  // --- LOGIKA KATEGORI ---
+  const openEditModal = (cat) => {
+    setEditingId(cat.id);
+    setFormData({
+      name: cat.name, type: cat.type, icon: cat.icon, color: cat.color, budget: cat.budget || 0
+    });
+    setDisplayBudget(cat.budget ? formatRupiah(cat.budget.toString()) : '');
+    setIsModalOpen(true);
+  };
+
   const handleSaveCategory = async (e) => {
     e.preventDefault();
-    if (!formData.name.trim()) {
-      setShowAlert({ show: true, title: 'Nama Kosong!', message: 'Kasih nama kategorinya dulu dong! 🏷️' });
-      return;
-    }
+    if (!formData.name.trim()) return alert('Nama kategori wajib diisi!');
     const payload = { ...formData, user_id: session.user.id, budget: formData.type === 'pengeluaran' ? Number(formData.budget) : 0 };
-
     if (editingId) {
       await supabase.from('category').update({ ...payload, updated_at: new Date() }).eq('id', editingId);
     } else {
@@ -79,13 +76,10 @@ export default function Kategori({ session, setCurrentPage }) {
     setEditingId(null);
   };
 
-  // --- LOGIKA RECURRING ---
   const handleSaveRecurring = async (e) => {
     e.preventDefault();
     if (!recFormData.category_id || !recFormData.note) return alert('Lengkapi data dulu ges!');
-
     const payload = { ...recFormData, user_id: session.user.id };
-
     if (editingId) {
       await supabase.from('recurring_transactions').update(payload).eq('id', editingId);
     } else {
@@ -108,22 +102,23 @@ export default function Kategori({ session, setCurrentPage }) {
       payment_method: rec.payment_method
     });
     setDisplayRecAmount(formatRupiah(rec.amount.toString()));
+    setRecCatSearch(''); // Reset search saat buka
     setIsRecModalOpen(true);
   };
 
   return (
-    <div className="min-h-screen pb-24 font-sans bg-gray-50">
-      {/* HEADER & TAB FIXED */}
+    <div className="min-h-screen pb-24 font-sans text-gray-900 bg-gray-50">
+      {/* HEADER */}
       <div className="sticky top-0 z-40 bg-white shadow-sm rounded-b-[2.5rem] px-6 pt-12 pb-4">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <button onClick={() => setCurrentPage('dashboard')} className="flex items-center justify-center w-10 h-10 font-bold text-gray-600 bg-gray-100 rounded-2xl active:scale-90">←</button>
-            <h1 className="text-xl font-black tracking-tight text-gray-800 uppercase">Pengaturan</h1>
+            <h1 className="text-xl font-black tracking-tight uppercase">Pengaturan</h1>
           </div>
           <button
             onClick={() => {
               if (activeTab === 'list') { resetForm(); setIsModalOpen(true); }
-              else { setEditingId(null); setIsRecModalOpen(true); }
+              else { setEditingId(null); setRecCatSearch(''); setIsRecModalOpen(true); }
             }}
             className="flex items-center justify-center w-10 h-10 text-2xl font-bold text-white bg-blue-600 shadow-md rounded-2xl active:scale-95"
           >
@@ -137,10 +132,8 @@ export default function Kategori({ session, setCurrentPage }) {
         </div>
       </div>
 
-      {/* CONTENT */}
       <div className="p-5">
         {activeTab === 'list' ? (
-          /* TAB KATEGORI */
           <div className="space-y-4">
             {categories.map((cat) => {
               const used = transactions.filter(t => t.category_id === cat.id).reduce((sum, item) => sum + item.amount, 0);
@@ -151,13 +144,13 @@ export default function Kategori({ session, setCurrentPage }) {
                     <div className="flex items-center gap-4">
                       <div className="flex items-center justify-center w-12 h-12 text-2xl rounded-2xl" style={{ backgroundColor: `${cat.color}15`, color: cat.color }}>{cat.icon}</div>
                       <div>
-                        <h4 className="text-sm font-black tracking-tight text-gray-800">{cat.name}</h4>
+                        <h4 className="text-sm font-black tracking-tight">{cat.name}</h4>
                         <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{cat.type}</p>
                       </div>
                     </div>
                     <div className="flex gap-1">
-                      <button onClick={() => openEditModal(cat)} className="p-2 text-gray-400 hover:text-blue-500">✏️</button>
-                      <button onClick={() => setDeleteId(cat.id)} className="p-2 text-gray-400 hover:text-red-500">🗑️</button>
+                      <button onClick={() => openEditModal(cat)} className="p-2 text-gray-400 transition-colors hover:text-blue-500">✏️</button>
+                      <button onClick={() => setDeleteId(cat.id)} className="p-2 text-gray-400 transition-colors hover:text-red-500">🗑️</button>
                     </div>
                   </div>
                   {cat.type === 'pengeluaran' && cat.budget > 0 && (
@@ -176,43 +169,98 @@ export default function Kategori({ session, setCurrentPage }) {
             })}
           </div>
         ) : (
-          /* TAB RECURRING (TAGIHAN RUTIN) */
           <div className="space-y-4">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 mb-2">Daftar Pengingat Rutin</p>
-            {recurringData.length === 0 ? (
-              <div className="text-center py-20 bg-white rounded-[2rem] border-2 border-dashed border-gray-100">
-                <p className="text-sm font-bold text-gray-300">Belum ada tagihan rutin ges 🍃</p>
-              </div>
-            ) : (
-              recurringData.map((rec) => (
-                <div key={rec.id} className="p-5 bg-white border border-gray-100 shadow-sm rounded-[2rem] flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center justify-center w-12 h-12 text-2xl bg-gray-50 rounded-2xl">{rec.category?.icon}</div>
-                    <div>
-                      <h4 className="text-sm font-black tracking-tight text-gray-800 uppercase">{rec.note}</h4>
-                      <p className="text-[9px] font-bold text-blue-500 uppercase">Tiap Tgl {rec.billing_date} • {rec.payment_method}</p>
-                    </div>
+            {recurringData.map((rec) => (
+              <div key={rec.id} className="p-5 bg-white border border-gray-100 shadow-sm rounded-[2rem] flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div
+                    className="flex items-center justify-center w-12 h-12 text-2xl rounded-2xl"
+                    style={{
+                      backgroundColor: `${rec.category?.color || '#94a3b8'}15`,
+                      color: rec.category?.color || '#64748b'
+                    }}
+                  >
+                    {rec.category?.icon || '🔄'}
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-black text-gray-800">Rp {rec.amount.toLocaleString('id-ID')}</p>
-                    <div className="flex justify-end gap-2 mt-1">
-                      <button onClick={() => openEditRec(rec)} className="text-[10px] font-black text-blue-400 uppercase">Edit</button>
-                      <button onClick={() => setDeleteRecId(rec.id)} className="text-[10px] font-black text-red-400 uppercase">Hapus</button>
-                    </div>
+                  <div>
+                    <h4 className="text-sm font-black tracking-tight uppercase">{rec.note}</h4>
+                    <p className="text-[9px] font-bold text-blue-500 uppercase">Tgl {rec.billing_date} • {rec.payment_method}</p>
                   </div>
                 </div>
-              ))
-            )}
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-sm font-black">Rp {rec.amount.toLocaleString('id-ID')}</p>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <button onClick={() => openEditRec(rec)} className="p-2 text-xs text-gray-400 transition-colors rounded-lg bg-gray-50 hover:text-blue-500">✏️</button>
+                    <button onClick={() => setDeleteRecId(rec.id)} className="p-2 text-xs text-gray-400 transition-colors rounded-lg bg-gray-50 hover:text-red-500">🗑️</button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
 
-      {/* MODAL FORM RECURRING (NEW) */}
-      {isRecModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-sm transition-all">
+      {/* MODAL KATEGORI */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center p-0 transition-all sm:items-center bg-black/40 backdrop-blur-sm sm:p-4">
           <div className="bg-white w-full max-w-md rounded-t-[2.5rem] sm:rounded-3xl p-8 shadow-2xl animate-slide-up">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-black tracking-tight text-gray-800 uppercase">{editingId ? 'Edit Rutin 🔄' : 'Tagihan Rutin ✨'}</h2>
+              <h2 className="text-xl font-black tracking-tight uppercase">{editingId ? 'Edit Kategori 📝' : 'Kategori Baru ✨'}</h2>
+              <button onClick={() => setIsModalOpen(false)} className="w-8 h-8 font-bold text-gray-500 bg-gray-100 rounded-full active:scale-95">✕</button>
+            </div>
+            <form onSubmit={handleSaveCategory} className="space-y-4">
+              <div className="flex p-1 bg-gray-100 rounded-2xl">
+                <button type="button" onClick={() => setFormData({ ...formData, type: 'pengeluaran' })} className={`flex-1 py-2 text-[10px] font-black uppercase rounded-xl ${formData.type === 'pengeluaran' ? 'bg-white shadow-sm text-red-500' : 'text-gray-400'}`}>Pengeluaran</button>
+                <button type="button" onClick={() => setFormData({ ...formData, type: 'pemasukan' })} className={`flex-1 py-2 text-[10px] font-black uppercase rounded-xl ${formData.type === 'pemasukan' ? 'bg-white shadow-sm text-green-500' : 'text-gray-400'}`}>Pemasukan</button>
+              </div>
+              <div className="flex gap-3">
+                <div className="w-1/4">
+                  <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Icon</label>
+                  <input type="text" value={formData.icon} onChange={(e) => setFormData({ ...formData, icon: e.target.value })} className="w-full p-4 mt-1 text-2xl text-center border-none outline-none bg-gray-50 rounded-2xl" maxLength="2" required />
+                </div>
+                <div className="w-3/4">
+                  <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Nama</label>
+                  <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Jajan" className="w-full p-4 mt-1 text-sm font-bold border-none outline-none bg-gray-50 rounded-2xl focus:ring-2 focus:ring-blue-500" required />
+                </div>
+              </div>
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Warna</label>
+                <div className="grid grid-cols-7 gap-2 mt-2">
+                  {colorOptions.map(color => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, color })}
+                      className={`aspect-square w-full rounded-full transition-all ${formData.color === color ? 'scale-110 ring-2 ring-blue-400 ring-offset-2' : 'opacity-40 hover:opacity-100'}`}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+              </div>
+              {formData.type === 'pengeluaran' && (
+                <div>
+                  <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Budget</label>
+                  <input type="text" value={displayBudget} onChange={(e) => {
+                    const val = formatRupiah(e.target.value);
+                    setDisplayBudget(val);
+                    setFormData({ ...formData, budget: parseNumber(val) });
+                  }} placeholder="Rp 0" className="w-full p-4 mt-1 text-sm font-black border-none outline-none bg-gray-50 rounded-2xl focus:ring-2 focus:ring-blue-500" />
+                </div>
+              )}
+              <button type="submit" className="w-full py-4 mt-2 font-black text-white uppercase bg-blue-600 shadow-xl rounded-2xl active:scale-95">Simpan Kategori</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL RECURRING (UPGRADED) */}
+      {isRecModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-sm transition-all">
+          <div className="bg-white w-full max-w-md rounded-t-[2.5rem] sm:rounded-3xl p-8 shadow-2xl animate-slide-up max-h-[95vh] overflow-y-auto custom-scrollbar">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-black tracking-tight uppercase">{editingId ? 'Edit Rutin 🔄' : 'Tagihan Rutin ✨'}</h2>
               <button onClick={() => setIsRecModalOpen(false)} className="w-8 h-8 font-bold text-gray-500 bg-gray-100 rounded-full active:scale-95">✕</button>
             </div>
             <form onSubmit={handleSaveRecurring} className="space-y-5">
@@ -231,89 +279,106 @@ export default function Kategori({ session, setCurrentPage }) {
                 </div>
                 <div>
                   <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Tgl Tagihan</label>
-                  <input type="number" min="1" max="31" value={recFormData.billing_date} onChange={(e) => setRecFormData({ ...recFormData, billing_date: e.target.value })} className="w-full p-4 mt-1 text-sm font-black border-none outline-none bg-gray-50 rounded-2xl focus:ring-2 focus:ring-blue-500" required />
+                  <input type="number" min="1" max="31" value={recFormData.billing_date} onChange={(e) => setRecFormData({ ...recFormData, billing_date: Number(e.target.value) })} className="w-full p-4 mt-1 text-sm font-black border-none outline-none bg-gray-50 rounded-2xl focus:ring-2 focus:ring-blue-500" required />
                 </div>
               </div>
-              <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Kategori</label>
-                <select value={recFormData.category_id} onChange={(e) => setRecFormData({ ...recFormData, category_id: e.target.value })} className="w-full p-4 mt-1 text-sm font-bold border-none outline-none bg-gray-50 rounded-2xl focus:ring-2 focus:ring-blue-500" required>
-                  <option value="">Pilih Kategori...</option>
-                  {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
-                </select>
+
+              {/* SEARCHABLE CATEGORY PICKER */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between px-1">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Pilih Kategori</label>
+                  <input
+                    type="text"
+                    placeholder="Cari..."
+                    value={recCatSearch}
+                    onChange={(e) => setRecCatSearch(e.target.value)}
+                    className="text-[10px] bg-gray-100 border-none rounded-xl px-3 py-1.5 outline-none w-28 focus:w-36 focus:bg-gray-200 transition-all placeholder:text-gray-400"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 p-1 overflow-y-auto max-h-48 custom-scrollbar">
+                  {categories
+                    .filter(c => c.name.toLowerCase().includes(recCatSearch.toLowerCase()))
+                    .map((cat) => (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setRecFormData({ ...recFormData, category_id: cat.id })}
+                        className={`flex items-center gap-3 p-3 rounded-2xl border-2 transition-all text-left ${
+                          recFormData.category_id === cat.id
+                          ? 'border-blue-500 bg-blue-50 shadow-sm'
+                          : 'border-transparent bg-gray-50'
+                        }`}
+                      >
+                        <span className="flex-shrink-0 text-xl">{cat.icon}</span>
+                        <div className="overflow-hidden">
+                          <p className="text-[9px] font-black uppercase truncate leading-tight mb-1 text-gray-700">{cat.name}</p>
+                          <span className={`text-[7px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-tighter ${
+                            cat.type === 'pemasukan' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                          }`}>
+                            {cat.type === 'pemasukan' ? 'Masuk' : 'Keluar'}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  {categories.filter(c => c.name.toLowerCase().includes(recCatSearch.toLowerCase())).length === 0 && (
+                    <div className="col-span-2 py-8 text-center bg-gray-50 rounded-2xl">
+                       <p className="text-[10px] font-bold text-gray-400 italic">Kategori nggak ketemu, Puh! 🕵️‍♂️</p>
+                    </div>
+                  )}
+                </div>
               </div>
-              <button type="submit" className="w-full py-4 font-black text-white uppercase transition-transform bg-blue-600 shadow-xl rounded-2xl shadow-blue-100 active:scale-95">Simpan Pengingat</button>
+
+              <button type="submit" className="w-full py-5 font-black text-white uppercase bg-blue-600 shadow-xl rounded-[1.5rem] active:scale-95 transition-all mt-4">
+                {editingId ? 'Simpan Perubahan' : 'Simpan Pengingat'}
+              </button>
             </form>
           </div>
         </div>
       )}
 
-      {/* MODAL KATEGORI & LAINNYA (TETAP ADA) */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center p-0 transition-all sm:items-center bg-black/40 backdrop-blur-sm sm:p-4">
-          <div className="bg-white w-full max-w-md rounded-t-[2.5rem] sm:rounded-3xl p-8 shadow-2xl animate-slide-up">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-black tracking-tight text-gray-800 uppercase">{editingId ? 'Edit Kategori 📝' : 'Kategori Baru ✨'}</h2>
-              <button onClick={() => setIsModalOpen(false)} className="w-8 h-8 font-bold text-gray-500 bg-gray-100 rounded-full active:scale-95">✕</button>
-            </div>
-            <form onSubmit={handleSaveCategory} className="space-y-4">
-              <div className="flex p-1 bg-gray-100 rounded-2xl">
-                <button type="button" onClick={() => setFormData({ ...formData, type: 'pengeluaran' })} className={`flex-1 py-2 text-[10px] font-black uppercase rounded-xl ${formData.type === 'pengeluaran' ? 'bg-white shadow-sm text-red-500' : 'text-gray-400'}`}>Pengeluaran</button>
-                <button type="button" onClick={() => setFormData({ ...formData, type: 'pemasukan' })} className={`flex-1 py-2 text-[10px] font-black uppercase rounded-xl ${formData.type === 'pemasukan' ? 'bg-white shadow-sm text-green-500' : 'text-gray-400'}`}>Pemasukan</button>
-              </div>
-              <div className="flex gap-3">
-                <div className="w-1/4">
-                  <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Icon</label>
-                  <input type="text" value={formData.icon} onChange={(e) => setFormData({ ...formData, icon: e.target.value })} className="w-full p-4 mt-1 text-2xl text-center border-none outline-none bg-gray-50 rounded-2xl" maxLength="2" required />
-                </div>
-                <div className="w-3/4">
-                  <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Nama</label>
-                  <input ref={nameInputRef} type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Contoh: Jajan" className="w-full p-4 mt-1 text-sm font-bold border-none outline-none bg-gray-50 rounded-2xl" required />
-                </div>
-              </div>
-              <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Warna</label>
-                <div className="flex gap-3 mt-2">
-                  {colorOptions.map(color => (
-                    <button key={color} type="button" onClick={() => setFormData({ ...formData, color })} className={`w-8 h-8 rounded-full transition-transform ${formData.color === color ? 'scale-125 ring-2 ring-blue-400' : 'opacity-40'}`} style={{ backgroundColor: color }} />
-                  ))}
-                </div>
-              </div>
-              {formData.type === 'pengeluaran' && (
-                <div>
-                  <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Budget</label>
-                  <input type="text" value={displayBudget} onChange={(e) => {
-                    const val = formatRupiah(e.target.value);
-                    setDisplayBudget(val);
-                    setFormData({ ...formData, budget: parseNumber(val) });
-                  }} placeholder="Rp 0" className="w-full p-4 mt-1 text-sm font-black border-none outline-none bg-gray-50 rounded-2xl" />
-                </div>
-              )}
-              <button type="submit" className="w-full py-4 mt-2 font-black text-white uppercase bg-blue-600 shadow-xl rounded-2xl shadow-blue-100 active:scale-95">Simpan Kategori</button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL DELETE RECURRING (NEW) */}
-      {deleteRecId && (
+      {/* MODAL DELETE KATEGORI */}
+      {deleteId && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-in fade-in">
           <div className="w-full max-w-xs p-8 text-center bg-white shadow-2xl rounded-[2.5rem]">
             <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 text-3xl rounded-full bg-red-50">🗑️</div>
-            <h3 className="mb-2 text-xl font-black text-gray-800">Hapus Rutin?</h3>
-            <p className="mb-8 text-sm font-medium leading-relaxed text-gray-400">Tagihan ini nggak bakal diingetin lagi tiap bulan ges.</p>
+            <h3 className="mb-2 text-xl font-black tracking-tight text-gray-800">Hapus Kategori?</h3>
+            <p className="px-2 mb-8 text-sm font-medium text-gray-400">Kategori ini bakal disembunyiin dari daftar transaksi ges.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteId(null)} className="flex-1 py-4 text-xs font-black text-gray-400 bg-gray-50 rounded-2xl active:scale-95">Batal</button>
+              <button onClick={async () => {
+                await supabase.from('category').update({ deleted_at: new Date() }).eq('id', deleteId);
+                setDeleteId(null);
+                fetchData();
+              }} className="flex-1 py-4 text-xs font-black text-white bg-red-500 shadow-lg rounded-2xl active:scale-95">Ya, Hapus</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DELETE RECURRING */}
+      {deleteRecId && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-xs p-8 text-center bg-white shadow-2xl rounded-[2.5rem]">
+            <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 text-3xl rounded-full bg-red-50">🗑️</div>
+            <h3 className="mb-2 text-xl font-black tracking-tight text-gray-800">Hapus Rutin?</h3>
+            <p className="mb-8 text-sm font-medium text-gray-500">Tagihan ini nggak bakal diingetin lagi tiap bulan ges.</p>
             <div className="flex gap-3">
               <button onClick={() => setDeleteRecId(null)} className="flex-1 py-4 text-xs font-black text-gray-400 bg-gray-50 rounded-2xl active:scale-95">Batal</button>
               <button onClick={async () => {
                 await supabase.from('recurring_transactions').delete().eq('id', deleteRecId);
                 setDeleteRecId(null);
                 fetchData();
-              }} className="flex-1 py-4 text-xs font-black text-white bg-red-500 shadow-lg shadow-red-100 rounded-2xl active:scale-95">Ya, Hapus</button>
+              }} className="flex-1 py-4 text-xs font-black text-white bg-red-500 rounded-2xl active:scale-95">Ya, Hapus</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* (Modal delete kategori tetap ada, silakan sesuaikan dengan pola yang sama) */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+      ` }} />
     </div>
   );
 }
