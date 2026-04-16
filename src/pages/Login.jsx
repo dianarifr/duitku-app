@@ -2,8 +2,13 @@ import { supabase } from '../supabaseClient';
 
 function Login() {
   const handleLogin = async () => {
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
+      options: {
+        // PAKSA balik ke URL yang sesuai lokasi kita sekarang
+        redirectTo: import.meta.env.REDIRECT_LOGIN,
+      },
     });
 
     if (error) {

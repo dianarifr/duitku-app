@@ -1,20 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
-import { formatRupiah, parseNumber } from '../utils/formatters';
 
-export default function Laporan({ session, setCurrentPage }) {
+export default function Laporan({ session, setCurrentPage, setEditData }) {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
-  const [editingTransaction, setEditingTransaction] = useState(null);
-  const [categories, setCategories] = useState([]);
-  const [displayEditAmount, setDisplayEditAmount] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-
-  // State untuk Auto-Complete
-  const [allNotes, setAllNotes] = useState([]);
-  const [filteredNotes, setFilteredNotes] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedMethod, setSelectedMethod] = useState('all');
 
   const [filter, setFilter] = useState({
     start: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
@@ -26,46 +20,25 @@ export default function Laporan({ session, setCurrentPage }) {
   useEffect(() => {
     fetchFilteredData();
     fetchCategories();
-    fetchUniqueNotes(); // Ambil riwayat catatan buat auto-complete
   }, [filter]);
 
   const fetchCategories = async () => {
-    const { data } = await supabase
-      .from('category')
-      .select('*')
-      .is('deleted_at', null);
+    const { data } = await supabase.from('category').select('*').is('deleted_at', null);
     setCategories(data || []);
-  };
-
-  const fetchUniqueNotes = async () => {
-    const { data } = await supabase
-      .from('transaction')
-      .select('note')
-      .is('deleted_at', null)
-      .limit(100);
-
-    if (data) {
-      const unique = [...new Set(data.map(t => t.note))].filter(Boolean);
-      setAllNotes(unique);
-    }
   };
 
   const fetchFilteredData = async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from('transaction')
-      .select(`
-        *,
-        category (name, icon, color)
-      `)
+      .select(`*, category (name, icon, color)`)
       .is('deleted_at', null)
       .gte('date', filter.start)
       .lte('date', filter.end)
       .order('date', { ascending: false })
       .order('created_at', { ascending: false });
 
-    if (error) console.error(error);
-    else {
+    if (!error) {
       setTransactions(data || []);
       const inc = data?.filter(t => t.type === 'pemasukan').reduce((sum, t) => sum + t.amount, 0) || 0;
       const exp = data?.filter(t => t.type === 'pengeluaran').reduce((sum, t) => sum + t.amount, 0) || 0;
@@ -74,350 +47,163 @@ export default function Laporan({ session, setCurrentPage }) {
     setLoading(false);
   };
 
-  const handleNoteChange = (val) => {
-    setEditingTransaction({ ...editingTransaction, note: val });
-    if (val.length > 1) {
-      const filtered = allNotes.filter(n =>
-        n.toLowerCase().includes(val.toLowerCase()) && n !== val
-      );
-      setFilteredNotes(filtered);
-      setShowSuggestions(filtered.length > 0);
-    } else {
-      setShowSuggestions(false);
+  // FUNGSI PRESET TANGGAL PRO
+  const setDatePreset = (preset) => {
+    const now = new Date();
+    let start = new Date();
+    let end = new Date();
+
+    if (preset === '7days') {
+      start.setDate(now.getDate() - 7);
+    } else if (preset === 'thisMonth') {
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+    } else if (preset === 'lastMonth') {
+      start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      end = new Date(now.getFullYear(), now.getMonth(), 0);
     }
+
+    setFilter({
+      start: start.toISOString().split('T')[0],
+      end: end.toISOString().split('T')[0]
+    });
   };
 
+  // LOGIKA PENCARIAN & FILTER MULTI-DIMENSI
   const filteredTransactions = transactions.filter(t => {
     const searchLower = searchTerm.toLowerCase();
-    return (
+    const matchesSearch =
       t.note?.toLowerCase().includes(searchLower) ||
-      t.category?.name?.toLowerCase().includes(searchLower)
-    );
+      t.category?.name?.toLowerCase().includes(searchLower);
+
+    const matchesCategory = selectedCategory === 'all' || t.category_id === selectedCategory;
+    const matchesMethod = selectedMethod === 'all' || t.payment_method === selectedMethod;
+
+    return matchesSearch && matchesCategory && matchesMethod;
   });
 
   const handleDelete = async (id) => {
-    const { error } = await supabase
-      .from('transaction')
-      .update({ deleted_at: new Date().toISOString() })
-      .eq('id', id);
-
-    if (error) alert('Gagal hapus transaksi: ' + error.message);
-    else fetchFilteredData();
+    await supabase.from('transaction').update({ deleted_at: new Date().toISOString() }).eq('id', id);
+    fetchFilteredData();
   };
 
-  const openEditModal = (t) => {
-    setEditingTransaction({
-        ...t,
-        category_id: t.category_id || ''
-    });
-    setDisplayEditAmount(formatRupiah(t.amount.toString()));
-  };
-
-  const handleUpdate = async (e) => {
-    e.preventDefault();
-    if (!editingTransaction.category_id) return alert('Pilih kategori dulu, ges!');
-
-    setLoading(true);
-    const { error } = await supabase
-      .from('transaction')
-      .update({
-        amount: parseNumber(displayEditAmount),
-        category_id: editingTransaction.category_id,
-        note: editingTransaction.note,
-        date: editingTransaction.date,
-        updated_at: new Date()
-      })
-      .eq('id', editingTransaction.id);
-
-    if (error) {
-      alert('Gagal update: ' + error.message);
-    } else {
-      setEditingTransaction(null);
-      fetchFilteredData();
-    }
-    setLoading(false);
+  const handleOpenEdit = (t) => {
+    setEditData(t);
+    setCurrentPage('input-transaksi');
   };
 
   return (
     <div className="min-h-screen pb-10 font-sans text-gray-900 bg-gray-50">
-      {/* Header Fixed */}
-      <div className="bg-white px-6 pt-12 pb-6 shadow-sm sticky top-0 z-30 rounded-b-[2rem]">
-        <div className="flex items-center gap-4 mb-6">
-          <button
-            onClick={() => setCurrentPage('dashboard')}
-            className="flex items-center justify-center w-10 h-10 font-bold text-gray-600 transition-all bg-gray-100 rounded-2xl active:scale-90"
-          >
-            ←
-          </button>
-          <h1 className="text-xl font-black tracking-tight text-gray-800 uppercase">Riwayat Cuan</h1>
+      {/* Header & Filter Sticky */}
+      <div className="bg-white px-6 pt-12 pb-6 shadow-sm sticky top-0 z-30 rounded-b-[2.5rem]">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <button onClick={() => setCurrentPage('dashboard')} className="flex items-center justify-center w-10 h-10 font-bold transition-all bg-gray-100 rounded-2xl active:scale-90">←</button>
+            <h1 className="text-xl font-black tracking-tight uppercase">Riwayat</h1>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => setDatePreset('7days')} className="px-3 py-2 bg-blue-50 text-blue-600 text-[9px] font-black uppercase rounded-xl">7 Hari</button>
+            <button onClick={() => setDatePreset('thisMonth')} className="px-3 py-2 bg-blue-50 text-blue-600 text-[9px] font-black uppercase rounded-xl">Bulan Ini</button>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1">
-            <p className="text-[10px] font-black text-gray-400 uppercase ml-1 mb-1">Mulai</p>
+        {/* Search & Select Filter */}
+        <div className="space-y-3">
+          <div className="relative">
+            <span className="absolute -translate-y-1/2 left-4 top-1/2 opacity-30">🔍</span>
             <input
-              type="date"
-              value={filter.start}
-              onClick={(e) => e.target.showPicker()}
-              onChange={(e) => setFilter({...filter, start: e.target.value})}
-              className="w-full p-3 text-xs font-bold border-none outline-none appearance-none bg-gray-50 rounded-xl focus:ring-2 focus:ring-blue-500"
-              style={{ colorScheme: 'light' }}
+              type="text"
+              placeholder="Cari catatan seblak, kopi, gaji..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full p-4 text-sm font-bold transition-all border-none outline-none pl-11 bg-gray-50 rounded-2xl focus:ring-2 focus:ring-blue-500"
             />
-            <span className="absolute text-xs pointer-events-none right-3 bottom-3">📅</span>
           </div>
-          <div className="mt-5 font-black text-gray-300">➔</div>
-          <div className="relative flex-1">
-            <p className="text-[10px] font-black text-gray-400 uppercase ml-1 mb-1">Sampai</p>
-            <input
-              type="date"
-              value={filter.end}
-              onClick={(e) => e.target.showPicker()}
-              onChange={(e) => setFilter({...filter, end: e.target.value})}
-              className="w-full p-3 text-xs font-bold border-none outline-none appearance-none bg-gray-50 rounded-xl focus:ring-2 focus:ring-blue-500"
-              style={{ colorScheme: 'light' }}
-            />
-            <span className="absolute text-xs pointer-events-none right-3 bottom-3">📅</span>
+          <div className="flex gap-2">
+            <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className="flex-1 p-3 bg-gray-50 border-none rounded-xl text-[9px] font-black uppercase text-gray-400 outline-none">
+              <option value="all">Semua Kategori</option>
+              {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+            </select>
+            <select value={selectedMethod} onChange={(e) => setSelectedMethod(e.target.value)} className="flex-1 p-3 bg-gray-50 border-none rounded-xl text-[9px] font-black uppercase text-gray-400 outline-none">
+              <option value="all">Semua Metode</option>
+              <option value="cash">💵 Cash</option>
+              <option value="transfer">📱 Transfer</option>
+            </select>
           </div>
         </div>
       </div>
 
       {/* Summary Card */}
       <div className="px-6 mt-6">
-        <div className="bg-blue-600 rounded-[2.5rem] p-8 shadow-xl shadow-blue-100 text-white text-center relative overflow-hidden">
-          <div className="absolute w-40 h-40 rounded-full -top-10 -left-10 bg-white/10 blur-3xl"></div>
-          <div className="absolute w-40 h-40 rounded-full -bottom-10 -right-10 bg-blue-400/20 blur-3xl"></div>
-
-          <div className="relative z-10">
-            <p className="mb-2 text-xs font-bold tracking-widest uppercase opacity-80">Total Netto Periode Ini</p>
-            <h2 className="mb-4 text-3xl font-black">
-              Rp {(summary.income - summary.expense).toLocaleString('id-ID')}
-            </h2>
-
-            <div className="flex items-center justify-center gap-6 pt-4 border-t border-white/10">
+        <div className="bg-blue-600 rounded-[2.5rem] p-8 shadow-xl text-white text-center">
+            <p className="text-[10px] font-black uppercase opacity-60 tracking-[0.2em] mb-1">Netto Periode Ini</p>
+            <h2 className="mb-4 text-3xl font-black">Rp {(summary.income - summary.expense).toLocaleString('id-ID')}</h2>
+            <div className="flex justify-center gap-8 pt-4 border-t border-white/10">
               <div>
-                <p className="text-[10px] font-black text-blue-200 uppercase mb-1">Pemasukan</p>
-                <p className="text-sm font-black text-green-300">+ Rp {summary.income.toLocaleString('id-ID')}</p>
+                <p className="text-[9px] font-black uppercase opacity-60">Masuk</p>
+                <p className="text-sm font-black text-green-300">+{summary.income.toLocaleString('id-ID')}</p>
               </div>
-              <div className="w-px h-8 bg-white/10"></div>
               <div>
-                <p className="text-[10px] font-black text-blue-200 uppercase mb-1">Pengeluaran</p>
-                <p className="text-sm font-black text-red-300">- Rp {summary.expense.toLocaleString('id-ID')}</p>
+                <p className="text-[9px] font-black uppercase opacity-60">Keluar</p>
+                <p className="text-sm font-black text-red-300">-{summary.expense.toLocaleString('id-ID')}</p>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 🔍 SEARCH BAR */}
-      <div className="px-6 mt-6">
-        <div className="relative group">
-          <span className="absolute text-lg -translate-y-1/2 left-4 top-1/2 opacity-40">🔍</span>
-          <input
-            type="text"
-            placeholder="Cari seblak, gaji, atau kategori..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full p-4 pl-12 text-sm font-bold text-gray-700 transition-all bg-white border-none shadow-sm outline-none rounded-2xl focus:ring-2 focus:ring-blue-500 placeholder:text-gray-300 placeholder:font-normal"
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center bg-gray-100 rounded-full text-[10px] text-gray-400 font-black"
-            >✕</button>
-          )}
         </div>
       </div>
 
       {/* List Transaksi */}
-      <div className="px-6 mt-8 space-y-3">
-        <div className="flex items-center justify-between px-1 mb-4">
-            <h3 className="text-lg font-black text-gray-800">Detail Transaksi</h3>
-            <span className="bg-gray-200 text-gray-600 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">
-                {filteredTransactions.length} Data
-            </span>
-        </div>
-
+      <div className="px-6 mt-8 space-y-4">
         {loading ? (
-          <div className="py-20 text-xs font-bold tracking-widest text-center text-gray-400 uppercase animate-pulse">Sedang Memuat...</div>
+          <p className="py-10 text-xs font-black text-center text-gray-300 uppercase animate-pulse">Lagi Nyari Data...</p>
         ) : filteredTransactions.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-[2rem] border-2 border-dashed border-gray-100">
-            <p className="text-sm font-bold text-gray-400">
-              {searchTerm ? 'Duh, kaga ketemu transaksinya ges 🕵️‍♂️' : 'Nggak ada riwayat di tanggal ini ges 🍃'}
-            </p>
-          </div>
+          <div className="text-center py-20 bg-white rounded-[2.5rem] border-2 border-dashed border-gray-100 text-gray-400 font-bold">Kaga ada datanya ges 🕵️‍♂️</div>
         ) : (
-          filteredTransactions.map((t) => {
-            const isToday = new Date(t.date).toDateString() === new Date().toDateString();
-
-            return (
-                <div key={t.id} className="flex items-center justify-between p-4 transition-all bg-white border shadow-sm rounded-3xl border-gray-50 active:scale-[0.98] group relative">
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center justify-center flex-shrink-0 w-12 h-12 text-xl shadow-inner rounded-2xl"
-                            style={{ backgroundColor: `${t.category?.color || '#3b82f6'}15`, color: t.category?.color || '#3b82f6' }}>
-                            {t.category?.icon || '❓'}
-                        </div>
-                        <div>
-                            <div className="flex items-center gap-2 mb-1">
-                                <p className="w-24 text-sm font-black text-gray-800 truncate sm:w-48">
-                                    {t.note || t.category?.name || 'Tanpa Catatan'}
-                                </p>
-                                {isToday && (
-                                    <span className="text-[7px] bg-blue-500 text-white px-1.5 py-0.5 rounded-full font-black uppercase tracking-tighter">Baru</span>
-                                )}
-                            </div>
-                            <span className="text-[9px] font-black px-2 py-0.5 rounded-lg uppercase tracking-widest border"
-                                style={{
-                                    backgroundColor: `${t.category?.color || '#3b82f6'}10`,
-                                    borderColor: `${t.category?.color || '#3b82f6'}30`,
-                                    color: t.category?.color || '#3b82f6'
-                                }}>
-                                {t.category?.name || t.type}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        <div className="text-right">
-                            <p className={`font-black text-base ${t.type === 'pemasukan' ? 'text-green-500' : 'text-red-500'}`}>
-                                {t.type === 'pemasukan' ? '+' : '-'} {t.amount.toLocaleString('id-ID')}
-                            </p>
-                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
-                                {new Date(t.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
-                            </p>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                            <button onClick={() => openEditModal(t)} className="flex items-center justify-center w-8 h-8 text-[10px] bg-gray-50 rounded-lg active:bg-blue-50 transition-colors">✏️</button>
-                            <button onClick={() => setDeleteId(t.id)} className="flex items-center justify-center w-8 h-8 text-[10px] bg-gray-50 rounded-lg active:bg-red-50 transition-colors">🗑️</button>
-                        </div>
-                    </div>
+          filteredTransactions.map((t) => (
+            <div key={t.id} className="bg-white p-5 rounded-[2rem] border border-gray-50 shadow-sm flex flex-col gap-4">
+              <div className="flex items-start justify-between">
+                <div className="flex gap-4">
+                  <div className="flex items-center justify-center w-12 h-12 text-xl rounded-2xl" style={{ backgroundColor: `${t.category?.color}15`, color: t.category?.color }}>
+                    {t.category?.icon}
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black leading-tight text-gray-800 uppercase">{t.category?.name}</h4>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase">{new Date(t.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                  </div>
                 </div>
-            );
-          })
+                <div className="text-right">
+                  <p className={`text-base font-black ${t.type === 'pemasukan' ? 'text-green-500' : 'text-red-500'}`}>
+                    {t.type === 'pemasukan' ? '+' : '-'} {t.amount.toLocaleString('id-ID')}
+                  </p>
+                  <span className="text-[8px] font-black px-2 py-0.5 bg-gray-50 text-gray-400 rounded-lg border border-gray-100 uppercase">{t.payment_method}</span>
+                </div>
+              </div>
+
+              {/* DISPLAY CATATAN (NEW) */}
+              {t.note && (
+                <div className="px-4 py-3 border-l-4 border-blue-400 bg-gray-50 rounded-2xl">
+                  <p className="text-[11px] font-bold text-gray-600 italic leading-relaxed">"{t.note}"</p>
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-2 border-t border-gray-50">
+                <button onClick={() => handleOpenEdit(t)} className="flex-1 py-3 bg-gray-100 text-gray-500 text-[10px] font-black uppercase rounded-xl active:scale-95 transition-all">✏️ Edit</button>
+                <button onClick={() => setDeleteId(t.id)} className="flex-1 py-3 bg-red-50 text-red-400 text-[10px] font-black uppercase rounded-xl active:scale-95 transition-all">🗑️ Hapus</button>
+              </div>
+            </div>
+          ))
         )}
       </div>
 
-      {/* MODAL EDIT TRANSAKSI */}
-      {editingTransaction && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center p-0 transition-all bg-black/40 backdrop-blur-sm sm:items-center sm:p-4">
-            <div className="bg-white w-full max-w-md rounded-t-[2.5rem] sm:rounded-3xl p-6 pb-10 sm:pb-6 shadow-2xl animate-slide-up max-h-[90vh] overflow-y-auto">
-                <div className="sticky top-0 z-10 flex items-center justify-between pt-2 pb-4 mb-2 bg-white">
-                    <h2 className="text-xl font-black text-gray-800">Edit Catatan 📝</h2>
-                    <button onClick={() => setEditingTransaction(null)} className="flex items-center justify-center font-bold text-gray-500 transition-transform bg-gray-100 rounded-full w-9 h-9 active:scale-95">✕</button>
-                </div>
-
-                <form onSubmit={handleUpdate} className="space-y-6">
-                    {/* Nominal */}
-                    <div>
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nominal</label>
-                        <div className="relative mt-1">
-                            <span className="absolute text-lg font-black text-gray-400 -translate-y-1/2 left-4 top-1/2">Rp</span>
-                            <input
-                                type="text"
-                                value={displayEditAmount}
-                                onChange={(e) => setDisplayEditAmount(formatRupiah(e.target.value))}
-                                className="w-full p-4 pl-12 text-2xl font-black text-gray-700 border-none outline-none bg-gray-50 rounded-2xl focus:ring-2 focus:ring-blue-500"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Pilih Kategori */}
-                    <div>
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Pilih Kategori</label>
-                        <div className="grid grid-cols-4 gap-3 p-1 mt-2 overflow-y-auto max-h-48">
-                            {categories
-                                .filter(c => c.type === editingTransaction.type)
-                                .map(cat => (
-                                    <button
-                                        key={cat.id}
-                                        type="button"
-                                        onClick={() => setEditingTransaction({...editingTransaction, category_id: cat.id})}
-                                        className={`flex flex-col items-center gap-2 p-3 rounded-2xl transition-all border-2 ${
-                                            editingTransaction.category_id === cat.id
-                                            ? 'border-blue-500 bg-blue-50 scale-105 shadow-sm'
-                                            : 'border-transparent bg-gray-50 opacity-60'
-                                        }`}
-                                    >
-                                        <span className="text-2xl">{cat.icon}</span>
-                                        <span className="text-[9px] font-bold text-gray-600 truncate w-full text-center uppercase tracking-tighter">{cat.name}</span>
-                                    </button>
-                                ))
-                            }
-                        </div>
-                    </div>
-
-                    {/* Baris Tanggal & Note */}
-                    <div className="space-y-4">
-                        <div className="relative">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Kapan?</label>
-                            <input
-                                type="date"
-                                value={editingTransaction.date}
-                                onClick={(e) => e.target.showPicker()}
-                                onChange={(e) => setEditingTransaction({...editingTransaction, date: e.target.value})}
-                                className="w-full p-4 mt-1 font-bold text-gray-700 border-none outline-none appearance-none bg-gray-50 rounded-2xl focus:ring-2 focus:ring-blue-500"
-                                style={{ colorScheme: 'light' }}
-                            />
-                            <span className="absolute right-4 top-[2.4rem] pointer-events-none text-lg">📅</span>
-                        </div>
-
-                        {/* CATATAN DENGAN AUTO-COMPLETE */}
-                        <div className="relative">
-                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Catatan</label>
-                            <input
-                                type="text"
-                                value={editingTransaction.note || ''}
-                                onChange={(e) => handleNoteChange(e.target.value)}
-                                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                                placeholder="Misal: Beli seblak mercon..."
-                                className="w-full p-4 mt-1 font-medium text-gray-700 border-none outline-none bg-gray-50 rounded-2xl focus:ring-2 focus:ring-blue-500"
-                            />
-                            {showSuggestions && (
-                                <div className="absolute left-0 right-0 z-[60] mt-1 overflow-hidden bg-white border border-gray-100 shadow-2xl rounded-2xl animate-in fade-in zoom-in duration-200">
-                                    {filteredNotes.map((note, idx) => (
-                                        <button
-                                            key={idx}
-                                            type="button"
-                                            onClick={() => {
-                                                setEditingTransaction({ ...editingTransaction, note: note });
-                                                setShowSuggestions(false);
-                                            }}
-                                            className="w-full p-4 text-xs font-bold text-left text-gray-600 border-b border-gray-50 last:border-none hover:bg-blue-50 active:bg-blue-100"
-                                        >
-                                            ✨ {note}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    <button
-                        disabled={loading}
-                        className={`w-full py-4 mt-2 font-black text-white transition-all rounded-2xl active:scale-95 shadow-xl ${
-                            editingTransaction.type === 'pemasukan' ? 'bg-green-500 shadow-green-100' : 'bg-red-500 shadow-red-100'
-                        }`}
-                    >
-                        {loading ? 'Sabar, lagi nyimpen...' : `Update ${editingTransaction.type}`}
-                    </button>
-                </form>
-            </div>
-        </div>
-      )}
-
-      {/* Modal Konfirmasi Hapus */}
+      {/* Modal Hapus Tetap Sama */}
       {deleteId && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="w-full max-w-xs p-8 text-center bg-white shadow-2xl rounded-[2.5rem] animate-in zoom-in duration-300">
-                <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 text-4xl rounded-full bg-red-50">🗑️</div>
-                <h3 className="mb-2 text-xl font-black text-gray-800">Hapus Catatan?</h3>
-                <p className="mb-8 text-sm font-medium leading-relaxed text-gray-500">
-                    Data transaksi ini bakal dihapus permanen dari riwayat kamu ges. Yakin?
-                </p>
-                <div className="flex gap-3">
-                    <button onClick={() => setDeleteId(null)} className="flex-1 py-4 text-xs font-black text-gray-400 transition-transform bg-gray-100 rounded-2xl active:scale-95">Batal</button>
-                    <button onClick={() => { handleDelete(deleteId); setDeleteId(null); }} className="flex-1 py-4 text-xs font-black text-white transition-transform bg-red-500 shadow-lg shadow-red-100 rounded-2xl active:scale-95">Ya, Hapus</button>
-                </div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-xs p-8 text-center bg-white shadow-2xl rounded-[2.5rem] animate-in zoom-in duration-300">
+            <h3 className="mb-2 text-xl font-black text-gray-800">Hapus?</h3>
+            <p className="mb-8 text-sm font-bold text-gray-400">Yakin mau hapus transaksi ini, ges?</p>
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteId(null)} className="flex-1 py-4 text-xs font-black text-gray-400 bg-gray-50 rounded-2xl">Batal</button>
+              <button onClick={() => { handleDelete(deleteId); setDeleteId(null); }} className="flex-1 py-4 text-xs font-black text-white bg-red-500 rounded-2xl">Hapus</button>
             </div>
+          </div>
         </div>
       )}
     </div>
