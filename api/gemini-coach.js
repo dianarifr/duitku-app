@@ -70,6 +70,8 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error("Error Detail:", error.message);
+    console.log("Budget yang diterima:", budgets);
+    console.log("API Key tersedia:", !!process.env.GEMINI_API_KEY);
     return res.status(500).json({ advice: "Duh, otaknya lagi konslet Puh. Coba lagi nanti!" });
   }
 }
