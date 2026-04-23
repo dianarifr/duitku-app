@@ -28,9 +28,9 @@ export default async function handler(req, res) {
     }
 
     const API_KEY = process.env.GEMINI_API_KEY;
-    if (!API_KEY) {
-      console.error("LOG: API_KEY TIDAK DITEMUKAN DI ENV VERCEL");
-      return res.status(500).json({ advice: "Kuncinya (API KEY) gak ada di brankas Vercel, Puh!" });
+    const API_URL = process.env.GEMINI_API_URL;
+    if (!API_URL || !API_KEY) {
+      throw new Error("Konfigurasi ENV belum lengkap, Puh!");
     }
 
     // 3. Rakit prompt sesuai gaya lo
