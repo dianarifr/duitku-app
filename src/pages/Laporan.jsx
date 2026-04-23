@@ -151,7 +151,7 @@ export default function Laporan({ session, setCurrentPage, setEditData }) {
       </div>
 
       {/* List Transaksi */}
-      <div className="px-6 mt-8 space-y-4">
+      <div className="px-6 mt-8 space-y-4 pb-15">
         {loading ? (
           <p className="py-10 text-xs font-black text-center text-gray-300 uppercase animate-pulse">Lagi Nyari Data...</p>
         ) : filteredTransactions.length === 0 ? (

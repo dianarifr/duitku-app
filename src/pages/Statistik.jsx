@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { getFinancialRange } from '../utils/formatters';
 
 export default function Statistik({ session, setCurrentPage }) {
   const [chartData, setChartData] = useState([]);
@@ -25,14 +26,25 @@ export default function Statistik({ session, setCurrentPage }) {
 
   const fetchStatistik = async () => {
     setLoading(true);
-    const firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
 
+    // 1. Ambil Payday User
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('payday')
+      .eq('id', session.user.id)
+      .single();
+
+    const payday = profile?.payday || 1;
+    const { start, end } = getFinancialRange(payday);
+
+    // 2. Query Transaksi dengan Range Finansial
     const { data, error } = await supabase
       .from('transaction')
-      .select(`amount, type, category (name, color, icon)`)
+      .select(`amount, type, date, category (name, color, icon, budget)`)
       .is('deleted_at', null)
       .eq('type', filterType)
-      .gte('date', firstDay);
+      .gte('date', start)
+      .lte('date', end);
 
     if (error) {
       console.error(error);

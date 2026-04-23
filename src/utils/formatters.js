@@ -14,3 +14,35 @@ export const parseNumber = (formattedValue) => {
   const cleanValue = formattedValue.toString().replace(/\./g, '');
   return parseInt(cleanValue, 10) || 0;
 };
+
+export const getFinancialRange = (payday = 1) => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const date = now.getDate();
+
+  let startDate;
+
+  // Jika hari ini belum sampai tanggal gajian,
+  // berarti kita masih di periode bulan lalu.
+  if (date < payday) {
+    startDate = new Date(year, month - 1, payday);
+  } else {
+    // Jika sudah tanggal gajian atau lewat, mulai periode bulan ini.
+    startDate = new Date(year, month, payday);
+  }
+
+  // Set jam ke 00:00:00 biar akurat
+  startDate.setHours(0, 0, 0, 0);
+
+  // Akhir periode adalah H-1 dari tanggal gajian bulan depan
+  const endDate = new Date(startDate);
+  endDate.setMonth(endDate.getMonth() + 1);
+  endDate.setDate(endDate.getDate() - 1);
+  endDate.setHours(23, 59, 59, 999);
+
+  return {
+    start: startDate.toISOString(),
+    end: endDate.toISOString()
+  };
+};

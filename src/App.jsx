@@ -6,23 +6,20 @@ import Kategori from './pages/Kategori';
 import InputTransaksi from './pages/InputTransaksi';
 import Laporan from './pages/Laporan';
 import Statistik from './pages/Statistik';
+import BottomNav from './components/BottomNav'; // Shortcut baru kita
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { registerSW } from 'virtual:pwa-register';
 
 function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // State Navigasi
   const [currentPage, setCurrentPage] = useState('dashboard');
-
-  // State Kurir Data (Penting biar gak blank!)
   const [editData, setEditData] = useState(null);
 
   // Register PWA Service Worker
   registerSW({ immediate: true });
   useRegisterSW({
-    onRegistered(r) { console.log('SW Registered: ' + r); },
+    onRegistered(r) { console.log('SW Registered'); },
     onRegisterError(error) { console.log('SW registration error', error); },
   });
 
@@ -51,44 +48,63 @@ function App() {
     return <Login />;
   }
 
-  // ==== SISTEM NAVIGASI MULTIFUNGSI ====
+  // Cek apakah sedang di halaman input (termasuk trigger dari BottomNav)
+  const isInputPage = ['input', 'input-pengeluaran', 'input-pemasukan', 'input-transaksi'].includes(currentPage);
 
-  if (currentPage === 'kategori') {
-    return <Kategori session={session} setCurrentPage={setCurrentPage} />;
-  }
+  return (
+    <div className="relative min-h-screen bg-gray-50">
 
-  if (currentPage === 'laporan') {
-    return (
-      <Laporan
-        session={session}
-        setCurrentPage={setCurrentPage}
-        setEditData={setEditData} // Oper fungsi ini ke Laporan
-      />
-    );
-  }
+      {/* AREA KONTEN UTAMA */}
+      <main className="h-full max-w-md pb-10 mx-auto">
+        {/* Render Dashboard */}
+        {currentPage === 'dashboard' && (
+          <Dashboard session={session} setCurrentPage={setCurrentPage} />
+        )}
 
-  if (currentPage === 'statistik') {
-    return <Statistik session={session} setCurrentPage={setCurrentPage} />;
-  }
+        {/* Render Kategori */}
+        {currentPage === 'kategori' && (
+          <Kategori session={session} setCurrentPage={setCurrentPage} />
+        )}
 
-  // Handle Input & Edit (Satu Pintu!)
-  const isInputPage = ['input-pengeluaran', 'input-pemasukan', 'input-transaksi'].includes(currentPage);
+        {/* Render Laporan */}
+        {currentPage === 'laporan' && (
+          <Laporan
+            session={session}
+            setCurrentPage={setCurrentPage}
+            setEditData={setEditData}
+          />
+        )}
 
-  if (isInputPage) {
-    return (
-      <InputTransaksi
-        session={session}
-        setCurrentPage={setCurrentPage}
-        // Tentukan tipe: kalau ada editData pake tipe data lama, kalau ngga pake currentPage
-        type={editData ? editData.type : (currentPage === 'input-pemasukan' ? 'pemasukan' : 'pengeluaran')}
-        editData={editData}
-        setEditData={setEditData} // Buat reset kurir setelah simpan
-      />
-    );
-  }
+        {/* Render Statistik */}
+        {currentPage === 'statistik' && (
+          <Statistik session={session} setCurrentPage={setCurrentPage} />
+        )}
 
-  // Default: Dashboard
-  return <Dashboard session={session} setCurrentPage={setCurrentPage} />;
+        {/* Render Input & Edit */}
+        {isInputPage && (
+          <InputTransaksi
+            session={session}
+            setCurrentPage={setCurrentPage}
+            type={editData ? editData.type : (currentPage === 'input-pemasukan' ? 'pemasukan' : 'pengeluaran')}
+            editData={editData}
+            setEditData={setEditData}
+          />
+        )}
+      </main>
+
+      {/* NAVIGASI MELAYANG (Floating Island) */}
+      {/* Sembunyikan Nav saat di halaman input biar ga nutupin keyboard/form */}
+      {!isInputPage && (
+        <BottomNav
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+        />
+      )}
+
+      {/* Ornamen Background (Opsional buat kesan mewah) */}
+      <div className="fixed top-0 left-0 w-full h-64 bg-gradient-to-b from-blue-50/50 to-transparent -z-10"></div>
+    </div>
+  );
 }
 
 export default App;

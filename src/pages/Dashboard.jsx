@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
+import { getFinancialRange } from '../utils/formatters';
 
 function Dashboard({ session, setCurrentPage }) {
   const [summary, setSummary] = useState({ total: 0, income: 0, expense: 0 });
@@ -12,6 +13,8 @@ function Dashboard({ session, setCurrentPage }) {
   const [pendingRecurring, setPendingRecurring] = useState([]);
   // State untuk kontrol Modal Pop-up
   const [showRecurringModal, setShowRecurringModal] = useState(false);
+  const [userPayday, setUserPayday] = useState(1)
+  const [periodLabel, setPeriodLabel] = useState('');
 
   const user = session.user;
   const userName = user.user_metadata?.full_name || user.email.split('@')[0];
@@ -25,12 +28,37 @@ function Dashboard({ session, setCurrentPage }) {
   const fetchDashboardData = async () => {
     setLoading(true);
     const now = new Date();
-    const currentMonthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
     const today = now.toISOString().split('T')[0];
     const todayDateNumber = now.getDate();
 
-    // 1. Cek input hari ini
+    // 1. Ambil Payday User dari Profiles
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('payday')
+      .eq('id', session.user.id)
+      .single();
+
+    const payday = profile?.payday || 1;
+    setUserPayday(payday); // Simpan ke state untuk dipake fungsi lain
+
+    // 2. Dapatkan Range Finansial (Bulan Ini & Bulan Lalu)
+    const currentRange = getFinancialRange(payday);
+
+    // Hitung range bulan lalu: sehari sebelum awal periode ini
+    const lastMonthDate = new Date(currentRange.start);
+    lastMonthDate.setDate(lastMonthDate.getDate() - 1);
+    const lastRange = getFinancialRange(payday, lastMonthDate);
+
+    // Penanda periode (YYYY-MM) berdasarkan awal siklus gajian
+    const currentMonthYear = currentRange.start.substring(0, 7);
+
+    // Set label periode untuk ditampilkan di UI
+    const options = { day: 'numeric', month: 'short' };
+    const startLabel = new Date(currentRange.start).toLocaleDateString('id-ID', options);
+    const endLabel = new Date(currentRange.end).toLocaleDateString('id-ID', options);
+    setPeriodLabel(`${startLabel} - ${endLabel}`);
+
+    // 3. Cek input hari ini
     const { data: todayData } = await supabase
       .from('transaction')
       .select('id')
@@ -40,8 +68,8 @@ function Dashboard({ session, setCurrentPage }) {
 
     setHasInputToday(todayData && todayData.length > 0);
 
-    // 2. Ambil Riwayat Terakhir
-    const { data: transData, error } = await supabase
+    // 4. Ambil Riwayat Terakhir (Global)
+    const { data: transData } = await supabase
       .from('transaction')
       .select(`*, category (name, icon, color)`)
       .is('deleted_at', null)
@@ -49,21 +77,18 @@ function Dashboard({ session, setCurrentPage }) {
       .order('created_at', { ascending: false })
       .limit(10);
 
-    if (error) console.error(error);
-    else setTransactions(transData || []);
+    setTransactions(transData || []);
 
-    // 3. Ambil data transaksi bulan ini & bulan lalu
-    const firstLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
-    const endLastMonth = new Date(now.getFullYear(), now.getMonth(), 0).toISOString();
-
+    // 5. Ambil data transaksi dalam range finansial (Siklus Ini + Siklus Lalu)
     const { data: allTrans } = await supabase
       .from('transaction')
       .select('amount, type, date, payment_method, category_id')
       .is('deleted_at', null)
-      .gte('date', firstLastMonth);
+      .gte('date', lastRange.start)
+      .lte('date', currentRange.end);
 
-    const thisMonthTrans = allTrans?.filter(t => t.date >= firstDay) || [];
-    const lastMonthTrans = allTrans?.filter(t => t.date >= firstLastMonth && t.date <= endLastMonth) || [];
+    const thisMonthTrans = allTrans?.filter(t => t.date >= currentRange.start && t.date <= currentRange.end) || [];
+    const lastMonthTrans = allTrans?.filter(t => t.date >= lastRange.start && t.date <= lastRange.end) || [];
 
     let cashIn = 0, cashOut = 0, bankIn = 0, bankOut = 0, totalIncome = 0, totalExpense = 0;
 
@@ -78,7 +103,7 @@ function Dashboard({ session, setCurrentPage }) {
       }
     });
 
-    // 4. Logika Pantauan Budget
+    // 6. Pantauan Budget (Filter tgl gajian)
     const { data: categoriesWithBudget } = await supabase
       .from('category')
       .select('id, name, icon, budget')
@@ -96,7 +121,7 @@ function Dashboard({ session, setCurrentPage }) {
       setCriticalBudgets(filtered);
     }
 
-    // 5. Logika Catch-up Transaksi Berulang (Recurring)
+    // 7. Recurring Catch-up
     const { data: recurringList } = await supabase
       .from('recurring_transactions')
       .select('*, category(name, icon)')
@@ -109,11 +134,10 @@ function Dashboard({ session, setCurrentPage }) {
         return !hasProcessed && isDueDate;
       });
       setPendingRecurring(pending);
-      // Buka modal kalau ada tagihan pending
       if (pending.length > 0) setShowRecurringModal(true);
     }
 
-    // Hitung Perbandingan
+    // Perbandingan Siklus
     const lastExpense = lastMonthTrans?.filter(t => t.type === 'pengeluaran').reduce((sum, t) => sum + t.amount, 0) || 0;
     if (lastExpense > 0) {
       const diffPercent = ((totalExpense - lastExpense) / lastExpense) * 100;
@@ -130,26 +154,38 @@ function Dashboard({ session, setCurrentPage }) {
 
   const handlePayRecurring = async (rec) => {
     const now = new Date();
-    const currentMonthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    // Tentukan periode berdasarkan state userPayday
+    const { start } = getFinancialRange(userPayday);
+    const currentMonthYear = start.substring(0, 7);
+
     const { error } = await supabase.from('transaction').insert([{
       user_id: session.user.id,
       amount: rec.amount,
       category_id: rec.category_id,
       note: `[Rutin] ${rec.note}`,
       date: now.toISOString().split('T')[0],
-      type: rec.type,
+      type: 'pengeluaran',
       payment_method: rec.payment_method
     }]);
+
     if (!error) {
-      await supabase.from('recurring_transactions').update({ last_processed_at: currentMonthYear }).eq('id', rec.id);
+      await supabase.from('recurring_transactions')
+        .update({ last_processed_at: currentMonthYear })
+        .eq('id', rec.id);
       fetchDashboardData();
     }
   };
 
   const handleSkipRecurring = async (rec) => {
-    const now = new Date();
-    const currentMonthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    const { error } = await supabase.from('recurring_transactions').update({ last_processed_at: currentMonthYear }).eq('id', rec.id);
+    // Tentukan periode berdasarkan state userPayday
+    const { start } = getFinancialRange(userPayday);
+    const currentMonthYear = start.substring(0, 7);
+
+    const { error } = await supabase.from('recurring_transactions')
+      .update({ last_processed_at: currentMonthYear })
+      .eq('id', rec.id);
+
     if (!error) fetchDashboardData();
   };
 
@@ -158,7 +194,7 @@ function Dashboard({ session, setCurrentPage }) {
   };
 
   return (
-    <div className="min-h-screen pb-20 font-sans bg-gray-50">
+    <div className="min-h-screen pb-32 font-sans bg-gray-50">
       {/* Header & Profile */}
       <div className="bg-blue-600 px-6 pt-12 pb-14 rounded-b-[3rem] shadow-lg text-white relative overflow-hidden">
         <div className="absolute top-[-20px] right-[-20px] w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
@@ -176,6 +212,9 @@ function Dashboard({ session, setCurrentPage }) {
           <p className="mb-1 text-[10px] font-black uppercase tracking-[0.2em] text-blue-100 opacity-80">Saldo Keseluruhan</p>
           <h1 className="text-4xl font-black tracking-tighter">Rp {summary.total.toLocaleString('id-ID')}</h1>
         </div>
+        <p className="text-[10px] font-black text-white/60 uppercase tracking-widest text-center mt-2">
+          Periode: {periodLabel}
+        </p>
       </div>
 
       {/* RINGKASAN DOMPET VS BANK */}
@@ -193,24 +232,6 @@ function Dashboard({ session, setCurrentPage }) {
             <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest">Saldo Bank</span>
           </div>
           <p className="text-sm font-black text-gray-800">Rp {wallet.bank.toLocaleString('id-ID')}</p>
-        </div>
-      </div>
-
-      {/* Menu Jalan Pintas */}
-      <div className="relative z-20 px-5 mt-6">
-        <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-5 grid grid-cols-5 gap-1 border border-gray-50">
-          {[
-            { label: 'Keluar', icon: '💸', color: 'bg-red-50 text-red-500', page: 'input-pengeluaran' },
-            { label: 'Masuk', icon: '🤑', color: 'bg-green-50 text-green-500', page: 'input-pemasukan' },
-            { label: 'Riwayat', icon: '📜', color: 'bg-orange-50 text-orange-500', page: 'laporan' },
-            { label: 'Analisis', icon: '📊', color: 'bg-purple-50 text-purple-500', page: 'statistik' },
-            { label: 'Kategori', icon: '📂', color: 'bg-blue-50 text-blue-500', page: 'kategori' }
-          ].map((item, idx) => (
-            <button key={idx} onClick={() => setCurrentPage(item.page)} className="flex flex-col items-center gap-2 text-center transition-all group active:scale-90">
-              <div className={`w-11 h-11 ${item.color} rounded-2xl flex items-center justify-center text-xl shadow-sm group-hover:shadow-md transition-shadow`}>{item.icon}</div>
-              <span className="text-[9px] font-black text-gray-500 uppercase tracking-tighter">{item.label}</span>
-            </button>
-          ))}
         </div>
       </div>
 
@@ -247,7 +268,7 @@ function Dashboard({ session, setCurrentPage }) {
 
       {/* BANNER & WAWASAN */}
       {!loading && (
-        <div className="px-5 mt-6 space-y-4">
+        <div className="px-5 space-y-4 mt-7">
           {!hasInputToday && (
             <div className="bg-gradient-to-r from-orange-500 to-orange-400 p-4 rounded-[2rem] shadow-xl shadow-orange-100 flex items-center justify-between border border-white/20 animate-bounce">
               <div className="flex items-center gap-3">
@@ -274,7 +295,7 @@ function Dashboard({ session, setCurrentPage }) {
       )}
 
       {/* Ringkasan In/Out */}
-      <div className="grid grid-cols-2 gap-4 px-5 mt-6">
+      <div className="grid grid-cols-2 gap-4 px-5 mt-2">
         <div className="p-4 text-center bg-white border border-gray-100 shadow-sm rounded-2xl">
           <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Masuk</p>
           <p className="text-sm font-black text-green-600">+ Rp {summary.income.toLocaleString('id-ID')}</p>
@@ -293,7 +314,7 @@ function Dashboard({ session, setCurrentPage }) {
         </div>
         <div className="space-y-3">
           {loading ? (
-            <div className="py-10 text-xs font-bold text-center text-gray-400 uppercase animate-pulse">Lagi ngitung duit...</div>
+            <div className="py-10 text-xs font-bold text-center text-gray-400 uppercase animate-pulse">Lagi ngitung duit 🙏</div>
           ) : transactions.length === 0 ? (
             <div className="py-10 text-center bg-white border-2 border-gray-100 border-dashed rounded-3xl"><p className="text-sm font-bold text-gray-400">Belum ada catatan nih, bos! 🍃</p></div>
           ) : (
