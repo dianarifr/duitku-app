@@ -1,11 +1,10 @@
 export default async function handler(req, res) {
-  // 1. CORS Headers (Biar localhost bisa nembak domain live)
+  // 1. CORS Headers (Tetep stay biar localhost aman)
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
 
-  // Handle Preflight request
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
@@ -15,11 +14,14 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: 'Harus pake POST, Puh!' });
   }
 
+  // Siapkan variabel di luar try biar bisa dibaca di catch kalau error
+  let budgetsForLog = null;
+
   try {
-    // 2. SAFE PARSING (Biar nggak gampang Invocation Failed)
-    // Cek apakah body perlu di-parse atau sudah jadi object
+    // 2. SAFE PARSING (Gak bakal meledak kalau body udah object)
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     const { budgets } = body;
+    budgetsForLog = budgets; // Simpan buat log kalau nanti error
 
     if (!budgets || !Array.isArray(budgets)) {
       return res.status(400).json({ advice: "Datanya mana, Puh? Kosong nih." });
@@ -27,10 +29,11 @@ export default async function handler(req, res) {
 
     const API_KEY = process.env.GEMINI_API_KEY;
     if (!API_KEY) {
+      console.error("LOG: API_KEY TIDAK DITEMUKAN DI ENV VERCEL");
       return res.status(500).json({ advice: "Kuncinya (API KEY) gak ada di brankas Vercel, Puh!" });
     }
 
-    // 3. Rakit "Bisikan" buat Gemini
+    // 3. Rakit prompt sesuai gaya lo
     const budgetInfo = budgets.map(b =>
       `- ${b.category?.name}: Terpakai ${Math.round(b.percent)}% (Sisa Rp ${(b.amount - b.used).toLocaleString('id-ID')})`
     ).join('\n');
@@ -48,30 +51,48 @@ export default async function handler(req, res) {
     `;
 
     // 4. Panggil Gemini
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+    const googleResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }]
+        contents: [{ parts: [{ text: prompt }] }],
+        safetySettings: [
+          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+        ],
+        generationConfig: {
+          temperature: 0.8, // Biar makin kreatif ngomelnya
+          maxOutputTokens: 200,
+        }
       })
     });
 
-    const data = await response.json();
+    const data = await googleResponse.json();
 
-    // Cek respon dari Google
+    // 5. Cek Error Spesifik dari Google (Penting!)
+    if (data.error) {
+      console.error("LOG ERROR GOOGLE:", data.error.message);
+      throw new Error(data.error.message);
+    }
+
     if (!data.candidates || data.candidates.length === 0) {
-      throw new Error("Otalnya lagi bengong bentar puh!");
+      console.log("ISI DATA DARI GOOGLE:", JSON.stringify(data));
+      throw new Error("Otaknya lagi bengong bentar puh!");
     }
 
     const advice = data.candidates[0].content.parts[0].text;
 
-    // 5. Kirim balik ke Frontend
     return res.status(200).json({ advice });
 
   } catch (error) {
-    console.error("Error Detail:", error.message);
-    console.log("Budget yang diterima:", budgets);
-    console.log("API Key tersedia:", !!process.env.GEMINI_API_KEY);
+    // 6. Log yang jujur di Vercel, tapi user tetep dapet pesan cakep lo
+    console.error("ALASAN ASLI RUSAK:", error.message);
+    console.log("Budget yang diterima saat error:", budgetsForLog);
+    console.log("Kondisi API Key:", !!process.env.GEMINI_API_KEY ? "ADA" : "KOSONG");
+
+    // Pesan default lo yang cakep
     return res.status(500).json({ advice: "Duh, otaknya lagi konslet Puh. Coba lagi nanti!" });
   }
 }
