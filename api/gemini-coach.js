@@ -51,7 +51,7 @@ export default async function handler(req, res) {
     `;
 
     // 4. Panggil Gemini
-    const googleResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+    const googleResponse = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-3-flash:generateContent?key=${API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -63,8 +63,8 @@ export default async function handler(req, res) {
           { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
         ],
         generationConfig: {
-          temperature: 0.8, // Biar makin kreatif ngomelnya
-          maxOutputTokens: 200,
+          temperature: 0.8,
+          maxOutputTokens: 300
         }
       })
     });
