@@ -37,12 +37,13 @@ function Dashboard({ session, setCurrentPage }) {
       });
 
       const data = await response.json();
-      setAiAdvice(data.advice);
 
-      // Simpan ke cache (PENTING: Gunakan hash yang sama dengan useEffect)
-      const hash = JSON.stringify(budgets.map(b => ({ id: b.id, p: Math.round(b.percent) })));
-      localStorage.setItem('ai_advice_cache', data.advice);
-      localStorage.setItem('ai_budget_hash', hash);
+      if (data.advice) {
+        setAiAdvice(data.advice);
+        localStorage.setItem('ai_advice_cache', data.advice);
+        localStorage.setItem('ai_budget_hash', JSON.stringify(budgets.map(b => ({ id: b.id, p: Math.round(b.percent) }))));
+        console.log("✅ Berhasil dapet wejangan & masuk cache!");
+      }
     } catch (error) {
       console.error("AI Coach pundung:", error);
     } finally {
@@ -59,8 +60,6 @@ function Dashboard({ session, setCurrentPage }) {
     if (!loading && criticalBudgets.length > 0) {
       const cachedAdvice = localStorage.getItem('ai_advice_cache');
       const cachedHash = localStorage.getItem('ai_budget_hash');
-
-      // Buat sidik jari data sekarang
       const currentHash = JSON.stringify(criticalBudgets.map(b => ({ id: b.id, p: Math.round(b.percent) })));
 
       if (currentHash !== cachedHash) {
@@ -279,6 +278,32 @@ function Dashboard({ session, setCurrentPage }) {
           <p className="text-sm font-black text-red-600">- Rp {summary.expense.toLocaleString('id-ID')}</p>
         </div>
       </div>
+
+      {/* ========================================== */}
+      {/* SECTION AI COACH (BARU) */}
+      {/* ========================================== */}
+      {(aiAdvice || isAiLoading) && (
+        <div className="px-5 mt-6">
+          <div className="bg-white border-2 border-blue-50 p-5 rounded-[2.5rem] shadow-sm relative overflow-hidden">
+            {/* Dekorasi Robot Mini */}
+            <div className="absolute top-0 right-0 p-4 text-4xl opacity-10">🤖</div>
+
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="bg-blue-600 text-white px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest">AI Coach Duitku</span>
+                {isAiLoading && (
+                  <span className="text-[9px] font-black text-blue-400 animate-pulse uppercase tracking-widest">Lagi Mikir...</span>
+                )}
+              </div>
+
+              <p className="text-sm italic font-bold leading-relaxed text-gray-700">
+                "{aiAdvice || "Sabar Puh, lagi ngumpulin kata-kata pedas..."}"
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ========================================== */}
 
       {/* Riwayat */}
       <div className="px-5 mt-8">
