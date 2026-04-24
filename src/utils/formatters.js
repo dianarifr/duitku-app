@@ -8,6 +8,15 @@ export const formatRupiah = (value) => {
   return numberString.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 };
 
+export const formatDateForInput = (date) => {
+  if (!date) return '';
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export const parseNumber = (formattedValue) => {
   if (!formattedValue) return 0;
   // Hapus semua titik agar jadi angka murni

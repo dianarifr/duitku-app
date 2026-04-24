@@ -6,8 +6,8 @@ function Login() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        // PAKSA balik ke URL yang sesuai lokasi kita sekarang
-        redirectTo: import.meta.env.REDIRECT_LOGIN,
+        // Otomatis balik ke mana pun asal kita saat ini, sat-set!
+        redirectTo: window.location.origin,
       },
     });
 
