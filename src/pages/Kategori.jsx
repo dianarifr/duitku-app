@@ -107,11 +107,6 @@ export default function Kategori({ session, setCurrentPage }) {
           />
         )}
       </div>
-
-      <p className="text-center text-[8px] font-black text-gray-300 uppercase tracking-widest mt-8">
-        💡 Klik 2x pada kartu untuk mengedit
-      </p>
-
     </div>
   );
 }

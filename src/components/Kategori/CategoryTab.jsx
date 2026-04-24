@@ -38,6 +38,11 @@ export default function CategoryTab({
       </div>
 
       <div className="space-y-4">
+        <div className="flex flex-col">
+          <span className="text-[8px] font-bold text-blue-400 uppercase italic animate-pulse">
+            ⚡ Double Click buat edit
+          </span>
+        </div>
         {categories.length === 0 ? (
           <div className="py-20 text-center bg-white rounded-[2rem] border-2 border-dashed border-gray-100 font-black text-[10px] text-gray-400 uppercase">Kategori tidak ditemukan ges 🕵️‍♂️</div>
         ) : (

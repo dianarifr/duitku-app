@@ -9,7 +9,12 @@ export default function TransactionList({ loading, transactions, onEdit, hook })
 
   return (
     <>
-      <div className="px-6 pb-24 mt-8 space-y-4">
+      <div className="px-6 pb-24 mt-4 space-y-4">
+        <div className="flex flex-col">
+          <span className="text-[8px] font-bold text-blue-400 uppercase italic animate-pulse">
+            ⚡ Double Click buat edit
+          </span>
+        </div>
         {transactions.map((t) => (
           <div
             key={t.id}
@@ -55,7 +60,7 @@ export default function TransactionList({ loading, transactions, onEdit, hook })
         ))}
 
         <p className="text-center text-[8px] font-black text-gray-300 uppercase tracking-widest mt-4">
-          💡 Klik 2x pada kartu untuk mengedit
+          ⚡ Double Click buat edit
         </p>
       </div>
 
