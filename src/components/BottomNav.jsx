@@ -5,8 +5,8 @@ export default function BottomNav({ currentPage, setCurrentPage }) {
     { id: 'dashboard', icon: '🏠', label: 'Home' },
     { id: 'laporan', icon: '📊', label: 'Laporan' },
     { id: 'input', icon: '✨', label: 'Catat', primary: true }, // Icon Kece: Sparkles
-    { id: 'statistik', icon: '📈', label: 'Stats' },
     { id: 'kategori', icon: '⚙️', label: 'Set' },
+    { id: 'statistik', icon: '📈', label: 'Stats' },
   ];
 
   return (

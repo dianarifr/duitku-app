@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { formatRupiah } from '../utils/formatters';
 
-export function useKategori(session, fetchData, showToast) {
+export function useKategori(session, fetchData, showAlert) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -32,11 +32,19 @@ export function useKategori(session, fetchData, showToast) {
       : await supabase.from('category').insert([payload]);
 
     if (!error) {
+      showAlert(
+        'Berhasil ges 👌',
+        'Kategori berhasil disimpan! 🙌',
+        'simpan',
+      );
       setIsModalOpen(false);
       fetchData();
-      showToast('Kategori berhasil disimpan! 🙌');
     } else {
-      showToast('Gagal simpan kategori ges 😅', 'error');
+      showAlert(
+        'Aduh kenapa nih 🤔',
+        'Gagal simpan kategori, sistemnya lagi ngambek kayaknya ges! 😅',
+        'error'
+      );
     }
   };
 
@@ -44,11 +52,19 @@ export function useKategori(session, fetchData, showToast) {
     const { error } = await supabase.from('category').update({ deleted_at: new Date() }).eq('id', deleteId).eq('user_id', session.user.id);
 
     if (!error) {
+      showAlert(
+        'Berhasil ges 👌',
+        'Kategori sudah dibuang ke tong sampah! 🗑️',
+        'success'
+      );
       setDeleteId(null);
       fetchData();
-      showToast('Kategori sudah dibuang ke tong sampah! 🗑️');
     } else {
-      showToast('Gagal hapus kategori 😅', 'error');
+      showAlert(
+        'Aduh kenapa nih 🤔',
+        'Gagal hapus kategori, sistemnya lagi ngambek kayaknya ges! 😅',
+        'error'
+      );
     }
   };
 

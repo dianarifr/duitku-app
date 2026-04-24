@@ -6,9 +6,10 @@ import Kategori from './pages/Kategori';
 import InputTransaksi from './pages/InputTransaksi';
 import Laporan from './pages/Laporan';
 import Statistik from './pages/Statistik';
-import BottomNav from './components/BottomNav'; // Shortcut baru kita
+import BottomNav from './components/BottomNav';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { registerSW } from 'virtual:pwa-register';
+import { AlertProvider } from './context/AlertContext'; // Kantor Pusat Alert
 
 function App() {
   const [session, setSession] = useState(null);
@@ -44,66 +45,60 @@ function App() {
     );
   }
 
-  if (!session) {
-    return <Login />;
-  }
-
-  // Cek apakah sedang di halaman input (termasuk trigger dari BottomNav)
-  const isInputPage = ['input', 'input-pengeluaran', 'input-pemasukan', 'input-transaksi'].includes(currentPage);
-
+  // Bungkus seluruh aplikasi dengan AlertProvider
   return (
-    <div className="relative min-h-screen bg-gray-50">
+    <AlertProvider>
+      {!session ? (
+        <Login />
+      ) : (
+        <div className="relative min-h-screen bg-gray-50">
+          {/* AREA KONTEN UTAMA */}
+          <main className="h-full max-w-md pb-10 mx-auto">
+            {/* Navigasi Halaman */}
+            {currentPage === 'dashboard' && (
+              <Dashboard session={session} setCurrentPage={setCurrentPage} setEditData={setEditData} />
+            )}
 
-      {/* AREA KONTEN UTAMA */}
-      <main className="h-full max-w-md pb-10 mx-auto">
-        {/* Render Dashboard */}
-        {currentPage === 'dashboard' && (
-          <Dashboard session={session} setCurrentPage={setCurrentPage} />
-        )}
+            {currentPage === 'kategori' && (
+              <Kategori session={session} setCurrentPage={setCurrentPage} />
+            )}
 
-        {/* Render Kategori */}
-        {currentPage === 'kategori' && (
-          <Kategori session={session} setCurrentPage={setCurrentPage} />
-        )}
+            {currentPage === 'laporan' && (
+              <Laporan
+                session={session}
+                setCurrentPage={setCurrentPage}
+                setEditData={setEditData}
+              />
+            )}
 
-        {/* Render Laporan */}
-        {currentPage === 'laporan' && (
-          <Laporan
-            session={session}
-            setCurrentPage={setCurrentPage}
-            setEditData={setEditData}
-          />
-        )}
+            {currentPage === 'statistik' && (
+              <Statistik session={session} setCurrentPage={setCurrentPage} />
+            )}
 
-        {/* Render Statistik */}
-        {currentPage === 'statistik' && (
-          <Statistik session={session} setCurrentPage={setCurrentPage} />
-        )}
+            {['input', 'input-pengeluaran', 'input-pemasukan', 'input-transaksi'].includes(currentPage) && (
+              <InputTransaksi
+                session={session}
+                setCurrentPage={setCurrentPage}
+                type={editData ? editData.type : (currentPage === 'input-pemasukan' ? 'pemasukan' : 'pengeluaran')}
+                editData={editData}
+                setEditData={setEditData}
+              />
+            )}
+          </main>
 
-        {/* Render Input & Edit */}
-        {isInputPage && (
-          <InputTransaksi
-            session={session}
-            setCurrentPage={setCurrentPage}
-            type={editData ? editData.type : (currentPage === 'input-pemasukan' ? 'pemasukan' : 'pengeluaran')}
-            editData={editData}
-            setEditData={setEditData}
-          />
-        )}
-      </main>
+          {/* NAVIGASI MELAYANG */}
+          {!['input', 'input-pengeluaran', 'input-pemasukan', 'input-transaksi'].includes(currentPage) && (
+            <BottomNav
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+            />
+          )}
 
-      {/* NAVIGASI MELAYANG (Floating Island) */}
-      {/* Sembunyikan Nav saat di halaman input biar ga nutupin keyboard/form */}
-      {!isInputPage && (
-        <BottomNav
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-        />
+          {/* Ornamen Background */}
+          <div className="fixed top-0 left-0 w-full h-64 bg-gradient-to-b from-blue-50/50 to-transparent -z-10"></div>
+        </div>
       )}
-
-      {/* Ornamen Background (Opsional buat kesan mewah) */}
-      <div className="fixed top-0 left-0 w-full h-64 bg-gradient-to-b from-blue-50/50 to-transparent -z-10"></div>
-    </div>
+    </AlertProvider>
   );
 }
 

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { getFinancialRange, formatDateForInput } from '../utils/formatters';
 
-import Toast from '../components/Toast';
+import { useAlert } from '../context/AlertContext';
+
 import LaporanHeader from '../components/Laporan/LaporanHeader';
 import LaporanSummary from '../components/Laporan/LaporanSummary';
 import TransactionList from '../components/Laporan/TransactionList';
@@ -10,6 +11,7 @@ import TransactionList from '../components/Laporan/TransactionList';
 import { useLaporan } from '../hooks/useLaporan';
 
 export default function Laporan({ session, setCurrentPage, setEditData }) {
+  const { showAlert } = useAlert();
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -18,12 +20,6 @@ export default function Laporan({ session, setCurrentPage, setEditData }) {
   const [selectedMethod, setSelectedMethod] = useState('all');
   const [summary, setSummary] = useState({ income: 0, expense: 0 });
   const [filter, setFilter] = useState({ start: '', end: '' });
-  const [notification, setNotification] = useState(null);
-
-  const showToast = (msg, type = 'success') => {
-    console.log("🔔 Toast Triggered:", msg);
-    setNotification({ msg, type });
-  };
 
   const fetchFilteredData = async () => {
     setLoading(true);
@@ -41,7 +37,8 @@ export default function Laporan({ session, setCurrentPage, setEditData }) {
     setLoading(false);
   };
 
-  const laporanHook = useLaporan(session, fetchFilteredData, showToast);
+  // 3. Masukkan showAlert global ke dalam hook laporan
+  const laporanHook = useLaporan(session, fetchFilteredData, showAlert);
 
   useEffect(() => {
     const initFilter = async () => {
@@ -87,11 +84,6 @@ export default function Laporan({ session, setCurrentPage, setEditData }) {
         onEdit={(t) => { setEditData(t); setCurrentPage('input-transaksi'); }}
         hook={laporanHook}
       />
-
-      {/* RENDER TOAST NOTIFIKASI */}
-      {notification && (
-        <Toast message={notification.msg} type={notification.type} onClose={() => setNotification(null)} />
-      )}
     </div>
   );
 }

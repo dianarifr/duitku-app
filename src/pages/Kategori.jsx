@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { getFinancialRange } from '../utils/formatters';
 
-import Toast from '../components/Toast';
+import { useAlert } from '../context/AlertContext';
 import CategoryTab from '../components/Kategori/CategoryTab';
 import RecurringTab from '../components/Kategori/RecurringTab';
 
@@ -10,6 +10,7 @@ import { useKategori } from '../hooks/useKategori';
 import { useRecurring } from '../hooks/useRecurring';
 
 export default function Kategori({ session, setCurrentPage }) {
+  const { showAlert } = useAlert();
   const [categories, setCategories] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [recurringData, setRecurringData] = useState([]);
@@ -19,8 +20,6 @@ export default function Kategori({ session, setCurrentPage }) {
   const [activeTab, setActiveTab] = useState('list');
   const [searchTerm, setSearchTerm] = useState('');
   const [notification, setNotification] = useState(null);
-
-  const showToast = (msg, type = 'success') => setNotification({ msg, type });
 
   const fetchData = async (pd) => {
     setLoading(true);
@@ -56,8 +55,8 @@ export default function Kategori({ session, setCurrentPage }) {
   };
 
   // INIT CUSTOM HOOKS
-  const kategoriHook = useKategori(session, fetchData, showToast);
-  const recurringHook = useRecurring(session, fetchData, showToast);
+  const kategoriHook = useKategori(session, fetchData, showAlert);
+  const recurringHook = useRecurring(session, fetchData, showAlert);
 
   // Filters
   const filteredCategories = categories.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -113,10 +112,6 @@ export default function Kategori({ session, setCurrentPage }) {
         💡 Klik 2x pada kartu untuk mengedit
       </p>
 
-      {/* RENDER TOAST */}
-      {notification && (
-        <Toast message={notification.msg} type={notification.type} onClose={() => setNotification(null)} />
-      )}
     </div>
   );
 }

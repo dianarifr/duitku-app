@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { formatRupiah } from '../utils/formatters';
 
-export function useRecurring(session, fetchData, showToast) {
+export function useRecurring(session, fetchData, showAlert) {
   const [isRecModalOpen, setIsRecModalOpen] = useState(false);
   const [deleteRecId, setDeleteRecId] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -35,11 +35,15 @@ export function useRecurring(session, fetchData, showToast) {
       : await supabase.from('recurring_transactions').insert([payload]);
 
     if (!error) {
+      showAlert('Berhasil ges 👌', 'Tagihan rutin aman tersimpan! 🙌', 'success');
       setIsRecModalOpen(false);
       fetchData();
-      showToast('Tagihan rutin aman tersimpan! 🙌');
     } else {
-      showToast('Waduh, rutin gagal disave 😅', 'error');
+      showAlert(
+        'Aduh kenapa nih 🤔',
+        'Gagal simpan tagihan rutin, sistemnya lagi ngambek kayaknya ges! 😅',
+        'error'
+      );
     }
   };
 
@@ -47,11 +51,15 @@ export function useRecurring(session, fetchData, showToast) {
     const { error } = await supabase.from('recurring_transactions').delete().eq('id', deleteRecId).eq('user_id', session.user.id);
 
     if (!error) {
+      showAlert('Berhasil ges 👌', 'Tagihan rutin resmi dihapus! 🗑️', 'success');
       setDeleteRecId(null);
       fetchData();
-      showToast('Tagihan rutin resmi dihapus! 🗑️');
     } else {
-      showToast('Gagal hapus tagihan 😅', 'error');
+      showAlert(
+        'Aduh kenapa nih 🤔',
+        'Gagal hapus tagihan rutin, sistemnya lagi ngambek kayaknya ges! 😅',
+        'error'
+      );
     }
   };
 
@@ -61,7 +69,7 @@ export function useRecurring(session, fetchData, showToast) {
 
     if (!error) {
       fetchData();
-      showToast(newStatus ? 'Tagihan diaktifkan kembali! 🔥' : 'Tagihan dinonaktifkan sementara 🧊');
+      showAlert('Berhasil ges 👌', newStatus ? 'Tagihan diaktifkan kembali! 🔥' : 'Tagihan dinonaktifkan sementara 🧊', 'success');
     }
   };
 

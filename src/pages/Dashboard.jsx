@@ -10,7 +10,7 @@ import AICoach from '../components/Dashboard/AICoach';
 import HistoryList from '../components/Dashboard/HistoryList';
 import RecurringModal from '../components/Dashboard/RecurringModal';
 
-function Dashboard({ session, setCurrentPage }) {
+function Dashboard({ session, setCurrentPage, setEditData}) {
   const [summary, setSummary] = useState({ total: 0, income: 0, expense: 0 });
   const [wallet, setWallet] = useState({ dompet: 0, bank: 0 });
   const [transactions, setTransactions] = useState([]);
@@ -211,7 +211,7 @@ function Dashboard({ session, setCurrentPage }) {
       <WalletCards wallet={wallet} />
       <SummarySection hasInputToday={hasInputToday} loading={loading} income={summary.income} expense={summary.expense} onInputClick={() => setCurrentPage('input-pengeluaran')} />
       <AICoach aiAdvice={aiAdvice} isAiLoading={isAiLoading} />
-      <HistoryList transactions={transactions} loading={loading} onSeeAll={() => setCurrentPage('laporan')} />
+      <HistoryList transactions={transactions} loading={loading} onSeeAll={() => setCurrentPage('laporan')} onEdit={(t) => { setEditData(t); setCurrentPage('input-transaksi'); }} />
       <RecurringModal show={showRecurringModal} pending={pendingRecurring} onPay={handlePayRecurring} onClose={() => setShowRecurringModal(false)} />
     </div>
   );
