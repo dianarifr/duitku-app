@@ -118,6 +118,8 @@ function Dashboard({ session, setCurrentPage }) {
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
       const pending = recurringList.filter(rec => {
+        if (rec.is_active === false) return false;
+
         // 1. Tentukan bulan target untuk tagihan ini
         const startCycle = new Date(currentRange.start); // Misal: 23 April
         let targetYear = startCycle.getFullYear();
