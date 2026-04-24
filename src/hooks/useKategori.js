@@ -35,7 +35,7 @@ export function useKategori(session, fetchData, showAlert) {
       showAlert(
         'Berhasil ges 👌',
         'Kategori berhasil disimpan! 🙌',
-        'simpan',
+        'success',
       );
       setIsModalOpen(false);
       fetchData();
