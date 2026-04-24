@@ -75,9 +75,30 @@ export default function RecurringTab({ recurringData, categories, hook }) {
                     setRecFormData({ ...recFormData, amount: parseNumber(val) });
                   }} className="w-full p-4 mt-1 text-sm font-black border-none outline-none bg-gray-50 rounded-2xl focus:ring-2 focus:ring-blue-500" placeholder="Rp 0" required />
                 </div>
-                <div>
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Tgl Tagihan</label>
-                  <input type="number" min="1" max="31" value={recFormData.billing_date} onChange={(e) => setRecFormData({ ...recFormData, billing_date: Number(e.target.value) })} className="w-full p-4 mt-1 text-sm font-black border-none outline-none bg-gray-50 rounded-2xl focus:ring-2 focus:ring-blue-500" required />
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
+                    Tgl Tagihan
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={recFormData.billing_date}
+                      onChange={(e) => setRecFormData({ ...recFormData, billing_date: Number(e.target.value) })}
+                      className="w-full p-4 text-sm font-black border-none outline-none appearance-none cursor-pointer bg-gray-50 rounded-2xl focus:ring-2 focus:ring-blue-500"
+                      required
+                    >
+                      <option value="" disabled className="text-gray-400">Pilih Tanggal</option>
+                      {[...Array(31)].map((_, i) => (
+                        <option key={i + 1} value={i + 1} className="font-bold text-gray-800">
+                          {i + 1}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Ikon Panah Kecil biar user tau ini dropdown */}
+                    <div className="absolute inset-y-0 flex items-center pointer-events-none right-4">
+                      <span className="text-xs text-gray-400">▼</span>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="space-y-3">
