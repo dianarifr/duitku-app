@@ -32,11 +32,12 @@ function Dashboard({ session, setCurrentPage, setEditData}) {
   const userName = user.user_metadata?.full_name || user.email.split('@')[0];
   const avatarUrlDummy = `https://ui-avatars.com/api/?name=${userName}&background=0D8ABC&color=fff&rounded=true&bold=true`;
   const avatarUrl = user.user_metadata?.avatar_url || avatarUrlDummy;
+  const apiUrl = import.meta.env.VITE_APP_API_URL;
 
   const getAiCoachAdvice = async (budgets) => {
     try {
       setIsAiLoading(true);
-      const response = await fetch(`${APP_API_URL}`, {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ budgets })
