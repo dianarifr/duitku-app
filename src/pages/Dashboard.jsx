@@ -182,8 +182,7 @@ function Dashboard({ session, setCurrentPage, setEditData}) {
       .from('category')
       .select('id, name, icon, color, budget')
       .eq('user_id', session.user.id)
-      .is('deleted_at', null)
-      .gt('budget', 0); // Ambil cuma yang ada budgetnya
+      .is('deleted_at', null);
 
     if (catData) {
       // Hitung pemakaian per kategori berdasarkan thisMonthTrans

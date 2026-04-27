@@ -24,7 +24,7 @@ export default function RecurringTab({ recurringData, categories, hook }) {
           <div className="py-20 text-center bg-white rounded-[2rem] border-2 border-dashed border-gray-100 font-black text-[10px] text-gray-400 uppercase">Tagihan tidak ditemukan ges 🕵️‍♂️</div>
         ) : (
           recurringData.map((rec) => (
-            <div key={rec.id} onDoubleClick={() => openEditRec(rec)} className={`p-5 border shadow-sm rounded-[2rem] flex flex-col transition-all cursor-pointer select-none ${rec.is_active === false ? 'bg-gray-50 border-gray-100 opacity-60' : 'bg-white border-gray-50'}`}>
+            <div key={rec.id} onDoubleClick={() => openEditRec(rec)} className={`p-5 border shadow-sm rounded-[2rem] flex flex-col transition-all cursor-pointer select-none hover:border-blue-300 hover:shadow-md group ${rec.is_active === false ? 'bg-gray-50 border-gray-100 opacity-60' : 'bg-white border-gray-50'}`}>
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-4 overflow-hidden">
                   <div className="flex items-center justify-center w-12 h-12 text-2xl rounded-2xl shrink-0" style={{ backgroundColor: `${rec.category?.color || '#94a3b8'}15`, color: rec.category?.color || '#64748b' }}>

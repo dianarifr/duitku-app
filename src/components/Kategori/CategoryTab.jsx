@@ -57,7 +57,7 @@ export default function CategoryTab({
             const barWidth = Math.min(rawPercent, 100);
             const isOver = used > cat.budget;
             return (
-              <div key={cat.id} onDoubleClick={() => openEditModal(cat)} className="p-5 bg-white border border-gray-100 shadow-sm rounded-[2rem] active:scale-[0.98] transition-all cursor-pointer select-none">
+              <div key={cat.id} onDoubleClick={() => openEditModal(cat)} className="p-5 bg-white border border-gray-100 shadow-sm rounded-[2rem] active:scale-[0.98] transition-all cursor-pointer select-none hover:border-blue-300 hover:shadow-md group">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="flex items-center justify-center w-12 h-12 text-2xl rounded-2xl" style={{ backgroundColor: `${cat.color}15`, color: cat.color }}>{cat.icon}</div>

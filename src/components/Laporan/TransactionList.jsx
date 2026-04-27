@@ -19,7 +19,7 @@ export default function TransactionList({ loading, transactions, onEdit, hook })
           <div
             key={t.id}
             onDoubleClick={() => onEdit(t)}
-            className="bg-white p-5 rounded-[2rem] border border-gray-50 shadow-sm flex flex-col gap-4 active:scale-[0.98] transition-transform select-none cursor-pointer"
+            className="bg-white p-5 rounded-[2rem] border border-gray-50 shadow-sm flex flex-col gap-4 active:scale-[0.98] transition-transform select-none cursor-pointer hover:border-blue-300 hover:shadow-md group"
           >
             <div className="flex items-start justify-between">
               <div className="flex gap-4">

@@ -11,7 +11,7 @@ export default function SummarySection({ hasInputToday, loading, income, expense
                 <p className="text-xs font-bold text-white">Belum ada catatan hari ini.</p>
               </div>
             </div>
-            <button onClick={onInputClick} className="bg-white text-orange-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase shadow-md">Isi Sekarang</button>
+            <button onClick={onInputClick} className="bg-white text-orange-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase shadow-md cursor-pointer">Isi Sekarang</button>
           </div>
         )}
       </div>
