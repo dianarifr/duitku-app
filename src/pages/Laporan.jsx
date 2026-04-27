@@ -10,7 +10,7 @@ import TransactionList from '../components/Laporan/TransactionList';
 
 import { useLaporan } from '../hooks/useLaporan';
 
-export default function Laporan({ session, setCurrentPage, setEditData }) {
+export default function Laporan({ session, setCurrentPage, setEditData, tempCategoryFilter, setTempCategoryFilter }) {
   const { showAlert } = useAlert();
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -39,6 +39,14 @@ export default function Laporan({ session, setCurrentPage, setEditData }) {
 
   // 3. Masukkan showAlert global ke dalam hook laporan
   const laporanHook = useLaporan(session, fetchFilteredData, showAlert);
+
+  // Di dalam komponen Laporan atau LaporanHeader
+  useEffect(() => {
+    if (tempCategoryFilter !== 'all') {
+      setSelectedCategory(tempCategoryFilter); // Set filter kategori sesuai titipan
+      setTempCategoryFilter('all'); // Reset titipan biar gak kegulung terus filternya
+    }
+  }, [tempCategoryFilter]);
 
   useEffect(() => {
     const initFilter = async () => {

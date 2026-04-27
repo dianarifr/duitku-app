@@ -1,11 +1,11 @@
 // Komponen Internal untuk tiap Kotak
-const Card = ({ category }) => {
+const Card = ({ category, onDeepDive }) => {
   const hasBudget = category.budget > 0;
   const percentage = hasBudget ? Math.min((category.used / category.budget) * 100, 100) : 0;
   const isOverBudget = hasBudget && category.used > category.budget;
 
   return (
-    <div className="bg-white p-4 rounded-[2rem] border border-gray-50 shadow-sm flex flex-col justify-between h-full active:scale-95 transition-all hover:border-blue-300 hover:shadow-md group cursor-pointer">
+    <div onDoubleClick={() => onDeepDive(category.id)} className="bg-white p-4 rounded-[2rem] border border-gray-50 shadow-sm flex flex-col justify-between h-full active:scale-95 transition-all hover:border-blue-300 hover:shadow-md group cursor-pointer">
       <div className="flex items-center justify-between mb-3">
         <div
           className="flex items-center justify-center text-lg w-9 h-9 rounded-2xl"
@@ -67,7 +67,7 @@ const Card = ({ category }) => {
 };
 
 // KOMPONEN UTAMA
-export default function BudgetSection({ loading, budgetMonitoring, setCurrentPage }) {
+export default function BudgetSection({ loading, budgetMonitoring, setCurrentPage, onCategoryDeepDive }) {
   // Filter kategori yang hanya memiliki pengeluaran (used > 0)
   const activeCategories = budgetMonitoring.filter(cat => cat.used > 0);
 
@@ -88,7 +88,7 @@ export default function BudgetSection({ loading, budgetMonitoring, setCurrentPag
       ) : activeCategories.length > 0 ? (
         <div className="grid grid-cols-2 gap-4">
           {activeCategories.map((cat) => (
-            <Card key={cat.id} category={cat} />
+            <Card key={cat.id} category={cat} onDeepDive={onCategoryDeepDive} />
           ))}
         </div>
       ) : (

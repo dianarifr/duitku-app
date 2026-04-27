@@ -11,7 +11,7 @@ import HistoryList from '../components/Dashboard/HistoryList';
 import RecurringModal from '../components/Dashboard/RecurringModal';
 import BudgetSection from '../components/Dashboard/BudgetCard';
 
-function Dashboard({ session, setCurrentPage, setEditData}) {
+function Dashboard({ session, setCurrentPage, setEditData, onCategoryDeepDive}) {
   const [summary, setSummary] = useState({ total: 0, income: 0, expense: 0 });
   const [wallet, setWallet] = useState({ dompet: 0, bank: 0 });
   const [transactions, setTransactions] = useState([]);
@@ -246,13 +246,45 @@ function Dashboard({ session, setCurrentPage, setEditData}) {
 
   return (
     <div className="min-h-screen pb-32 font-sans bg-gray-50">
-      <DashboardHeader userName={userName} avatarUrl={avatarUrl} totalBalance={summary.total} periodLabel={periodLabel} onLogout={() => supabase.auth.signOut()} />
+      <DashboardHeader
+        userName={userName}
+        avatarUrl={avatarUrl}
+        totalBalance={summary.total}
+        periodLabel={periodLabel}
+        onLogout={() => supabase.auth.signOut()}
+      />
       <WalletCards wallet={wallet} />
-      <SummarySection hasInputToday={hasInputToday} loading={loading} income={summary.income} expense={summary.expense} onInputClick={() => setCurrentPage('input-pengeluaran')} />
-      <AICoach aiAdvice={aiAdvice} isAiLoading={isAiLoading} isExpanded={showAiCoach} onToggle={toggleAiCoach}/>
-      {/* <HistoryList transactions={transactions} loading={loading} onSeeAll={() => setCurrentPage('laporan')} onEdit={(t) => { setEditData(t); setCurrentPage('input-transaksi'); }} /> */}
-      <BudgetSection loading={loading} budgetMonitoring={budgetMonitoring} setCurrentPage={setCurrentPage} />
-      <RecurringModal show={showRecurringModal} pending={pendingRecurring} onPay={handlePayRecurring} onClose={() => setShowRecurringModal(false)} />
+      <SummarySection
+        hasInputToday={hasInputToday}
+        loading={loading}
+        income={summary.income}
+        expense={summary.expense}
+        onInputClick={() => setCurrentPage('input-pengeluaran')}
+      />
+      <AICoach
+        aiAdvice={aiAdvice}
+        isAiLoading={isAiLoading}
+        isExpanded={showAiCoach}
+        onToggle={toggleAiCoach}
+      />
+      {/* <HistoryList
+        transactions={transactions}
+        loading={loading}
+        onSeeAll={() => setCurrentPage('laporan')}
+        onEdit={(t) => { setEditData(t); setCurrentPage('input-transaksi'); }}
+      /> */}
+      <BudgetSection
+        loading={loading}
+        budgetMonitoring={budgetMonitoring}
+        setCurrentPage={setCurrentPage}
+        onCategoryDeepDive={onCategoryDeepDive}
+      />
+      <RecurringModal
+        show={showRecurringModal}
+        pending={pendingRecurring}
+        onPay={handlePayRecurring}
+        onClose={() => setShowRecurringModal(false)}
+      />
     </div>
   );
 }

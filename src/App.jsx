@@ -16,6 +16,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [editData, setEditData] = useState(null);
+  const [tempCategoryFilter, setTempCategoryFilter] = useState('all');
 
   // Register PWA Service Worker
   registerSW({ immediate: true });
@@ -87,7 +88,12 @@ function App() {
           <main className="h-full max-w-md pb-10 mx-auto">
             {/* Navigasi Halaman */}
             {currentPage === 'dashboard' && (
-              <Dashboard session={session} setCurrentPage={navigateTo} setEditData={setEditData} />
+              <Dashboard
+                session={session}
+                setCurrentPage={navigateTo}
+                setEditData={setEditData}
+                onCategoryDeepDive={(catId) => { setTempCategoryFilter(catId); setCurrentPage('laporan'); }}
+              />
             )}
 
             {currentPage === 'kategori' && (
@@ -99,6 +105,8 @@ function App() {
                 session={session}
                 setCurrentPage={navigateTo}
                 setEditData={setEditData}
+                tempCategoryFilter={tempCategoryFilter}
+                setTempCategoryFilter={setTempCategoryFilter}
               />
             )}
 
