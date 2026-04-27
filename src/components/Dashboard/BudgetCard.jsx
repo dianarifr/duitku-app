@@ -54,7 +54,7 @@ const Card = ({ category, onDeepDive }) => {
               className={`h-full transition-all duration-1000 rounded-full`}
               style={{
                 width: `${percentage}%`,
-                backgroundColor: isOverBudget ? '#ef4444' : category.color
+                backgroundColor: isOverBudget ? '#ef4444' : (Math.round(percentage) > 80 ? '#f59e0b' : category.color)
               }}
             />
           </div>
