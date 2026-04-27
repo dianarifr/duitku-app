@@ -77,12 +77,6 @@ export default function BudgetSection({ loading, budgetMonitoring, setCurrentPag
         <h3 className="text-[10px] font-black tracking-widest text-gray-400 uppercase">
           Monitoring Pengeluaran
         </h3>
-        <button
-          onClick={() => setCurrentPage('kategori')}
-          className="text-[10px] font-black text-blue-600 uppercase italic cursor-pointer active:scale-90 transition-transform"
-        >
-          ⚡ Atur Budget 📂
-        </button>
       </div>
 
       {loading ? (

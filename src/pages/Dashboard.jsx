@@ -27,6 +27,15 @@ function Dashboard({ session, setCurrentPage, setEditData}) {
 
   const [aiAdvice, setAiAdvice] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [showAiCoach, setShowAiCoach] = useState(() => {
+    const saved = localStorage.getItem('show_ai_coach');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  const toggleAiCoach = () => {
+    const newVal = !showAiCoach;
+    setShowAiCoach(newVal);
+    localStorage.setItem('show_ai_coach', JSON.stringify(newVal));
+  };
 
   const user = session.user;
   const userName = user.user_metadata?.full_name || user.email.split('@')[0];
@@ -240,7 +249,7 @@ function Dashboard({ session, setCurrentPage, setEditData}) {
       <DashboardHeader userName={userName} avatarUrl={avatarUrl} totalBalance={summary.total} periodLabel={periodLabel} onLogout={() => supabase.auth.signOut()} />
       <WalletCards wallet={wallet} />
       <SummarySection hasInputToday={hasInputToday} loading={loading} income={summary.income} expense={summary.expense} onInputClick={() => setCurrentPage('input-pengeluaran')} />
-      <AICoach aiAdvice={aiAdvice} isAiLoading={isAiLoading} />
+      <AICoach aiAdvice={aiAdvice} isAiLoading={isAiLoading} isExpanded={showAiCoach} onToggle={toggleAiCoach}/>
       {/* <HistoryList transactions={transactions} loading={loading} onSeeAll={() => setCurrentPage('laporan')} onEdit={(t) => { setEditData(t); setCurrentPage('input-transaksi'); }} /> */}
       <BudgetSection loading={loading} budgetMonitoring={budgetMonitoring} setCurrentPage={setCurrentPage} />
       <RecurringModal show={showRecurringModal} pending={pendingRecurring} onPay={handlePayRecurring} onClose={() => setShowRecurringModal(false)} />
