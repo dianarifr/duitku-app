@@ -35,11 +35,12 @@ export default async function handler(req, res) {
 
     // 3. Rakit prompt sesuai gaya lo
     const budgetInfo = budgets.map(b => {
-      const name = b.name || "Kategori Tanpa Nama";
+      const name = b.name || 'Kategori Misterius';
+      const used = b.used || 0;
+      const budget = b.budget || 0;
       const percent = Math.round(b.percent || 0);
-      const sisa = (b.budget || 0) - (b.used || 0);
 
-      return `- ${name}: Terpakai ${percent}% (Sisa Rp ${sisa.toLocaleString('id-ID')})`;
+      return `- ${name}: Terpakai ${percent}% (Budget: Rp ${budget.toLocaleString('id-ID')}, Terpakai: Rp ${used.toLocaleString('id-ID')})`;
     }).join('\n');
 
     const prompt = `

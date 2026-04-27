@@ -209,7 +209,7 @@ function Dashboard({ session, setCurrentPage, setEditData, onCategoryDeepDive}) 
       // Kirim data ke AI Coach (Critical Budgets)
       const critical = budgetStatus
         .map(b => ({ ...b, percent: (b.used / (b.budget || 1)) * 100 }))
-        .filter(b => b.percent >= 80)
+        .filter(b => b.budget > 0 && b.percent >= 80)
         .sort((a, b) => b.percent - a.percent);
 
       setCriticalBudgets(critical);
