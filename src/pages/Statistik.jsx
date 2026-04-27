@@ -1,68 +1,16 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../supabaseClient';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { getFinancialRange } from '../utils/formatters';
+import { useStatistik } from '../hooks/useStatistik';
 
 export default function Statistik({ session, setCurrentPage }) {
-  const [chartData, setChartData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [filterType, setFilterType] = useState('pengeluaran');
-
-  // Logic Perhitungan
-  const totalValue = chartData.reduce((acc, curr) => acc + curr.value, 0);
-
-  const today = new Date();
-  const daysPassed = today.getDate();
-  const dailyAvg = totalValue / daysPassed;
-
-  // Ambil Kategori Tertinggi lengkap dengan icon dan color-nya
-  const topCategory = chartData.length > 0
-    ? [...chartData].sort((a, b) => b.value - a.value)[0]
-    : null;
-
-  useEffect(() => {
-    fetchStatistik();
-  }, [filterType]);
-
-  const fetchStatistik = async () => {
-    setLoading(true);
-
-    // 1. Ambil Payday User
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('payday')
-      .eq('id', session.user.id)
-      .single();
-
-    const payday = profile?.payday || 1;
-    const { start, end } = getFinancialRange(payday);
-
-    // 2. Query Transaksi dengan Range Finansial
-    const { data, error } = await supabase
-      .from('transaction')
-      .select(`amount, type, date, category (name, color, icon, budget)`)
-      .is('deleted_at', null)
-      .eq('type', filterType)
-      .gte('date', start)
-      .lte('date', end);
-
-    if (error) {
-      console.error(error);
-    } else {
-      const grouped = data.reduce((acc, curr) => {
-        const catName = curr.category?.name || 'Lainnya';
-        const catColor = curr.category?.color || '#cbd5e1';
-        const catIcon = curr.category?.icon || '❓';
-        if (!acc[catName]) {
-          acc[catName] = { name: catName, value: 0, color: catColor, icon: catIcon };
-        }
-        acc[catName].value += curr.amount;
-        return acc;
-      }, {});
-      setChartData(Object.values(grouped));
-    }
-    setLoading(false);
-  };
+  const {
+    chartData,
+    loading,
+    filterType,
+    setFilterType,
+    totalValue,
+    dailyAvg,
+    topCategory
+  } = useStatistik(session);
 
   return (
     <div className="min-h-screen pb-24 font-sans bg-gray-50">
@@ -143,12 +91,11 @@ export default function Statistik({ session, setCurrentPage }) {
         <div className="bg-white p-5 rounded-[2rem] border border-gray-50 shadow-sm flex flex-col justify-center">
           <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Rata-rata / Hari</p>
           <p className="text-sm font-black tracking-tighter text-gray-800 uppercase">
-            Rp {Math.round(dailyAvg).toLocaleString('id-ID')}
+            Rp {Math.round(dailyAvg || 0).toLocaleString('id-ID')}
           </p>
         </div>
 
         <div className="bg-white p-5 rounded-[2rem] border border-gray-50 shadow-sm flex items-center gap-3">
-          {/* ICON TOP CATEGORY (NEW) */}
           <div
             className="flex items-center justify-center w-10 h-10 text-xl rounded-xl shrink-0"
             style={{
@@ -167,50 +114,53 @@ export default function Statistik({ session, setCurrentPage }) {
         </div>
       </div>
 
-      {/* Intensity Bar */}
+      {/* Intensity Bar & Breakdown List tetap sama kodenya di bawah ini ... */}
+      {/* (Gunakan data dari hook: chartData, totalValue) */}
+      {/* ... bagian Intensity Bar dan Breakdown List lo ... */}
       {chartData.length > 0 && (
-        <div className="px-6 mt-8">
-          <div className="flex items-center justify-between px-1 mb-3">
-            <h3 className="text-[10px] font-black tracking-widest text-gray-400 uppercase">Intensitas Kategori</h3>
-            <span className="text-[10px] font-black text-gray-800 uppercase">{chartData.length} Jenis</span>
-          </div>
-          <div className="flex w-full h-4 overflow-hidden bg-gray-200 rounded-full shadow-inner">
-            {chartData.sort((a,b) => b.value - a.value).map((item, idx) => (
-              <div
-                key={idx}
-                style={{ width: `${(item.value / totalValue) * 100}%`, backgroundColor: item.color }}
-                className="h-full transition-all duration-1000 border-r border-white/20 last:border-none"
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Breakdown List */}
-      <div className="px-6 mt-8 space-y-3">
-        <div className="flex items-end justify-between px-1 mb-2">
-            <h3 className="text-[10px] font-black tracking-widest text-gray-400 uppercase">Rincian Per Kategori</h3>
-            <span className="text-[10px] font-black text-gray-800 uppercase">Rp {totalValue.toLocaleString('id-ID')}</span>
-        </div>
-
-        {chartData.sort((a,b) => b.value - a.value).map((item, idx) => {
-          const percent = ((item.value / totalValue) * 100).toFixed(1);
-          return (
-            <div key={idx} className="flex items-center justify-between p-5 transition-transform bg-white border shadow-sm rounded-[1.5rem] border-gray-50 active:scale-[0.98]">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-10 h-10 text-lg shadow-inner rounded-xl" style={{ backgroundColor: `${item.color}15`, color: item.color }}>
-                  {item.icon}
+        <>
+            <div className="px-6 mt-8">
+                <div className="flex items-center justify-between px-1 mb-3">
+                    <h3 className="text-[10px] font-black tracking-widest text-gray-400 uppercase">Intensitas Kategori</h3>
+                    <span className="text-[10px] font-black text-gray-800 uppercase">{chartData.length} Jenis</span>
                 </div>
-                <div>
-                    <p className="mb-1 text-sm font-black leading-none tracking-tighter text-gray-800 uppercase">{item.name}</p>
-                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{percent}% Dari Total</p>
+                <div className="flex w-full h-4 overflow-hidden bg-gray-200 rounded-full shadow-inner">
+                    {[...chartData].sort((a,b) => b.value - a.value).map((item, idx) => (
+                    <div
+                        key={idx}
+                        style={{ width: `${(item.value / (totalValue || 1)) * 100}%`, backgroundColor: item.color }}
+                        className="h-full transition-all duration-1000 border-r border-white/20 last:border-none"
+                    />
+                    ))}
                 </div>
-              </div>
-              <p className="text-sm font-black tracking-tighter text-gray-700">Rp {item.value.toLocaleString('id-ID')}</p>
             </div>
-          )
-        })}
-      </div>
+
+            <div className="px-6 mt-8 space-y-3">
+                <div className="flex items-end justify-between px-1 mb-2">
+                    <h3 className="text-[10px] font-black tracking-widest text-gray-400 uppercase">Rincian Per Kategori</h3>
+                    <span className="text-[10px] font-black text-gray-800 uppercase">Rp {totalValue.toLocaleString('id-ID')}</span>
+                </div>
+
+                {[...chartData].sort((a,b) => b.value - a.value).map((item, idx) => {
+                    const percent = ((item.value / (totalValue || 1)) * 100).toFixed(1);
+                    return (
+                        <div key={idx} className="flex items-center justify-between p-5 transition-transform bg-white border shadow-sm rounded-[1.5rem] border-gray-50 active:scale-[0.98]">
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center justify-center w-10 h-10 text-lg shadow-inner rounded-xl" style={{ backgroundColor: `${item.color}15`, color: item.color }}>
+                                    {item.icon}
+                                </div>
+                                <div>
+                                    <p className="mb-1 text-sm font-black leading-none tracking-tighter text-gray-800 uppercase">{item.name}</p>
+                                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{percent}% Dari Total</p>
+                                </div>
+                            </div>
+                            <p className="text-sm font-black tracking-tighter text-gray-700">Rp {item.value.toLocaleString('id-ID')}</p>
+                        </div>
+                    )
+                })}
+            </div>
+        </>
+      )}
     </div>
   );
 }
