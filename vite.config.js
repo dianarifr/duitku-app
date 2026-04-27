@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import pkg from './package.json';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -12,7 +13,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
-        name: 'Duitku Tracker Pro',
+        name: 'Duitku Apps',
         short_name: 'Duitku',
         description: 'Catat cuan harian makin asik dan rapi',
         theme_color: '#2563eb', // Warna biru branding kamu
@@ -42,7 +43,6 @@ export default defineConfig({
       workbox: {
         // Biar aset tailwind dan react ter-cache dengan baik
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
-        cacheId: 'duitku-v2', // Ganti ID-nya biar cache lama dibuang
         cleanupOutdatedCaches: true,
       }
     })

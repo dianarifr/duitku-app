@@ -25,6 +25,7 @@ function App() {
   });
 
   useEffect(() => {
+    // --- 1. LOGIKA AUTH (Supabase) ---
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
@@ -34,8 +35,38 @@ function App() {
       setSession(session);
     });
 
-    return () => subscription.unsubscribe();
+    // --- 2. LOGIKA NAVIGASI (Fix Back Gesture) ---
+    const handlePopState = (event) => {
+      // Jika ada state halaman di history, pindah ke halaman tersebut
+      if (event.state && event.state.page) {
+        setCurrentPage(event.state.page);
+      } else {
+        // Jika balik ke paling awal, default ke dashboard
+        setCurrentPage('dashboard');
+      }
+    };
+
+    // Pasang listener tombol back/gesture
+    window.addEventListener('popstate', handlePopState);
+
+    // Inisialisasi history awal jika baru buka aplikasi
+    if (!window.history.state) {
+      window.history.replaceState({ page: 'dashboard' }, '', '');
+    }
+
+    // --- 3. CLEANUP (Bersih-bersih saat komponen unmount) ---
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('popstate', handlePopState);
+    };
   }, []);
+
+  // --- 4. FUNGSI NAVIGASI BARU (Gunakan ini untuk ganti halaman) ---
+  const navigateTo = (page) => {
+    setCurrentPage(page);
+    // Simpan halaman baru ke dalam history browser
+    window.history.pushState({ page }, '', '');
+  };
 
   if (loading) {
     return (
@@ -56,29 +87,29 @@ function App() {
           <main className="h-full max-w-md pb-10 mx-auto">
             {/* Navigasi Halaman */}
             {currentPage === 'dashboard' && (
-              <Dashboard session={session} setCurrentPage={setCurrentPage} setEditData={setEditData} />
+              <Dashboard session={session} setCurrentPage={navigateTo} setEditData={setEditData} />
             )}
 
             {currentPage === 'kategori' && (
-              <Kategori session={session} setCurrentPage={setCurrentPage} />
+              <Kategori session={session} setCurrentPage={navigateTo} />
             )}
 
             {currentPage === 'laporan' && (
               <Laporan
                 session={session}
-                setCurrentPage={setCurrentPage}
+                setCurrentPage={navigateTo}
                 setEditData={setEditData}
               />
             )}
 
             {currentPage === 'statistik' && (
-              <Statistik session={session} setCurrentPage={setCurrentPage} />
+              <Statistik session={session} setCurrentPage={navigateTo} />
             )}
 
             {['input', 'input-pengeluaran', 'input-pemasukan', 'input-transaksi'].includes(currentPage) && (
               <InputTransaksi
                 session={session}
-                setCurrentPage={setCurrentPage}
+                setCurrentPage={navigateTo}
                 type={editData ? editData.type : (currentPage === 'input-pemasukan' ? 'pemasukan' : 'pengeluaran')}
                 editData={editData}
                 setEditData={setEditData}
@@ -90,7 +121,7 @@ function App() {
           {!['input', 'input-pengeluaran', 'input-pemasukan', 'input-transaksi'].includes(currentPage) && (
             <BottomNav
               currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
+              setCurrentPage={navigateTo}
             />
           )}
 
