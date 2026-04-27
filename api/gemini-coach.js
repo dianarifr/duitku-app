@@ -34,9 +34,13 @@ export default async function handler(req, res) {
     }
 
     // 3. Rakit prompt sesuai gaya lo
-    const budgetInfo = budgets.map(b =>
-      `- ${b.category?.name}: Terpakai ${Math.round(b.percent)}% (Sisa Rp ${(b.amount - b.used).toLocaleString('id-ID')})`
-    ).join('\n');
+    const budgetInfo = budgets.map(b => {
+      const name = b.name || "Kategori Tanpa Nama";
+      const percent = Math.round(b.percent || 0);
+      const sisa = (b.budget || 0) - (b.used || 0);
+
+      return `- ${name}: Terpakai ${percent}% (Sisa Rp ${sisa.toLocaleString('id-ID')})`;
+    }).join('\n');
 
     const prompt = `
       Kamu adalah "Sepuh Keuangan" yang gayanya santai tapi mulutnya pedes, sarkas, dan hobi nyindir.
@@ -46,10 +50,11 @@ export default async function handler(req, res) {
       1. Sindir dengan telak kategori pengeluaran yang paling bocor/kritis dari data di bawah. WAJIB sebutkan nama kategorinya!
       2. Kasih satu saran singkat dan masuk akal biar user nggak makin boncos.
 
-      Aturan main:
-      - Maksimal 3 kalimat.
+      Aturan main, PENTING!!!
+      - Maksimal 3 kalimat, jangan kepanjangan kayak cerpen.
       - Dilarang keras pakai bullet points atau list.
-      - Buat user kena mental tapi tetep merasa dapet ilmu.
+      - Buat user kena mental tapi tetep merasa dapet ilmu (saran).
+      - Jangan pake basa-basi atau kata pengantar.
 
       Ini contoh output yang gue mau:
       - "Wah, kategori Makanan & Minuman kamu udah kayak saringan bocor, ges! Udah gitu, saran gue, coba deh masak sendiri atau cari promo, biar dompet nggak makin kurus."

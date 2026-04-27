@@ -46,7 +46,7 @@ function Dashboard({ session, setCurrentPage, setEditData, onCategoryDeepDive}) 
   const getAiCoachAdvice = async (budgets) => {
     try {
       setIsAiLoading(true);
-      const response = await fetch(apiUrl, {
+      const response = await fetch(`${apiUrl}/gemini-coach`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ budgets })
