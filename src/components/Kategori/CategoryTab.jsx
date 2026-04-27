@@ -47,8 +47,15 @@ export default function CategoryTab({
           <div className="py-20 text-center bg-white rounded-[2rem] border-2 border-dashed border-gray-100 font-black text-[10px] text-gray-400 uppercase">Kategori tidak ditemukan ges 🕵️‍♂️</div>
         ) : (
           categories.map((cat) => {
+            // Hitung total terpakai
             const used = transactions.filter(t => t.category_id === cat.id).reduce((sum, item) => sum + item.amount, 0);
-            const percent = cat.budget > 0 ? Math.min((used / cat.budget) * 100, 100) : 0;
+
+            // Hitung persentase asli (bisa lebih dari 100)
+            const rawPercent = cat.budget > 0 ? (used / cat.budget) * 100 : 0;
+
+            // Limit persentase untuk lebar bar (maks 100)
+            const barWidth = Math.min(rawPercent, 100);
+            const isOver = used > cat.budget;
             return (
               <div key={cat.id} onDoubleClick={() => openEditModal(cat)} className="p-5 bg-white border border-gray-100 shadow-sm rounded-[2rem] active:scale-[0.98] transition-all cursor-pointer select-none">
                 <div className="flex items-center justify-between">
@@ -64,8 +71,28 @@ export default function CategoryTab({
                   </span>
                 </div>
                 {cat.type === 'pengeluaran' && cat.budget > 0 && (
-                  <div className="mt-4 w-full h-1.5 bg-gray-50 rounded-full overflow-hidden">
-                    <div className="h-full transition-all" style={{ width: `${percent}%`, backgroundColor: cat.color }} />
+                  <div className="mt-4">
+                    <div className="flex items-center justify-between mb-1.5 px-0.5">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Terpakai:</span>
+                        <span className="text-[10px] font-black text-gray-700">
+                          Rp {used.toLocaleString('id-ID')}
+                        </span>
+                      </div>
+                      <span className={`text-[10px] font-black italic ${isOver ? 'text-red-500' : 'text-blue-500'}`}>
+                        {Math.round(rawPercent)}%
+                      </span>
+                    </div>
+
+                    <div className="w-full h-1.5 bg-gray-50 rounded-full overflow-hidden">
+                      <div
+                        className="h-full transition-all duration-700"
+                        style={{
+                          width: `${barWidth}%`,
+                          backgroundColor: isOver ? '#EF4444' : cat.color
+                        }}
+                      />
+                    </div>
                   </div>
                 )}
                 <button onClick={(e) => { e.stopPropagation(); setDeleteId(cat.id); }} className="w-full mt-4 py-3 bg-red-50 text-red-400 text-[10px] font-black uppercase rounded-xl active:scale-95 transition-all">
