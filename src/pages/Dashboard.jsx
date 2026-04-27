@@ -9,6 +9,7 @@ import SummarySection from '../components/Dashboard/SummarySection';
 import AICoach from '../components/Dashboard/AICoach';
 import HistoryList from '../components/Dashboard/HistoryList';
 import RecurringModal from '../components/Dashboard/RecurringModal';
+import BudgetSection from '../components/Dashboard/BudgetCard';
 
 function Dashboard({ session, setCurrentPage, setEditData}) {
   const [summary, setSummary] = useState({ total: 0, income: 0, expense: 0 });
@@ -22,6 +23,7 @@ function Dashboard({ session, setCurrentPage, setEditData}) {
   const [showRecurringModal, setShowRecurringModal] = useState(false);
   const [userPayday, setUserPayday] = useState(1);
   const [periodLabel, setPeriodLabel] = useState('');
+  const [budgetMonitoring, setBudgetMonitoring] = useState([]);
 
   const [aiAdvice, setAiAdvice] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
@@ -34,7 +36,7 @@ function Dashboard({ session, setCurrentPage, setEditData}) {
   const getAiCoachAdvice = async (budgets) => {
     try {
       setIsAiLoading(true);
-      const response = await fetch('https://duitku.freepalestine.my.id/api/gemini-coach', {
+      const response = await fetch(`${APP_API_URL}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ budgets })
@@ -166,15 +168,43 @@ function Dashboard({ session, setCurrentPage, setEditData}) {
     setWallet({ dompet: cashIn - cashOut, bank: bankIn - bankOut });
 
     // 6. Ambil Data Tambahan (History & Budgets)
-    const { data: transData } = await supabase
-      .from('transaction')
-      .select(`*, category (name, icon, color)`)
+    // const { data: transData } = await supabase
+    //   .from('transaction')
+    //   .select(`*, category (name, icon, color)`)
+    //   .eq('user_id', session.user.id)
+    //   .is('deleted_at', null)
+    //   .order('date', { ascending: false })
+    //   .order('created_at', { ascending: false })
+    //   .limit(10);
+    // setTransactions(transData || []);
+
+    const { data: catData } = await supabase
+      .from('category')
+      .select('id, name, icon, color, budget')
       .eq('user_id', session.user.id)
       .is('deleted_at', null)
-      .order('date', { ascending: false })
-      .order('created_at', { ascending: false })
-      .limit(10);
-    setTransactions(transData || []);
+      .gt('budget', 0); // Ambil cuma yang ada budgetnya
+
+    if (catData) {
+      // Hitung pemakaian per kategori berdasarkan thisMonthTrans
+      const budgetStatus = catData.map(cat => {
+        const used = thisMonthTrans
+          .filter(t => t.category_id === cat.id && t.type === 'pengeluaran')
+          .reduce((sum, t) => sum + t.amount, 0);
+
+        return { ...cat, used };
+      });
+
+      setBudgetMonitoring(budgetStatus); // <--- Isi data ke state biar nggak Error lagi
+
+      // Kirim data ke AI Coach (Critical Budgets)
+      const critical = budgetStatus
+        .map(b => ({ ...b, percent: (b.used / (b.budget || 1)) * 100 }))
+        .filter(b => b.percent >= 80)
+        .sort((a, b) => b.percent - a.percent);
+
+      setCriticalBudgets(critical);
+    }
 
     const { data: todayData } = await supabase
       .from('transaction')
@@ -211,7 +241,8 @@ function Dashboard({ session, setCurrentPage, setEditData}) {
       <WalletCards wallet={wallet} />
       <SummarySection hasInputToday={hasInputToday} loading={loading} income={summary.income} expense={summary.expense} onInputClick={() => setCurrentPage('input-pengeluaran')} />
       <AICoach aiAdvice={aiAdvice} isAiLoading={isAiLoading} />
-      <HistoryList transactions={transactions} loading={loading} onSeeAll={() => setCurrentPage('laporan')} onEdit={(t) => { setEditData(t); setCurrentPage('input-transaksi'); }} />
+      {/* <HistoryList transactions={transactions} loading={loading} onSeeAll={() => setCurrentPage('laporan')} onEdit={(t) => { setEditData(t); setCurrentPage('input-transaksi'); }} /> */}
+      <BudgetSection loading={loading} budgetMonitoring={budgetMonitoring} setCurrentPage={setCurrentPage} />
       <RecurringModal show={showRecurringModal} pending={pendingRecurring} onPay={handlePayRecurring} onClose={() => setShowRecurringModal(false)} />
     </div>
   );
