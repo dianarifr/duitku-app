@@ -89,7 +89,7 @@ export default function CategoryTab({
                         className="h-full transition-all duration-700"
                         style={{
                           width: `${barWidth}%`,
-                          backgroundColor: isOver ? '#EF4444' : cat.color
+                          backgroundColor: isOver ? '#EF4444' : (Math.round(rawPercent) > 80 ? '#f59e0b' : cat.color)
                         }}
                       />
                     </div>
