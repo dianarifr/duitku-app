@@ -23,7 +23,7 @@ export default function ActionHub({ show, onClose, onSelect }) {
             onClick={() => onSelect('input-pengeluaran')}
             className="flex flex-col items-center gap-3 group"
           >
-            <div className="flex items-center justify-center w-16 h-16 text-2xl transition-all duration-200 bg-red-50 rounded-[1.5rem] group-active:scale-90 border border-red-100 shadow-sm">
+            <div className="flex items-center justify-center w-16 h-16 text-2xl transition-all duration-200 border border-red-100 shadow-sm bg-red-50 rounded-3xl group-active:scale-90">
               📉
             </div>
             <span className="text-[10px] font-black uppercase text-gray-500 tracking-wider">Keluar</span>
@@ -34,7 +34,7 @@ export default function ActionHub({ show, onClose, onSelect }) {
             onClick={() => onSelect('input-pemasukan')}
             className="flex flex-col items-center gap-3 group"
           >
-            <div className="flex items-center justify-center w-16 h-16 text-2xl transition-all duration-200 bg-green-50 rounded-[1.5rem] group-active:scale-90 border border-green-100 shadow-sm">
+            <div className="flex items-center justify-center w-16 h-16 text-2xl transition-all duration-200 border border-green-100 shadow-sm bg-green-50 rounded-3xl group-active:scale-90">
               📈
             </div>
             <span className="text-[10px] font-black uppercase text-gray-500 tracking-wider">Masuk</span>
@@ -45,7 +45,7 @@ export default function ActionHub({ show, onClose, onSelect }) {
             onClick={() => onSelect('input-mutasi')}
             className="flex flex-col items-center gap-3 group"
           >
-            <div className="flex items-center justify-center w-16 h-16 text-2xl transition-all duration-200 bg-blue-50 rounded-[1.5rem] group-active:scale-90 border border-blue-100 shadow-sm">
+            <div className="flex items-center justify-center w-16 h-16 text-2xl transition-all duration-200 border border-blue-100 shadow-sm bg-blue-50 rounded-3xl group-active:scale-90">
               ⇄
             </div>
             <span className="text-[10px] font-black uppercase text-gray-500 tracking-wider">Mutasi</span>
