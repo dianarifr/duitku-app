@@ -15,7 +15,7 @@ export default function LaporanHeader({
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="bg-white px-6 pt-12 pb-5 shadow-sm sticky top-0 z-30 rounded-b-[2.5rem] border-b border-gray-50 transition-all duration-300">
+    <div className="sticky top-0 z-30 px-6 pt-12 pb-5 transition-all duration-300 bg-white border-b shadow-sm rounded-b-4xl border-gray-50">
       {/* Baris 1: Judul & Back */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-4">

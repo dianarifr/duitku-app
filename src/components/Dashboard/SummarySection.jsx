@@ -1,9 +1,9 @@
-export default function SummarySection({ hasInputToday, loading, income, expense, onInputClick }) {
+export default function SummarySection({ hasInputToday, loading, income, expense, onInputClick, formatNominal }) {
   return (
     <>
       <div className="px-5 space-y-4 mt-7">
         {!loading && !hasInputToday && (
-          <div className="bg-gradient-to-r from-orange-500 to-orange-400 p-4 rounded-[2rem] shadow-xl flex items-center justify-between border border-white/20">
+          <div className="flex items-center justify-between p-4 border shadow-xl bg-linier-to-r from-orange-500 to-orange-400 rounded-2xl border-white/20">
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center w-10 h-10 bg-white/20 rounded-2xl">📝</div>
               <div>
@@ -19,11 +19,11 @@ export default function SummarySection({ hasInputToday, loading, income, expense
       <div className="grid grid-cols-2 gap-4 px-5 mt-4">
         <div className="p-4 text-center bg-white border border-gray-100 shadow-sm rounded-2xl">
           <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Masuk</p>
-          <p className="text-sm font-black text-green-600">+ Rp {income.toLocaleString('id-ID')}</p>
+          <p className="text-sm font-black text-green-600">+ {formatNominal(income)}</p>
         </div>
         <div className="p-4 text-center bg-white border border-gray-100 shadow-sm rounded-2xl">
           <p className="text-[9px] font-black text-gray-400 uppercase mb-1">Keluar</p>
-          <p className="text-sm font-black text-red-600">- Rp {expense.toLocaleString('id-ID')}</p>
+          <p className="text-sm font-black text-red-600">- {formatNominal(expense)}</p>
         </div>
       </div>
     </>

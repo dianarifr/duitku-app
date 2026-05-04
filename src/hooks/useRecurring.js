@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { formatRupiah } from '../utils/formatters';
+import { useAlert } from '../context/AlertContext';
 
-export function useRecurring(session, fetchData, showAlert) {
+export function useRecurring(session, fetchData) {
+  const { showAlert } = useAlert();
   const [isRecModalOpen, setIsRecModalOpen] = useState(false);
   const [deleteRecId, setDeleteRecId] = useState(null);
   const [editingId, setEditingId] = useState(null);

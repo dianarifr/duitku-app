@@ -1,10 +1,11 @@
 import React from 'react';
 
-export default function BottomNav({ currentPage, setCurrentPage }) {
+// Tambahkan prop onActionClick untuk memicu ActionHub
+export default function BottomNav({ currentPage, setCurrentPage, onActionClick }) {
   const menus = [
     { id: 'dashboard', icon: '🏠', label: 'Home' },
     { id: 'laporan', icon: '📊', label: 'Laporan' },
-    { id: 'input', icon: '✨', label: 'Catat', primary: true }, // Icon Kece: Sparkles
+    { id: 'input', icon: '✨', label: 'Catat', primary: true }, // Tombol Utama
     { id: 'kategori', icon: '⚙️', label: 'Set' },
     { id: 'statistik', icon: '📈', label: 'Stats' },
   ];
@@ -15,7 +16,15 @@ export default function BottomNav({ currentPage, setCurrentPage }) {
         {menus.map((menu) => (
           <button
             key={menu.id}
-            onClick={() => setCurrentPage(menu.id)}
+            onClick={() => {
+              // LOGIC BARU: Jika tombol primary (tengah), buka ActionHub.
+              // Jika bukan, baru ganti halaman seperti biasa.
+              if (menu.primary) {
+                onActionClick();
+              } else {
+                setCurrentPage(menu.id);
+              }
+            }}
             className={`relative flex flex-col items-center justify-center transition-all duration-500 ${
               menu.primary
                 ? 'w-16 h-16 bg-gradient-to-br from-orange-400 via-rose-500 to-purple-600 rounded-full shadow-[0_10px_25px_rgba(244,63,94,0.4)] -translate-y-6 border-4 border-white'

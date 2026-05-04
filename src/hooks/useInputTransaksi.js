@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { formatRupiah, parseNumber } from '../utils/formatters';
-import { useAlert } from '../context/AlertContext'; // Ambil hook global
+import { useAlert } from '../context/AlertContext';
 
 export function useInputTransaksi(session, editData, setEditData, setCurrentPage, initialType) {
-  const { showAlert } = useAlert(); // Gunakan showAlert dari Global Context
+  const { showAlert } = useAlert();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(initialType === 'pemasukan' ? 'pemasukan' : 'pengeluaran');
@@ -40,7 +40,7 @@ export function useInputTransaksi(session, editData, setEditData, setCurrentPage
   }, [activeTab, editData]);
 
   const fetchSuggestions = async () => {
-    const { data } = await supabase.from('transaction').select('note').eq('type', activeTab).is('deleted_at', null).order('created_at', { ascending: false }).limit(50);
+    const { data } = await supabase.from('transaction').select('note').eq('type', activeTab).eq('user_id', session.user.id).is('deleted_at', null).order('created_at', { ascending: false }).limit(50);
     if (data) setSuggestions([...new Set(data.map(t => t.note))].filter(Boolean));
   };
 

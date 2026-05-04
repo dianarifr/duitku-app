@@ -8,6 +8,14 @@ export const formatRupiah = (value) => {
   return numberString.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 };
 
+export const formatNominal = (amount) => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+  }).format(amount || 0).replace('IDR', 'Rp ').replace(/\s/g, ' ');
+};
+
 export const formatDateForInput = (date) => {
   if (!date) return '';
   const d = new Date(date);

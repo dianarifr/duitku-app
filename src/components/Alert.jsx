@@ -5,7 +5,7 @@ export default function Alert({ title, message, type = 'success', onConfirm }) {
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="w-full max-w-xs p-8 text-center bg-white shadow-2xl rounded-[2.5rem] animate-in zoom-in-95 duration-300">
+      <div className="w-full max-w-xs p-8 text-center duration-300 bg-white shadow-2xl rounded-4xl animate-in zoom-in-95">
         {/* Icon Section */}
         <div className={`flex items-center justify-center w-20 h-20 mx-auto mb-6 text-4xl rounded-full ${iconBg} shadow-inner`}>
           {icon}
@@ -22,7 +22,7 @@ export default function Alert({ title, message, type = 'success', onConfirm }) {
         {/* Action Button */}
         <button
           onClick={onConfirm}
-          className={`w-full py-4 text-xs font-black text-white rounded-2xl shadow-lg active:scale-95 transition-all ${buttonColor}`}
+          className={`w-full py-4 text-xs font-black text-white rounded-xl shadow-lg active:scale-95 transition-all ${buttonColor}`}
         >
           OKEEYY 👌
         </button>

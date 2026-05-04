@@ -1,1 +1,6 @@
 @import "tailwindcss";
+@layer components {
+  .icon-box {
+    @apply flex items-center justify-center w-10 h-10 text-xl transition-all shadow-sm rounded-2xl;
+  }
+}

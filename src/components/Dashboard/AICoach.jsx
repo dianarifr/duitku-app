@@ -16,7 +16,7 @@ export default function AICoach({ aiAdvice, isAiLoading, isExpanded, onToggle })
             </button>
           </div>
 
-          <div className="bg-white border-2 border-blue-50 p-5 rounded-[2.5rem] shadow-sm relative overflow-hidden group">
+          <div className="relative p-5 overflow-hidden bg-white border-2 shadow-sm border-blue-50 rounded-2xl group">
             <div className="absolute top-0 right-0 p-4 text-4xl transition-transform opacity-10 group-hover:rotate-12">🤖</div>
             <div className="relative z-10">
               <div className="flex items-center gap-2 mb-3">

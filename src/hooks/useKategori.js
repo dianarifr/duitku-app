@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { formatRupiah } from '../utils/formatters';
+import { useAlert } from '../context/AlertContext';
 
-export function useKategori(session, fetchData, showAlert) {
+export function useKategori(session, fetchData) {
+  const { showAlert } = useAlert();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [editingId, setEditingId] = useState(null);

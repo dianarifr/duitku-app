@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { getFinancialRange } from '../utils/formatters';
 
-import { useAlert } from '../context/AlertContext';
 import CategoryTab from '../components/Kategori/CategoryTab';
 import RecurringTab from '../components/Kategori/RecurringTab';
 
@@ -10,7 +9,6 @@ import { useKategori } from '../hooks/useKategori';
 import { useRecurring } from '../hooks/useRecurring';
 
 export default function Kategori({ session, setCurrentPage }) {
-  const { showAlert } = useAlert();
   const [categories, setCategories] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [recurringData, setRecurringData] = useState([]);
@@ -55,8 +53,8 @@ export default function Kategori({ session, setCurrentPage }) {
   };
 
   // INIT CUSTOM HOOKS
-  const kategoriHook = useKategori(session, fetchData, showAlert);
-  const recurringHook = useRecurring(session, fetchData, showAlert);
+  const kategoriHook = useKategori(session, fetchData);
+  const recurringHook = useRecurring(session, fetchData);
 
   // Filters
   const filteredCategories = categories.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -65,7 +63,7 @@ export default function Kategori({ session, setCurrentPage }) {
   return (
     <div className="min-h-screen pb-24 font-sans text-gray-900 bg-gray-50">
       {/* HEADER */}
-      <div className="sticky top-0 z-40 bg-white shadow-sm rounded-b-[2.5rem] px-6 pt-12 pb-4">
+      <div className="sticky top-0 z-40 px-6 pt-12 pb-4 bg-white shadow-sm rounded-b-4xl">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <button onClick={() => setCurrentPage('dashboard')} className="flex items-center justify-center w-10 h-10 text-lg font-bold text-gray-500 bg-gray-100 rounded-2xl active:scale-90">←</button>
@@ -73,14 +71,14 @@ export default function Kategori({ session, setCurrentPage }) {
           </div>
           <button
             onClick={() => activeTab === 'list' ? kategoriHook.openAddModal() : recurringHook.openAddRecModal()}
-            className="w-10 h-10 text-2xl font-bold text-white bg-blue-600 shadow-md rounded-2xl active:scale-90"
+            className="w-10 h-10 text-2xl font-bold text-white bg-blue-600 shadow-md rounded-xl active:scale-90"
           >
             +
           </button>
         </div>
 
         <div className="relative mb-4">
-          <input type="text" placeholder="Cari..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full p-4 pl-12 text-sm font-bold bg-gray-100 border-none outline-none rounded-2xl focus:ring-2 focus:ring-blue-500" />
+          <input type="text" placeholder="Cari..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full p-4 pl-12 text-sm font-bold bg-gray-100 border-none outline-none rounded-xl focus:ring-2 focus:ring-blue-500" />
           <span className="absolute text-xs -translate-y-1/2 left-4 top-1/2 opacity-30">🔍</span>
         </div>
 

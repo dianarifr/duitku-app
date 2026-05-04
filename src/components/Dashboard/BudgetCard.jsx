@@ -1,3 +1,6 @@
+import React from 'react';
+import { formatNominal } from '../../utils/formatters';
+
 // Komponen Internal untuk tiap Kotak
 const Card = ({ category, onDeepDive }) => {
   const hasBudget = category.budget > 0;
@@ -5,51 +8,55 @@ const Card = ({ category, onDeepDive }) => {
   const isOverBudget = hasBudget && category.used > category.budget;
 
   return (
-    <div onDoubleClick={() => onDeepDive(category.id)} className="bg-white p-4 rounded-[2rem] border border-gray-50 shadow-sm flex flex-col justify-between h-full active:scale-95 transition-all hover:border-blue-300 hover:shadow-md group cursor-pointer">
-      <div className="flex items-center justify-between mb-3">
+    <div
+      onDoubleClick={() => onDeepDive(category.id)}
+      className="flex flex-col justify-between h-full p-5 transition-all bg-white border border-gray-100 shadow-sm cursor-pointer rounded-2xl active:scale-95 hover:border-blue-300 hover:shadow-md group"
+    >
+      <div className="flex items-center justify-between mb-4">
         <div
-          className="flex items-center justify-center text-lg w-9 h-9 rounded-2xl"
+          className="flex items-center icon-box"
           style={{ backgroundColor: `${category.color}15`, color: category.color }}
         >
           {category.icon}
         </div>
 
         {hasBudget ? (
-          <span className={`text-[8px] font-black px-2 py-1 rounded-lg uppercase ${isOverBudget ? 'bg-red-50 text-red-500' : 'bg-gray-50 text-gray-400'}`}>
+          <span className={`text-[9px] font-black px-2.5 py-1 rounded-xl uppercase tracking-tighter ${isOverBudget ? 'bg-red-50 text-red-500' : 'bg-blue-50 text-blue-600'}`}>
             {isOverBudget ? 'Over' : `${Math.round(percentage)}%`}
           </span>
         ) : (
-          <span className="text-[7px] font-black px-2 py-1 rounded-lg uppercase bg-gray-50 text-gray-300 tracking-tighter">
-            No Limit
+          <span className="text-[7px] font-black px-2 py-1 rounded-lg uppercase bg-gray-50 text-gray-300 tracking-widest">
+            Limitless
           </span>
         )}
       </div>
 
       <div>
-        <h4 className="text-[10px] font-black text-gray-800 uppercase truncate mb-1">
+        <h4 className="text-[11px] font-black text-gray-800 uppercase tracking-tight truncate mb-1">
           {category.name}
         </h4>
 
-        <div className="flex items-end gap-1 mb-2">
-          <span className={`text-[11px] font-black ${hasBudget ? 'text-gray-900' : 'text-blue-600'}`}>
-            {category.used >= 1000000 ? `${(category.used / 1000000).toFixed(1)}jt` : (category.used / 1000).toFixed(0) + 'rb'}
+        <div className="flex flex-col mb-3">
+          {/* Nominal Terpakai Menggunakan formatNominal */}
+          <span className={`text-xs font-black ${hasBudget && isOverBudget ? 'text-red-600' : 'text-gray-900'}`}>
+            {formatNominal(category.used)}
           </span>
 
           {hasBudget && (
-            <span className="text-[8px] font-bold text-gray-300 uppercase mb-0.5">
-              / {category.budget >= 1000000 ? `${(category.budget / 1000000).toFixed(1)}jt` : (category.budget / 1000).toFixed(0) + 'rb'}
+            <span className="text-[8px] font-bold text-gray-300 uppercase tracking-widest">
+              Limit: {formatNominal(category.budget)}
             </span>
           )}
 
           {!hasBudget && (
-            <span className="text-[8px] font-bold text-gray-300 uppercase mb-0.5">
-              Terpakai
+            <span className="text-[8px] font-bold text-gray-300 uppercase tracking-widest">
+              Total Terpakai
             </span>
           )}
         </div>
 
         {hasBudget ? (
-          <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+          <div className="w-full h-2 overflow-hidden bg-gray-100 rounded-full">
             <div
               className={`h-full transition-all duration-1000 rounded-full`}
               style={{
@@ -59,7 +66,7 @@ const Card = ({ category, onDeepDive }) => {
             />
           </div>
         ) : (
-          <div className="h-1.5 w-full bg-transparent"></div>
+          <div className="w-full h-2 bg-transparent"></div>
         )}
       </div>
     </div>
@@ -67,22 +74,22 @@ const Card = ({ category, onDeepDive }) => {
 };
 
 // KOMPONEN UTAMA
-export default function BudgetSection({ loading, budgetMonitoring, setCurrentPage, onCategoryDeepDive }) {
+export default function BudgetSection({ loading, budgetMonitoring, onCategoryDeepDive }) {
   // Filter kategori yang hanya memiliki pengeluaran (used > 0)
   const activeCategories = budgetMonitoring.filter(cat => cat.used > 0);
 
   return (
-    <div className="px-5 mt-8">
-      <div className="flex items-center justify-between px-1 mb-4">
-        <h3 className="text-[10px] font-black tracking-widest text-gray-400 uppercase">
-          Monitoring Pengeluaran
+    <div className="px-6 mt-10">
+      <div className="flex items-center justify-between px-1 mb-5">
+        <h3 className="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">
+          Monitoring Budget
         </h3>
       </div>
 
       {loading ? (
         <div className="grid grid-cols-2 gap-4">
           {[...Array(2)].map((_, i) => (
-            <div key={i} className="h-32 bg-gray-200 rounded-[2rem] animate-pulse"></div>
+            <div key={i} className="h-40 bg-white border border-gray-100 rounded-2xl animate-pulse"></div>
           ))}
         </div>
       ) : activeCategories.length > 0 ? (
@@ -92,10 +99,10 @@ export default function BudgetSection({ loading, budgetMonitoring, setCurrentPag
           ))}
         </div>
       ) : (
-        // Tampilan jika belum ada transaksi sama sekali di bulan ini
-        <div className="p-10 text-center border-2 border-dashed border-gray-200 rounded-[2.5rem] bg-white">
-          <p className="text-[9px] font-black text-gray-400 uppercase leading-relaxed">
-            Belum ada pengeluaran bulan ini ges.<br />Dompet aman terkendali! 🛡️
+        <div className="p-12 text-center border-2 border-gray-200 border-dashed rounded-2xl bg-white/50">
+          <div className="mb-3 text-3xl">🛡️</div>
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-relaxed">
+            Belum ada pengeluaran.<br />Dompet aman terkendali!
           </p>
         </div>
       )}

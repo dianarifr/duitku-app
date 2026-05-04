@@ -4,12 +4,14 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Kategori from './pages/Kategori';
 import InputTransaksi from './pages/InputTransaksi';
+import InputMutasi from './pages/InputMutasi';
 import Laporan from './pages/Laporan';
 import Statistik from './pages/Statistik';
 import BottomNav from './components/BottomNav';
+import ActionHub from './components/ActionHub';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { registerSW } from 'virtual:pwa-register';
-import { AlertProvider } from './context/AlertContext'; // Kantor Pusat Alert
+import { AlertProvider } from './context/AlertContext';
 
 function App() {
   const [session, setSession] = useState(null);
@@ -17,6 +19,9 @@ function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [editData, setEditData] = useState(null);
   const [tempCategoryFilter, setTempCategoryFilter] = useState('all');
+
+  // State untuk kontrol Menu Hub (Pilihan Masuk/Keluar/Mutasi)
+  const [showActionMenu, setShowActionMenu] = useState(false);
 
   // Register PWA Service Worker
   registerSW({ immediate: true });
@@ -38,34 +43,28 @@ function App() {
 
     // --- 2. LOGIKA NAVIGASI (Fix Back Gesture) ---
     const handlePopState = (event) => {
-      // Jika ada state halaman di history, pindah ke halaman tersebut
       if (event.state && event.state.page) {
         setCurrentPage(event.state.page);
       } else {
-        // Jika balik ke paling awal, default ke dashboard
         setCurrentPage('dashboard');
       }
     };
 
-    // Pasang listener tombol back/gesture
     window.addEventListener('popstate', handlePopState);
 
-    // Inisialisasi history awal jika baru buka aplikasi
     if (!window.history.state) {
       window.history.replaceState({ page: 'dashboard' }, '', '');
     }
 
-    // --- 3. CLEANUP (Bersih-bersih saat komponen unmount) ---
     return () => {
       subscription.unsubscribe();
       window.removeEventListener('popstate', handlePopState);
     };
   }, []);
 
-  // --- 4. FUNGSI NAVIGASI BARU (Gunakan ini untuk ganti halaman) ---
+  // --- 3. FUNGSI NAVIGASI ---
   const navigateTo = (page) => {
     setCurrentPage(page);
-    // Simpan halaman baru ke dalam history browser
     window.history.pushState({ page }, '', '');
   };
 
@@ -77,22 +76,35 @@ function App() {
     );
   }
 
-  // Bungkus seluruh aplikasi dengan AlertProvider
+  // Tentukan apakah halaman saat ini adalah form input (untuk menyembunyikan Navigasi Bawah)
+  const isInputPage = ['input', 'input-pengeluaran', 'input-pemasukan', 'input-transaksi', 'input-mutasi'].includes(currentPage);
+
   return (
     <AlertProvider>
       {!session ? (
         <Login />
       ) : (
         <div className="relative min-h-screen bg-gray-50">
+
           {/* AREA KONTEN UTAMA */}
           <main className="h-full max-w-md pb-10 mx-auto">
-            {/* Navigasi Halaman */}
+
             {currentPage === 'dashboard' && (
               <Dashboard
                 session={session}
                 setCurrentPage={navigateTo}
                 setEditData={setEditData}
+                onOpenActionMenu={() => setShowActionMenu(true)} // Biar tombol orange bisa buka ActionHub
                 onCategoryDeepDive={(catId) => { setTempCategoryFilter(catId); setCurrentPage('laporan'); }}
+              />
+            )}
+
+            {currentPage === 'input-mutasi' && (
+              <InputMutasi
+                session={session}
+                setCurrentPage={navigateTo}
+                editData={editData}
+                setEditData={setEditData}
               />
             )}
 
@@ -125,11 +137,22 @@ function App() {
             )}
           </main>
 
-          {/* NAVIGASI MELAYANG */}
-          {!['input', 'input-pengeluaran', 'input-pemasukan', 'input-transaksi'].includes(currentPage) && (
+          {/* 4. ACTION HUB (Overlay Pilihan Transaksi) */}
+          <ActionHub
+            show={showActionMenu}
+            onClose={() => setShowActionMenu(false)}
+            onSelect={(page) => {
+              navigateTo(page);
+              setShowActionMenu(false);
+            }}
+          />
+
+          {/* 5. NAVIGASI MELAYANG */}
+          {!isInputPage && (
             <BottomNav
               currentPage={currentPage}
               setCurrentPage={navigateTo}
+              onActionClick={() => setShowActionMenu(true)}
             />
           )}
 
