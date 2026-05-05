@@ -4,3 +4,17 @@
     @apply flex items-center justify-center w-10 h-10 text-xl transition-all shadow-sm rounded-2xl;
   }
 }
+/* Definisi Animasi Lompat */
+@keyframes mini-jump {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px); /* Jarak lompat yang lebih 'smooth' */
+  }
+}
+
+/* Class untuk dipakai di Tailwind */
+.animate-mini-jump {
+  animation: mini-jump 1.5s ease-in-out infinite;
+}
