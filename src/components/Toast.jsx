@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import * as Icon from '../lib/icons';
 
 export default function Toast({ message, type = 'success', onClose }) {
   const [visible, setVisible] = useState(true);
@@ -21,7 +22,13 @@ export default function Toast({ message, type = 'success', onClose }) {
   }, [onClose]);
 
   const bgColor = type === 'success' ? 'bg-gray-900' : 'bg-red-600';
-  const icon = type === 'success' ? '✅' : '⚠️';
+
+  // Memilih ikon berdasarkan tipe dari referensi centralized
+  const renderIcon = type === 'success' ? (
+    <Icon.CheckCircle2 size={18} strokeWidth={3} className="text-green-400" />
+  ) : (
+    <Icon.Zap size={18} strokeWidth={3} className="text-white" />
+  );
 
   return (
     <>
@@ -40,10 +47,10 @@ export default function Toast({ message, type = 'success', onClose }) {
 
       <div className={`fixed top-10 left-1/2 z-[9999] w-max max-w-[90vw] ${visible ? 'animate-toast-in' : 'animate-toast-out'}`}>
         <div className={`${bgColor} text-white px-6 py-4 rounded-[1.8rem] shadow-[0_25px_60px_rgba(0,0,0,0.5)] flex items-center gap-4 border border-white/10 ring-4 ring-black/10`}>
-          <div className="flex items-center justify-center text-lg rounded-full shadow-inner w-9 h-9 bg-white/15">
-            {icon}
+          <div className="flex items-center justify-center rounded-full shadow-inner w-9 h-9 bg-white/15">
+            {renderIcon}
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col text-left">
             <p className="text-[10px] font-black uppercase tracking-[0.2em] leading-none mb-1 text-white/50">
               {type === 'success' ? 'Notification' : 'Warning'}
             </p>

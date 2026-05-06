@@ -1,4 +1,3 @@
-import React from 'react';
 import { formatNominal } from '../../utils/formatters';
 
 // Komponen Internal untuk tiap Kotak

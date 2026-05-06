@@ -1,4 +1,6 @@
+import React from 'react';
 import { formatRupiah, parseNumber, formatNominal } from '../../utils/formatters';
+import * as Icon from '../../lib/icons';
 
 const colorOptions = ['#EF4444', '#F97316', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899'];
 
@@ -19,7 +21,7 @@ export default function CategoryTab({
     <>
       {/* CARD SIKLUS GAJIAN */}
       <div className="mb-6">
-        <div className="relative p-6 overflow-hidden text-white shadow-xl bg-gradient-to-br from-blue-600 to-blue-700 rounded-4xl">
+        <div className="relative p-4 overflow-hidden text-white shadow-xl bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl">
           <div className="relative z-10 flex items-center justify-between">
             <div className="space-y-1">
               <p className="text-[10px] font-black uppercase opacity-70 tracking-widest">Siklus Gajian</p>
@@ -29,13 +31,15 @@ export default function CategoryTab({
               <select
                 value={payday}
                 onChange={(e) => onUpdatePayday(Number(e.target.value))}
-                className="px-4 py-2 pr-8 text-xs font-black border-none outline-none appearance-none bg-white/20 rounded-xl"
+                className="px-4 py-2 pr-8 text-xs font-black border-none outline-none appearance-none cursor-pointer bg-white/20 rounded-xl"
               >
                 {[...Array(31)].map((_, i) => (
                   <option key={i+1} value={i+1} className="text-gray-800">Tgl {i+1}</option>
                 ))}
               </select>
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[8px]">▼</span>
+              <span className="absolute -translate-y-1/2 pointer-events-none right-3 top-1/2 opacity-70">
+                <Icon.ChevronDown size={10} strokeWidth={4} />
+              </span>
             </div>
           </div>
           {/* Ornamen */}
@@ -45,13 +49,17 @@ export default function CategoryTab({
 
       <div className="space-y-4">
         <div className="flex flex-col">
-          <span className="text-[8px] font-bold text-blue-400 uppercase italic animate-pulse">
-            ⚡ Double Click buat edit
-          </span>
+          <div className="flex items-center gap-1.5 text-[8px] font-bold text-blue-400 uppercase italic animate-pulse">
+            <Icon.Zap size={10} strokeWidth={3} />
+            <span>Double Click buat edit</span>
+          </div>
         </div>
 
         {categories.length === 0 ? (
-          <div className="py-20 text-center bg-white rounded-2xl border-2 border-dashed border-gray-100 font-black text-[10px] text-gray-400 uppercase tracking-widest">Kategori tidak ditemukan ges 🕵️‍♂️</div>
+          <div className="py-20 text-center bg-white rounded-2xl border-2 border-dashed border-gray-100 font-black text-[10px] text-gray-400 uppercase tracking-widest flex flex-col items-center justify-center gap-3">
+            <Icon.Search size={32} strokeWidth={3} className="opacity-20" />
+            Kategori tidak ditemukan ges
+          </div>
         ) : (
           categories.map((cat) => {
             const used = transactions.filter(t => t.category_id === cat.id).reduce((sum, item) => sum + item.amount, 0);
@@ -69,7 +77,6 @@ export default function CategoryTab({
                     <div>
                       <h4 className="text-sm font-black tracking-tight text-gray-800 uppercase">{cat.name}</h4>
                       <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-                        {/* Menggunakan formatNominal */}
                         Limit: {formatNominal(cat.budget)}
                       </p>
                     </div>
@@ -85,7 +92,6 @@ export default function CategoryTab({
                       <div className="flex items-baseline gap-1">
                         <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest opacity-60">Terpakai:</span>
                         <span className={`text-[10px] font-black ${isOver ? 'text-red-500' : 'text-gray-700'}`}>
-                          {/* Menggunakan formatNominal */}
                           {formatNominal(used)}
                         </span>
                       </div>
@@ -108,9 +114,10 @@ export default function CategoryTab({
 
                 <button
                   onClick={(e) => { e.stopPropagation(); setDeleteId(cat.id); }}
-                  className="w-full mt-5 py-3 bg-red-50/50 text-red-400 text-[9px] font-black uppercase rounded-xl active:scale-95 transition-all border border-red-50"
+                  className="w-full mt-5 py-3 bg-red-50/50 text-red-400 text-[9px] font-black uppercase rounded-xl active:scale-95 transition-all border border-red-50 flex items-center justify-center gap-2 hover:bg-red-50"
                 >
-                  🗑️ Hapus Kategori
+                  <Icon.Trash2 size={12} strokeWidth={3} />
+                  Hapus Kategori
                 </button>
               </div>
             );
@@ -123,10 +130,18 @@ export default function CategoryTab({
         <div className="fixed inset-0 flex items-end justify-center z-[110] bg-black/40 backdrop-blur-sm p-0 sm:items-center sm:p-4">
           <div className="w-full max-w-md p-8 bg-white shadow-2xl rounded-t-4xl sm:rounded-3xl animate-in slide-in-from-bottom-10">
             <div className="flex items-center justify-between px-1 mb-6">
-              <h2 className="text-xl italic font-black tracking-tight text-gray-800 uppercase">
-                {editingId ? 'Edit Kategori 📝' : 'Kategori Baru ✨'}
-              </h2>
-              <button onClick={() => setIsModalOpen(false)} className="flex items-center justify-center font-bold text-gray-400 transition-all rounded-full w-9 h-9 bg-gray-50 active:scale-95">✕</button>
+              <div className="flex items-center gap-2">
+                {editingId ? <Icon.Pencil size={18} strokeWidth={3} className="text-blue-500" /> : <Icon.Sparkles size={18} strokeWidth={3} className="text-blue-500" />}
+                <h2 className="text-xl italic font-black tracking-tight text-gray-800 uppercase">
+                  {editingId ? 'Edit Kategori' : 'Kategori Baru'}
+                </h2>
+              </div>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="flex items-center justify-center text-gray-400 transition-all rounded-full w-9 h-9 bg-gray-50 active:scale-95 hover:bg-gray-100"
+              >
+                <Icon.X size={18} strokeWidth={3} />
+              </button>
             </div>
 
             <form onSubmit={handleSaveCategory} className="space-y-5 text-left">
@@ -168,7 +183,8 @@ export default function CategoryTab({
                 </div>
               )}
 
-              <button type="submit" className="w-full py-5 mt-4 font-black tracking-widest text-white uppercase transition-all bg-blue-600 shadow-xl shadow-blue-100 rounded-2xl active:scale-95">
+              <button type="submit" className="flex items-center justify-center w-full gap-2 py-5 mt-4 font-black tracking-widest text-white uppercase transition-all bg-blue-600 shadow-xl shadow-blue-100 rounded-2xl active:scale-95">
+                <Icon.CheckCircle2 size={18} strokeWidth={3} />
                 Simpan Kategori
               </button>
             </form>
@@ -179,13 +195,17 @@ export default function CategoryTab({
       {/* MODAL DELETE KATEGORI */}
       {deleteId && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-xs p-8 text-center bg-white shadow-2xl rounded-4xl">
-            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 text-3xl text-red-500 rounded-full bg-red-50">🗑️</div>
-            <h3 className="mb-2 text-xl italic font-black text-gray-800 uppercase">Hapus Kategori?</h3>
-            <p className="mb-8 text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed">Akan disembunyikan dari daftar,<br/>ges 🤝</p>
+          <div className="w-full max-w-xs p-8 text-center bg-white border border-gray-100 shadow-2xl rounded-4xl">
+            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 text-red-500 rounded-full bg-red-50">
+              <Icon.Trash2 size={32} strokeWidth={2.5} />
+            </div>
+            <h3 className="mb-2 text-xl italic font-black tracking-tight text-gray-800 uppercase">Hapus Kategori?</h3>
+            <p className="mb-8 text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed">
+              Akan disembunyikan dari daftar,<br/>ges.
+            </p>
             <div className="flex gap-3">
-              <button onClick={() => setDeleteId(null)} className="flex-1 py-4 text-[10px] font-black text-gray-400 bg-gray-50 rounded-2xl">Batal</button>
-              <button onClick={handleDeleteCategory} className="flex-1 py-4 text-[10px] font-black text-white bg-red-500 rounded-2xl shadow-lg">Hapus</button>
+              <button onClick={() => setDeleteId(null)} className="flex-1 py-4 text-[10px] font-black text-gray-400 bg-gray-50 rounded-2xl active:scale-95 transition-transform">Batal</button>
+              <button onClick={handleDeleteCategory} className="flex-1 py-4 text-[10px] font-black text-white bg-red-500 rounded-2xl shadow-lg active:scale-95 transition-transform">Hapus</button>
             </div>
           </div>
         </div>

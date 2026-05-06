@@ -7,6 +7,7 @@ import { formatNominal } from '../utils/formatters';
 import DashboardHeader from '../components/Dashboard/DashboardHeader';
 import WalletCards from '../components/Dashboard/WalletCards';
 import SummarySection from '../components/Dashboard/SummarySection';
+import PaydayProgressBar from '../components/Dashboard/PaydayProgressBar'; // Komponen Baru
 import AICoach from '../components/Dashboard/AICoach';
 import HistoryList from '../components/Dashboard/HistoryList';
 import RecurringModal from '../components/Dashboard/RecurringModal';
@@ -23,6 +24,7 @@ function Dashboard({ session, setCurrentPage, setEditData, onCategoryDeepDive, o
   const [showRecurringModal, setShowRecurringModal] = useState(false);
   const [periodLabel, setPeriodLabel] = useState('');
   const [budgetMonitoring, setBudgetMonitoring] = useState([]);
+  const [payday, setPayday] = useState(1); // State untuk menyimpan tanggal gajian
 
   const [aiAdvice, setAiAdvice] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
@@ -92,10 +94,11 @@ function Dashboard({ session, setCurrentPage, setEditData, onCategoryDeepDive, o
       .eq('id', session.user.id)
       .single();
 
-    const payday = profile?.payday || 1;
+    const paydayVal = profile?.payday || 1;
+    setPayday(paydayVal); // Simpan ke state untuk progress bar
 
     // 2. Setup Range Tanggal
-    const currentRange = getFinancialRange(payday);
+    const currentRange = getFinancialRange(paydayVal);
     const options = { day: 'numeric', month: 'short' };
     setPeriodLabel(`${new Date(currentRange.start).toLocaleDateString('id-ID', options)} - ${new Date(currentRange.end).toLocaleDateString('id-ID', options)}`);
 
@@ -221,6 +224,9 @@ function Dashboard({ session, setCurrentPage, setEditData, onCategoryDeepDive, o
         onInputClick={onOpenActionMenu}
         formatNominal={formatNominal}
       />
+
+      {/* Payday Progress Bar disisipkan di atas AI Coach agar layout tetap simetris */}
+      <PaydayProgressBar payday={payday} />
 
       <AICoach
         aiAdvice={aiAdvice}

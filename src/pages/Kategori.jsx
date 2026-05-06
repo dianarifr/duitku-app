@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { getFinancialRange } from '../utils/formatters';
+import * as Icon from '../lib/icons';
 
 import CategoryTab from '../components/Kategori/CategoryTab';
 import RecurringTab from '../components/Kategori/RecurringTab';
@@ -66,25 +67,50 @@ export default function Kategori({ session, setCurrentPage }) {
       <div className="sticky top-0 z-40 px-6 pt-12 pb-4 bg-white shadow-sm rounded-b-4xl">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <button onClick={() => setCurrentPage('dashboard')} className="flex items-center justify-center w-10 h-10 text-lg font-bold text-gray-500 bg-gray-100 rounded-2xl active:scale-90">←</button>
+            <button
+              onClick={() => setCurrentPage('dashboard')}
+              className="flex items-center justify-center w-10 h-10 text-gray-500 bg-gray-100 rounded-2xl active:scale-90"
+            >
+              <Icon.ArrowLeft size={20} strokeWidth={3} />
+            </button>
             <h1 className="text-xl font-black tracking-tight uppercase">Pengaturan</h1>
           </div>
           <button
             onClick={() => activeTab === 'list' ? kategoriHook.openAddModal() : recurringHook.openAddRecModal()}
-            className="w-10 h-10 text-2xl font-bold text-white bg-blue-600 shadow-md rounded-xl active:scale-90"
+            className="flex items-center justify-center w-10 h-10 text-white bg-blue-600 shadow-md rounded-xl active:scale-90"
           >
-            +
+            <Icon.Plus size={24} strokeWidth={3} />
           </button>
         </div>
 
         <div className="relative mb-4">
-          <input type="text" placeholder="Cari..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full p-4 pl-12 text-sm font-bold bg-gray-100 border-none outline-none rounded-xl focus:ring-2 focus:ring-blue-500" />
-          <span className="absolute text-xs -translate-y-1/2 left-4 top-1/2 opacity-30">🔍</span>
+          <input
+            type="text"
+            placeholder="Cari..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full p-4 pl-12 text-sm font-bold bg-gray-100 border-none outline-none rounded-xl focus:ring-2 focus:ring-blue-500"
+          />
+          <span className="absolute text-gray-900 -translate-y-1/2 left-4 top-1/2 opacity-30">
+            <Icon.Search size={18} strokeWidth={3} />
+          </span>
         </div>
 
         <div className="flex p-1.5 bg-gray-100 rounded-2xl">
-          <button onClick={() => setActiveTab('list')} className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all ${activeTab === 'list' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400'}`}>📂 Kategori</button>
-          <button onClick={() => setActiveTab('recurring')} className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all ${activeTab === 'recurring' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400'}`}>🔄 Rutin</button>
+          <button
+            onClick={() => setActiveTab('list')}
+            className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all flex items-center justify-center gap-2 ${activeTab === 'list' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400'}`}
+          >
+            <Icon.LayoutGrid size={14} strokeWidth={3} />
+            Kategori
+          </button>
+          <button
+            onClick={() => setActiveTab('recurring')}
+            className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all flex items-center justify-center gap-2 ${activeTab === 'recurring' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400'}`}
+          >
+            <Icon.Repeat size={14} strokeWidth={3} />
+            Rutin
+          </button>
         </div>
       </div>
 

@@ -1,4 +1,3 @@
-// Tambahkan onEdit di props
 export default function HistoryList({ transactions, loading, onSeeAll, onEdit }) {
   return (
     <div className="px-5 mt-8">

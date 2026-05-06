@@ -1,4 +1,5 @@
 import { formatRupiah, parseNumber, formatNominal } from '../../utils/formatters';
+import * as Icon from '../../lib/icons';
 
 export default function RecurringTab({ recurringData, categories, hook }) {
   const {
@@ -16,14 +17,16 @@ export default function RecurringTab({ recurringData, categories, hook }) {
     <>
       <div className="space-y-4">
         <div className="flex flex-col">
-          <span className="text-[8px] font-bold text-blue-400 uppercase italic animate-pulse">
-            ⚡ Double Click buat edit
-          </span>
+          <div className="flex items-center gap-1.5 text-[8px] font-bold text-blue-400 uppercase italic animate-pulse">
+            <Icon.Zap size={10} strokeWidth={3} />
+            <span>Double Click buat edit</span>
+          </div>
         </div>
 
         {recurringData.length === 0 ? (
-          <div className="py-20 text-center bg-white rounded-2xl border-2 border-dashed border-gray-100 font-black text-[10px] text-gray-400 uppercase tracking-widest">
-            Tagihan tidak ditemukan ges 🕵️‍♂️
+          <div className="py-20 text-center bg-white rounded-2xl border-2 border-dashed border-gray-100 font-black text-[10px] text-gray-400 uppercase tracking-widest flex flex-col items-center justify-center gap-3">
+            <Icon.Search size={32} strokeWidth={3} className="opacity-20" />
+            Tagihan tidak ditemukan ges
           </div>
         ) : (
           recurringData.map((rec) => (
@@ -34,15 +37,14 @@ export default function RecurringTab({ recurringData, categories, hook }) {
             >
               <div className="flex items-start justify-between mb-5">
                 <div className="flex items-center gap-4 overflow-hidden">
-                  {/* IconBox Styling */}
                   <div
-                    className="flex items-center icon-box"
+                    className="flex items-center justify-center icon-box"
                     style={{
                       backgroundColor: `${rec.category?.color || '#94a3b8'}15`,
                       color: rec.category?.color || '#64748b'
                     }}
                   >
-                    {rec.category?.icon || '🔄'}
+                    {rec.category?.icon || <Icon.Repeat size={18} strokeWidth={3} />}
                   </div>
                   <div className="overflow-hidden">
                     <h4 className={`text-sm font-black tracking-tight uppercase truncate ${rec.is_active === false ? 'text-gray-400 line-through' : 'text-gray-800'}`}>
@@ -55,7 +57,6 @@ export default function RecurringTab({ recurringData, categories, hook }) {
                 </div>
 
                 <div className="flex flex-col items-end gap-3">
-                  {/* Toggle Switch */}
                   <button
                     onClick={(e) => { e.stopPropagation(); handleToggleRecurringActive(rec.id, rec.is_active); }}
                     className={`w-10 h-5 rounded-full transition-colors relative ${rec.is_active !== false ? 'bg-blue-600' : 'bg-gray-300'}`}
@@ -65,7 +66,6 @@ export default function RecurringTab({ recurringData, categories, hook }) {
 
                   <div className="text-right">
                     <p className={`text-sm font-black italic tracking-tight ${rec.is_active === false ? 'text-gray-400' : 'text-gray-900'}`}>
-                      {/* Menggunakan formatNominal */}
                       {formatNominal(rec.amount)}
                     </p>
                     <p className="text-[7px] font-black text-gray-300 uppercase tracking-widest">
@@ -77,9 +77,10 @@ export default function RecurringTab({ recurringData, categories, hook }) {
 
               <button
                 onClick={(e) => { e.stopPropagation(); setDeleteRecId(rec.id); }}
-                className="w-full py-3 bg-red-50/50 text-red-400 text-[9px] font-black uppercase rounded-xl active:scale-95 transition-all border border-red-50"
+                className="w-full py-3 bg-red-50/50 text-red-400 text-[9px] font-black uppercase rounded-xl active:scale-95 transition-all border border-red-50 flex items-center justify-center gap-2"
               >
-                🗑️ Hapus Tagihan Rutin
+                <Icon.Trash2 size={12} strokeWidth={3} />
+                Hapus Tagihan Rutin
               </button>
             </div>
           ))
@@ -91,10 +92,18 @@ export default function RecurringTab({ recurringData, categories, hook }) {
         <div className="fixed inset-0 z-[110] flex items-end justify-center bg-black/40 backdrop-blur-sm p-0 sm:items-center sm:p-4">
           <div className="bg-white w-full max-w-md rounded-t-4xl sm:rounded-3xl p-8 shadow-2xl animate-in slide-in-from-bottom-10 max-h-[95vh] overflow-y-auto">
             <div className="flex items-center justify-between px-1 mb-8 text-left">
-              <h2 className="text-xl italic font-black tracking-tight text-gray-800 uppercase">
-                {editingId ? 'Edit Rutin 📝' : 'Tagihan Rutin ✨'}
-              </h2>
-              <button onClick={() => setIsRecModalOpen(false)} className="flex items-center justify-center font-bold text-gray-400 transition-all rounded-full w-9 h-9 bg-gray-50 active:scale-95">✕</button>
+              <div className="flex items-center gap-2">
+                {editingId ? <Icon.Pencil size={18} strokeWidth={3} className="text-blue-500" /> : <Icon.Sparkles size={18} strokeWidth={3} className="text-blue-500" />}
+                <h2 className="text-xl italic font-black tracking-tight text-gray-800 uppercase">
+                  {editingId ? 'Edit Rutin' : 'Tagihan Rutin'}
+                </h2>
+              </div>
+              <button
+                onClick={() => setIsRecModalOpen(false)}
+                className="flex items-center justify-center text-gray-400 transition-all rounded-full w-9 h-9 bg-gray-50 active:scale-95 hover:bg-gray-100"
+              >
+                <Icon.X size={18} strokeWidth={3} />
+              </button>
             </div>
 
             <form onSubmit={handleSaveRecurring} className="space-y-6 text-left">
@@ -121,7 +130,7 @@ export default function RecurringTab({ recurringData, categories, hook }) {
                     <select
                       value={recFormData.billing_date}
                       onChange={(e) => setRecFormData({ ...recFormData, billing_date: Number(e.target.value) })}
-                      className="w-full p-4 text-sm font-black border-none outline-none appearance-none cursor-pointer bg-gray-50 rounded-xl focus:ring-2 focus:ring-blue-500"
+                      className="w-full p-4 pr-10 text-sm font-black border-none outline-none appearance-none cursor-pointer bg-gray-50 rounded-xl focus:ring-2 focus:ring-blue-500"
                       required
                     >
                       <option value="" disabled className="text-gray-400">Pilih Tanggal</option>
@@ -131,8 +140,8 @@ export default function RecurringTab({ recurringData, categories, hook }) {
                         </option>
                       ))}
                     </select>
-                    <div className="absolute inset-y-0 flex items-center pointer-events-none right-4">
-                      <span className="text-[10px] text-gray-400">▼</span>
+                    <div className="absolute inset-y-0 flex items-center opacity-50 pointer-events-none right-4">
+                      <Icon.ChevronDown size={12} strokeWidth={4} />
                     </div>
                   </div>
                 </div>
@@ -142,7 +151,14 @@ export default function RecurringTab({ recurringData, categories, hook }) {
                 <div className="flex items-center justify-between px-1">
                   <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">Kategori</label>
                   <div className="relative">
-                    <input type="text" placeholder="Cari..." value={recCatSearch} onChange={(e) => setRecCatSearch(e.target.value)} className="text-[9px] font-bold bg-gray-50 border border-gray-100 rounded-lg px-3 py-1.5 outline-none w-32 focus:bg-white focus:ring-1 focus:ring-blue-200 transition-all" />
+                    <Icon.Search size={10} strokeWidth={3} className="absolute text-gray-400 -translate-y-1/2 left-3 top-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Cari..."
+                      value={recCatSearch}
+                      onChange={(e) => setRecCatSearch(e.target.value)}
+                      className="text-[9px] font-bold bg-gray-50 border border-gray-100 rounded-lg pl-7 pr-3 py-1.5 outline-none w-32 focus:bg-white focus:ring-1 focus:ring-blue-200 transition-all"
+                    />
                   </div>
                 </div>
 
@@ -161,7 +177,8 @@ export default function RecurringTab({ recurringData, categories, hook }) {
                 </div>
               </div>
 
-              <button type="submit" className="w-full py-5 font-black tracking-widest text-white uppercase transition-all bg-blue-600 shadow-xl shadow-blue-100 rounded-xl active:scale-95">
+              <button type="submit" className="flex items-center justify-center w-full gap-2 py-5 font-black tracking-widest text-white uppercase transition-all bg-blue-600 shadow-xl shadow-blue-100 rounded-xl active:scale-95">
+                <Icon.CheckCircle2 size={18} strokeWidth={3} />
                 Simpan Tagihan
               </button>
             </form>
@@ -172,13 +189,15 @@ export default function RecurringTab({ recurringData, categories, hook }) {
       {/* MODAL DELETE RECURRING */}
       {deleteRecId && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-xs p-8 text-center bg-white shadow-2xl rounded-4xl">
-            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 text-3xl text-red-500 rounded-full bg-red-50">🔄</div>
-            <h3 className="mb-2 text-xl italic font-black text-gray-800 uppercase">Hapus Rutin?</h3>
-            <p className="mb-8 text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed">Gak diingetin lagi tiap bulan,<br/>ges 🤏</p>
+          <div className="w-full max-w-xs p-8 text-center bg-white border border-gray-100 shadow-2xl rounded-4xl">
+            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 text-red-500 rounded-full bg-red-50">
+              <Icon.Repeat size={32} strokeWidth={2.5} />
+            </div>
+            <h3 className="mb-2 text-xl italic font-black tracking-tight text-gray-800 uppercase">Hapus Rutin?</h3>
+            <p className="mb-8 text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed">Gak diingetin lagi tiap bulan,<br/>ges. 🤝</p>
             <div className="flex gap-3">
-              <button onClick={() => setDeleteRecId(null)} className="flex-1 py-4 text-[10px] font-black text-gray-400 bg-gray-50 rounded-2xl">Batal</button>
-              <button onClick={handleDeleteRecurring} className="flex-1 py-4 text-[10px] font-black text-white bg-red-500 rounded-2xl shadow-lg">Hapus</button>
+              <button onClick={() => setDeleteRecId(null)} className="flex-1 py-4 text-[10px] font-black text-gray-400 bg-gray-50 rounded-2xl active:scale-95 transition-transform">Batal</button>
+              <button onClick={handleDeleteRecurring} className="flex-1 py-4 text-[10px] font-black text-white bg-red-500 rounded-2xl shadow-lg active:scale-95 transition-transform">Hapus</button>
             </div>
           </div>
         </div>

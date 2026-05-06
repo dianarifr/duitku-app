@@ -1,4 +1,3 @@
-import React from 'react';
 import { formatNominal } from '../../utils/formatters';
 
 export default function LaporanSummary({ income, expense, mutation = 0 }) {

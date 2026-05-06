@@ -1,5 +1,5 @@
-import React from 'react';
 import { useInputMutasi } from '../hooks/useInputMutasi';
+import * as Icon from '../lib/icons';
 
 // Tambahkan prop editData dan setEditData
 export default function InputMutasi({ session, setCurrentPage, editData, setEditData }) {
@@ -21,15 +21,18 @@ export default function InputMutasi({ session, setCurrentPage, editData, setEdit
                 }}
                 className="flex items-center justify-center w-10 h-10 font-bold bg-white/20 rounded-2xl active:scale-90"
             >
-                ←
+                <Icon.ArrowLeft size={20} strokeWidth={3} />
             </button>
-            <h1 className="text-xl italic font-black tracking-tight uppercase">
-                {editData ? 'Koreksi Mutasi' : 'Pindah Kantong'}
-            </h1>
+            <div className="flex items-center gap-2">
+              <Icon.ArrowLeftRight size={18} strokeWidth={3} className="text-indigo-200" />
+              <h1 className="text-xl italic font-black tracking-tight uppercase">
+                  {editData ? 'Koreksi Mutasi' : 'Pindah Kantong'}
+              </h1>
+            </div>
           </div>
 
           {/* Toggle Button: Sekarang otomatis terpilih kalau mode edit */}
-          <div className="relative flex h-10 p-1 overflow-hidden bg-white/20 backdrop-blur-md rounded-xl w-44">
+          <div className="relative flex h-10 p-1 overflow-hidden border bg-white/20 backdrop-blur-md rounded-xl w-44 border-white/10">
             <div
               className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-xl shadow-sm transition-all duration-300 ease-in-out ${
                 formData.source === 'cash' ? 'translate-x-full' : 'translate-x-0'
@@ -38,23 +41,24 @@ export default function InputMutasi({ session, setCurrentPage, editData, setEdit
 
             <button
               type="button"
-              // Pakai (prev) => ({...prev}) biar lebih aman!
               onClick={() => setFormData(prev => ({...prev, source: 'transfer'}))}
-              className={`flex-1 text-[9px] font-black z-10 transition-colors ${
+              className={`flex-1 text-[9px] font-black z-10 transition-colors flex items-center justify-center gap-1 ${
                 formData.source === 'transfer' ? 'text-indigo-600' : 'text-white'
               }`}
             >
-              DARI BANK
+              <Icon.Landmark size={10} strokeWidth={3} />
+              BANK
             </button>
 
             <button
               type="button"
               onClick={() => setFormData(prev => ({...prev, source: 'cash'}))}
-              className={`flex-1 text-[9px] font-black z-10 transition-colors ${
+              className={`flex-1 text-[9px] font-black z-10 transition-colors flex items-center justify-center gap-1 ${
                 formData.source === 'cash' ? 'text-indigo-600' : 'text-white'
               }`}
             >
-              DARI CASH
+              <Icon.Wallet size={10} strokeWidth={3} />
+              CASH
             </button>
           </div>
         </div>
@@ -99,8 +103,16 @@ export default function InputMutasi({ session, setCurrentPage, editData, setEdit
           <div>
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Tanggal</label>
             <div className="relative mt-1">
-              <input type="date" value={formData.date} onClick={(e) => e.target.showPicker()} onChange={(e) => setFormData({...formData, date: e.target.value})} className="w-full p-4 font-bold text-gray-700 border-none outline-none bg-gray-50 rounded-xl focus:ring-2 focus:ring-indigo-500" />
-              <span className="absolute text-lg -translate-y-1/2 pointer-events-none right-4 top-1/2">📅</span>
+              <input
+                type="date"
+                value={formData.date}
+                onClick={(e) => e.target.showPicker()}
+                onChange={(e) => setFormData({...formData, date: e.target.value})}
+                className="w-full p-4 font-bold text-gray-700 border-none outline-none bg-gray-50 rounded-xl focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="absolute top-0 bottom-0 right-0 flex items-center justify-center w-12 text-indigo-400 pointer-events-none bg-gray-50 rounded-r-xl">
+                <Icon.Calendar size={18} strokeWidth={3} />
+              </span>
             </div>
           </div>
         </div>
@@ -110,8 +122,15 @@ export default function InputMutasi({ session, setCurrentPage, editData, setEdit
           <input type="text" placeholder="Setor tunai / Tarik tunai?" value={formData.note} onChange={(e) => setFormData({...formData, note: e.target.value})} className="w-full p-4 mt-1 text-sm font-bold text-gray-700 border-none outline-none bg-gray-50 rounded-xl focus:ring-2 focus:ring-indigo-500" />
         </div>
 
-        <button disabled={loading} className={`w-full py-5 rounded-xl text-white font-black text-lg shadow-xl active:scale-95 transition-all mt-6 bg-indigo-600 shadow-indigo-100 ${loading ? 'opacity-50' : ''}`}>
-          {loading ? 'MEMPROSES...' : editData ? 'UPDATE MUTASI ✨' : 'KONFIRMASI MUTASI 🚀'}
+        <button disabled={loading} className={`w-full py-5 rounded-xl text-white font-black text-lg shadow-xl active:scale-95 transition-all mt-6 bg-indigo-600 shadow-indigo-100 flex items-center justify-center gap-3 ${loading ? 'opacity-50' : ''}`}>
+          {loading ? (
+            'MEMPROSES...'
+          ) : (
+            <>
+              <Icon.CheckCircle2 size={20} strokeWidth={3} />
+              {editData ? 'UPDATE MUTASI' : 'KONFIRMASI MUTASI'}
+            </>
+          )}
         </button>
       </form>
     </div>
