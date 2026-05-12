@@ -26,7 +26,7 @@ export default function PaydayProgressBar({ payday }) {
   // 2. Status & Pesan Survival
   const getStatus = () => {
     if (progress < 20) return {
-      msg: "Bensin full, Puh! Gaspol tapi rem dijaga. 🔥",
+      msg: "Bensin full, ges! Gaspol tapi rem dijaga. 🔥",
       color: "bg-green-500",
       text: "text-green-500",
       icon: <Icon.Zap size={14} strokeWidth={3} />
@@ -44,7 +44,7 @@ export default function PaydayProgressBar({ payday }) {
       icon: <Icon.TrendingDown size={14} strokeWidth={3} />
     };
     return {
-      msg: "Dikit lagi gajian, Puh. Bertahanlah! 🏁",
+      msg: "Dikit lagi gajian, ges. Bertahanlah! 🏁",
       color: "bg-yellow-500",
       text: "text-yellow-500",
       icon: <Icon.Sparkles size={14} strokeWidth={3} />
