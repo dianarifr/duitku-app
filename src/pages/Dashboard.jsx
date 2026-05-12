@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { getFinancialRange } from '../utils/formatters';
 import { formatNominal } from '../utils/formatters';
+import { fetchAllDashboardData } from '../services/dashboardService';
 
 // IMPORT KOMPONEN
 import DashboardHeader from '../components/Dashboard/DashboardHeader';
@@ -83,107 +84,25 @@ function Dashboard({ session, setCurrentPage, setEditData, onCategoryDeepDive, o
   }, [criticalBudgets, loading]);
 
   const fetchDashboardData = async () => {
-    setLoading(true);
-    const now = new Date();
-    const today = now.toISOString().split('T')[0];
+    try {
+      setLoading(true);
+      const data = await fetchAllDashboardData(session.user.id);
 
-    // 1. Ambil Profil (Payday)
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('payday')
-      .eq('id', session.user.id)
-      .single();
+      setPayday(data.payday);
+      setPeriodLabel(data.periodLabel);
+      setSummary(data.summary);
+      setWallet(data.wallet);
+      setBudgetMonitoring(data.budgetMonitoring);
+      setCriticalBudgets(data.criticalBudgets);
+      setHasInputToday(data.hasInputToday);
+      setPendingRecurring(data.pendingRecurring);
 
-    const paydayVal = profile?.payday || 1;
-    setPayday(paydayVal); // Simpan ke state untuk progress bar
-
-    // 2. Setup Range Tanggal
-    const currentRange = getFinancialRange(paydayVal);
-    const options = { day: 'numeric', month: 'short' };
-    setPeriodLabel(`${new Date(currentRange.start).toLocaleDateString('id-ID', options)} - ${new Date(currentRange.end).toLocaleDateString('id-ID', options)}`);
-
-    // 3. Ambil Transaksi (Source of Truth)
-    const { data: allTrans } = await supabase
-      .from('transaction')
-      .select('amount, type, date, payment_method, category_id, note')
-      .eq('user_id', session.user.id)
-      .is('deleted_at', null)
-      .gte('date', currentRange.start)
-      .lte('date', currentRange.end);
-
-    const thisMonthTrans = allTrans || [];
-
-    // 4. Kalkulasi Summary & Wallet (Disesuaikan untuk Mutasi)
-    let cashIn = 0, cashOut = 0, bankIn = 0, bankOut = 0, totalIncome = 0, totalExpense = 0;
-
-    thisMonthTrans.forEach(t => {
-      const amt = t.amount;
-
-      if (t.type === 'pemasukan') {
-        totalIncome += amt;
-        t.payment_method === 'transfer' ? bankIn += amt : cashIn += amt;
-      }
-      else if (t.type === 'pengeluaran') {
-        totalExpense += amt;
-        t.payment_method === 'transfer' ? bankOut += amt : cashOut += amt;
-      }
-      else if (t.type === 'mutasi') {
-        // Mutasi tidak masuk Summary Income/Expense, tapi WAJIB masuk Wallet
-        if (t.note.includes('[KELUAR]')) {
-          t.payment_method === 'transfer' ? bankOut += amt : cashOut += amt;
-        } else if (t.note.includes('[MASUK]')) {
-          t.payment_method === 'transfer' ? bankIn += amt : cashIn += amt;
-        }
-      }
-    });
-
-    setSummary({
-      income: totalIncome,
-      expense: totalExpense,
-      total: totalIncome - totalExpense
-    });
-
-    setWallet({
-      dompet: cashIn - cashOut,
-      bank: bankIn - bankOut
-    });
-
-    // 5. Monitoring Budget (Exclude Mutasi agar tidak bocor)
-    const { data: catData } = await supabase
-      .from('category')
-      .select('id, name, icon, color, budget')
-      .eq('user_id', session.user.id)
-      .is('deleted_at', null);
-
-    if (catData) {
-      const budgetStatus = catData.map(cat => {
-        const used = thisMonthTrans
-          .filter(t => t.category_id === cat.id && t.type === 'pengeluaran')
-          .reduce((sum, t) => sum + t.amount, 0);
-        return { ...cat, used };
-      });
-
-      setBudgetMonitoring(budgetStatus);
-
-      const critical = budgetStatus
-        .map(b => ({ ...b, percent: (b.used / (b.budget || 1)) * 100 }))
-        .filter(b => b.budget > 0 && b.percent >= 80)
-        .sort((a, b) => b.percent - a.percent);
-
-      setCriticalBudgets(critical);
+      if (data.pendingRecurring.length > 0) setShowRecurringModal(true);
+    } catch (err) {
+      console.error("Gagal ambil data dashboard:", err);
+    } finally {
+      setLoading(false);
     }
-
-    // 6. Cek Input Hari Ini & Tagihan Rutin
-    const { data: todayData } = await supabase
-      .from('transaction')
-      .select('id')
-      .eq('user_id', session.user.id)
-      .eq('date', today)
-      .is('deleted_at', null)
-      .limit(1);
-    setHasInputToday(todayData && todayData.length > 0);
-
-    setLoading(false);
   };
 
   const handlePayRecurring = async (rec) => {
