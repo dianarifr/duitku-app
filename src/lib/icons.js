@@ -37,4 +37,5 @@ export {
   SlidersHorizontal, // ⚙️ Pengaturan
   Zap,            // ⚡ Hint / Quick Action
   ChevronDown,    // ▼ Dropdown Payday
+  Send,           // 📤 Kirim Pesan / Chat
 } from 'lucide-react';
