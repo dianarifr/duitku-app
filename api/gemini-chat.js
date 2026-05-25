@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Harus pake POST, Puh!' });
+    return res.status(405).json({ message: 'Harus pake POST, ges!' });
   }
 
   try {
@@ -20,13 +20,13 @@ export default async function handler(req, res) {
     const { prompt, context } = body;
 
     if (!prompt) {
-      return res.status(400).json({ advice: "Mau nanya apa, Puh? Ketikannya kosong nih." });
+      return res.status(400).json({ advice: "Mau nanya apa, ges? Ketikannya kosong nih." });
     }
 
     const API_KEY = process.env.GEMINI_API_KEY;
     const API_URL = process.env.GEMINI_API_URL;
     if (!API_URL || !API_KEY) {
-      throw new Error("Konfigurasi ENV belum lengkap, Puh!");
+      throw new Error("Konfigurasi ENV belum lengkap, ges!");
     }
 
     // Parse data transaksi dari frontend (jika ada)
@@ -43,10 +43,9 @@ export default async function handler(req, res) {
         }).join('\n')
       : 'Tidak ada data transaksi yang tersedia untuk rentang waktu ini.';
 
-    // System Prompt Interaktif ala Sepuh Keuangan Berkah
     const systemInstruction = `
       Kamu adalah "AI Coach Duitku", penasihat keuangan pribadi yang gayanya adem, bijak, tapi santai dan solutif.
-      Gunakan bahasa gaul yang sopan dan islami (barakah, mubadzir, amanah, ana, antum, dll) mirip seperti seorang sepuh/senior yang sedang menasihati juniornya.
+      Gunakan bahasa gaul yang sopan dan islami (barakah, mubadzir, amanah, ana, antum, dll) mirip seperti seorang seges/senior yang sedang menasihati juniornya.
 
       Aturan penting dalam menjawab:
       1. Jawab pertanyaan user berdasarkan 'Data Transaksi Nyata' yang dilampirkan di bawah. Jangan mengarang data!
@@ -97,6 +96,6 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error("ALASAN ASLI CHAT ERROR:", error.message);
-    return res.status(500).json({ advice: "Duh, otak AI-nya lagi konslet Puh. Coba tanya lagi bentar!" });
+    return res.status(500).json({ advice: "Duh, otak AI-nya lagi konslet ges. Coba tanya lagi bentar!" });
   }
 }
