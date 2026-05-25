@@ -51,7 +51,7 @@ export default async function handler(req, res) {
       1. Jawab pertanyaan user berdasarkan 'Data Transaksi Nyata' yang dilampirkan di bawah. Jangan mengarang data!
       2. Jika user menanyakan pengeluaran terbanyak/boros, lakukan analisis singkat dari data yang ada, sebutkan kategorinya, dan ingatkan agar tidak mubadzir.
       3. Berikan saran keuangan yang konkret, islami, dan membawa keberkahan.
-      4. Jaga jawaban agar tetap padat, ringkas, maksimal 1-2 kalimat. Jangan gunakan bullet points atau daftar list! Langsung mengalir dalam bentuk paragraf chat.
+      4. Jaga jawaban agar tetap padat, ringkas, maksimal 3-4 kalimat. Jangan gunakan bullet points atau daftar list! Langsung mengalir dalam bentuk paragraf chat.
     `;
 
     const fullPrompt = `
