@@ -58,8 +58,15 @@ export const getFinancialRange = (payday = 1) => {
   endDate.setDate(endDate.getDate() - 1);
   endDate.setHours(23, 59, 59, 999);
 
+  const formatLocal = (d) => {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
   return {
-    start: startDate.toISOString(),
-    end: endDate.toISOString()
+    start: formatLocal(startDate), // Output: "2026-07-23"
+    end: formatLocal(endDate)      // Output: "2026-08-22"
   };
 };
