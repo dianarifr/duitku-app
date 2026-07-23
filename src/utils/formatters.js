@@ -49,9 +49,6 @@ export const getFinancialRange = (payday = 1) => {
     startDate = new Date(year, month, payday);
   }
 
-  // Set jam ke 00:00:00 biar akurat
-  startDate.setHours(0, 0, 0, 0);
-
   // Akhir periode adalah H-1 dari tanggal gajian bulan depan
   const endDate = new Date(startDate);
   endDate.setMonth(endDate.getMonth() + 1);
