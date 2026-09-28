@@ -18,7 +18,6 @@ export default function Kategori({ session, setCurrentPage }) {
 
   const [activeTab, setActiveTab] = useState('list');
   const [searchTerm, setSearchTerm] = useState('');
-  const [notification, setNotification] = useState(null);
 
   const fetchData = async (pd) => {
     setLoading(true);
