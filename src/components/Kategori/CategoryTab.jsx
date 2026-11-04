@@ -20,45 +20,41 @@ export default function CategoryTab({
   return (
     <>
       {/* CARD SIKLUS GAJIAN */}
-      <div className="mb-6">
-        <div className="relative p-4 overflow-hidden text-white shadow-xl bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl">
-          <div className="relative z-10 flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-[10px] font-black uppercase opacity-70 tracking-widest">Siklus Gajian</p>
-              <h3 className="text-lg italic font-black">Tgl {payday}</h3>
-            </div>
-            <div className="relative">
-              <select
-                value={payday}
-                onChange={(e) => onUpdatePayday(Number(e.target.value))}
-                className="px-4 py-2 pr-8 text-xs font-black border-none outline-none appearance-none cursor-pointer bg-white/20 rounded-xl"
-              >
-                {[...Array(31)].map((_, i) => (
-                  <option key={i+1} value={i+1} className="text-gray-800">Tgl {i+1}</option>
-                ))}
-              </select>
-              <span className="absolute -translate-y-1/2 pointer-events-none right-3 top-1/2 opacity-70">
-                <Icon.ChevronDown size={10} strokeWidth={4} />
-              </span>
-            </div>
+      <div className="mb-5">
+        <div className="panel flex items-center justify-between gap-3 p-4">
+          <div>
+            <p className="section-label">Siklus gajian</p>
+            <h3 className="mt-1 font-serif text-lg font-semibold text-ink">Tanggal {payday}</h3>
           </div>
-          {/* Ornamen */}
-          <div className="absolute top-0 right-0 w-32 h-32 -mt-16 -mr-16 rounded-full bg-white/10 blur-2xl"></div>
+          <div className="relative">
+            <select
+              value={payday}
+              onChange={(e) => onUpdatePayday(Number(e.target.value))}
+              className="field min-h-9 w-28 cursor-pointer appearance-none pr-8 text-[11px]"
+            >
+              {[...Array(31)].map((_, i) => (
+                <option key={i+1} value={i+1} className="text-ink">Tgl {i+1}</option>
+              ))}
+            </select>
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted">
+              <Icon.ChevronDown size={12} strokeWidth={2.5} />
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div className="flex flex-col">
-          <div className="flex items-center gap-1.5 text-[8px] font-bold text-blue-400 uppercase italic animate-pulse">
-            <Icon.Zap size={10} strokeWidth={3} />
-            <span>Double Click buat edit</span>
+          <div className="flex items-center gap-1.5 font-mono text-[8px] uppercase tracking-[0.1em] text-muted">
+            <Icon.Zap size={10} strokeWidth={2.5} />
+            <span>Double click buat edit</span>
           </div>
         </div>
 
         {categories.length === 0 ? (
-          <div className="py-20 text-center bg-white rounded-2xl border-2 border-dashed border-gray-100 font-black text-[10px] text-gray-400 uppercase tracking-widest flex flex-col items-center justify-center gap-3">
-            <Icon.Search size={32} strokeWidth={3} className="opacity-20" />
-            Kategori tidak ditemukan ges
+          <div className="flex flex-col items-center justify-center gap-3 border border-dashed border-line-strong bg-surface/60 py-16 text-center">
+            <Icon.Search size={28} strokeWidth={2} className="text-muted opacity-40" />
+            <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted">Kategori tidak ditemukan ges</p>
           </div>
         ) : (
           categories.map((cat) => {
@@ -68,44 +64,44 @@ export default function CategoryTab({
             const isOver = used > cat.budget;
 
             return (
-              <div key={cat.id} onDoubleClick={() => openEditModal(cat)} className="p-5 bg-white border border-gray-100 shadow-sm rounded-2xl active:scale-[0.98] transition-all cursor-pointer select-none hover:border-blue-300 hover:shadow-md group">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="icon-box" style={{ backgroundColor: `${cat.color}15`, color: cat.color }}>
+              <div key={cat.id} onDoubleClick={() => openEditModal(cat)} className="panel cursor-pointer select-none p-4 transition-colors hover:border-line-strong active:scale-[0.99]">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="icon-box shrink-0" style={{ backgroundColor: `${cat.color}15`, color: cat.color }}>
                       {cat.icon}
                     </div>
-                    <div>
-                      <h4 className="text-sm font-black tracking-tight text-gray-800 uppercase">{cat.name}</h4>
-                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+                    <div className="min-w-0">
+                      <h4 className="truncate text-sm font-semibold uppercase tracking-tight text-ink">{cat.name}</h4>
+                      <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-muted">
                         Limit: {formatNominal(cat.budget)}
                       </p>
                     </div>
                   </div>
-                  <span className={`text-[7px] font-black px-2 py-1 rounded-md uppercase tracking-tighter ${cat.type === 'pemasukan' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                  <span className={`badge shrink-0 border-0 px-2 py-1 text-[8px] ${cat.type === 'pemasukan' ? 'bg-pos/10 text-pos' : 'bg-neg/10 text-neg'}`}>
                     {cat.type === 'pemasukan' ? 'Masuk' : 'Keluar'}
                   </span>
                 </div>
 
                 {cat.type === 'pengeluaran' && cat.budget > 0 && (
                   <div className="mt-4">
-                    <div className="flex items-center justify-between mb-2 px-0.5">
+                    <div className="mb-2 flex items-center justify-between px-0.5">
                       <div className="flex items-baseline gap-1">
-                        <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest opacity-60">Terpakai:</span>
-                        <span className={`text-[10px] font-black ${isOver ? 'text-red-500' : 'text-gray-700'}`}>
+                        <span className="font-mono text-[8px] uppercase tracking-[0.08em] text-muted">Terpakai:</span>
+                        <span className={`font-mono text-[10px] tabular-nums ${isOver ? 'text-neg' : 'text-ink-soft'}`}>
                           {formatNominal(used)}
                         </span>
                       </div>
-                      <span className={`text-[10px] font-black italic ${isOver ? 'text-red-500' : 'text-blue-500'}`}>
+                      <span className={`font-mono text-[10px] ${isOver ? 'text-neg' : 'text-muted'}`}>
                         {Math.round(rawPercent)}%
                       </span>
                     </div>
 
-                    <div className="w-full h-2 overflow-hidden border border-gray-100 rounded-full bg-gray-50">
+                    <div className="h-1.5 w-full overflow-hidden rounded-full border border-line bg-surface-alt">
                       <div
-                        className="h-full transition-all duration-1000 rounded-full"
+                        className="h-full rounded-full transition-all duration-1000"
                         style={{
                           width: `${barWidth}%`,
-                          backgroundColor: isOver ? '#EF4444' : (Math.round(rawPercent) > 80 ? '#f59e0b' : cat.color)
+                          backgroundColor: isOver ? '#b34a32' : (Math.round(rawPercent) > 80 ? '#b07a2a' : cat.color)
                         }}
                       />
                     </div>
@@ -113,11 +109,12 @@ export default function CategoryTab({
                 )}
 
                 <button
+                  type="button"
                   onClick={(e) => { e.stopPropagation(); setDeleteId(cat.id); }}
-                  className="w-full mt-5 py-3 bg-red-50/50 text-red-400 text-[9px] font-black uppercase rounded-xl active:scale-95 transition-all border border-red-50 flex items-center justify-center gap-2 hover:bg-red-50"
+                  className="mt-4 flex w-full items-center justify-center gap-2 border border-line py-2.5 font-mono text-[9px] uppercase tracking-[0.08em] text-danger transition-colors hover:bg-surface-alt active:scale-[0.99]"
                 >
-                  <Icon.Trash2 size={12} strokeWidth={3} />
-                  Hapus Kategori
+                  <Icon.Trash2 size={12} strokeWidth={2.5} />
+                  Hapus kategori
                 </button>
               </div>
             );
@@ -127,65 +124,65 @@ export default function CategoryTab({
 
       {/* MODAL FORM KATEGORI */}
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-end justify-center z-[110] bg-black/40 backdrop-blur-sm p-0 sm:items-center sm:p-4">
-          <div className="w-full max-w-md p-8 bg-white shadow-2xl rounded-t-4xl sm:rounded-3xl animate-in slide-in-from-bottom-10">
-            <div className="flex items-center justify-between px-1 mb-6">
+        <div className="fixed inset-0 z-[110] flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4">
+          <div className="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-xs border border-line bg-surface p-6 animate-in slide-in-from-bottom-10 sm:rounded-xs">
+            <div className="mb-6 flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
-                {editingId ? <Icon.Pencil size={18} strokeWidth={3} className="text-blue-500" /> : <Icon.Sparkles size={18} strokeWidth={3} className="text-blue-500" />}
-                <h2 className="text-xl italic font-black tracking-tight text-gray-800 uppercase">
-                  {editingId ? 'Edit Kategori' : 'Kategori Baru'}
+                {editingId ? <Icon.Pencil size={18} strokeWidth={2} className="text-accent" /> : <Icon.Sparkles size={18} strokeWidth={2} className="text-accent" />}
+                <h2 className="font-serif text-xl font-semibold text-ink">
+                  {editingId ? 'Edit kategori' : 'Kategori baru'}
                 </h2>
               </div>
               <button
+                type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="flex items-center justify-center text-gray-400 transition-all rounded-full w-9 h-9 bg-gray-50 active:scale-95 hover:bg-gray-100"
+                className="btn btn-icon h-9 w-9"
+                aria-label="Tutup"
               >
-                <Icon.X size={18} strokeWidth={3} />
+                <Icon.X size={17} strokeWidth={2.5} />
               </button>
             </div>
 
             <form onSubmit={handleSaveCategory} className="space-y-5 text-left">
-              <div className="flex p-1.5 bg-gray-100 rounded-2xl">
-                <button type="button" onClick={() => setFormData({ ...formData, type: 'pengeluaran' })} className={`flex-1 py-2.5 text-[10px] font-black uppercase rounded-xl transition-all ${formData.type === 'pengeluaran' ? 'bg-white shadow-sm text-red-500' : 'text-gray-400'}`}>Pengeluaran</button>
-                <button type="button" onClick={() => setFormData({ ...formData, type: 'pemasukan' })} className={`flex-1 py-2.5 text-[10px] font-black uppercase rounded-xl transition-all ${formData.type === 'pemasukan' ? 'bg-white shadow-sm text-green-500' : 'text-gray-400'}`}>Pemasukan</button>
+              <div className="flex border border-line bg-surface p-1">
+                <button type="button" onClick={() => setFormData({ ...formData, type: 'pengeluaran' })} className={`flex-1 py-2.5 font-mono text-[10px] uppercase tracking-[0.06em] transition-colors ${formData.type === 'pengeluaran' ? 'bg-ink text-paper' : 'text-muted'}`}>Pengeluaran</button>
+                <button type="button" onClick={() => setFormData({ ...formData, type: 'pemasukan' })} className={`flex-1 py-2.5 font-mono text-[10px] uppercase tracking-[0.06em] transition-colors ${formData.type === 'pemasukan' ? 'bg-ink text-paper' : 'text-muted'}`}>Pemasukan</button>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex gap-3">
                 <div className="w-1/4">
-                  <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] px-1">Icon</label>
-                  <input type="text" value={formData.icon} onChange={(e) => setFormData({ ...formData, icon: e.target.value })} className="w-full p-4 mt-2 text-2xl text-center transition-colors border-none outline-none bg-gray-50 rounded-2xl focus:bg-gray-100" maxLength="2" required />
+                  <label className="field-label">Ikon</label>
+                  <input type="text" value={formData.icon} onChange={(e) => setFormData({ ...formData, icon: e.target.value })} className="field text-center text-2xl" maxLength="2" required />
                 </div>
                 <div className="w-3/4">
-                  <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] px-1">Nama</label>
-                  <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Misal: Jajan Sore" className="w-full p-4 mt-2 text-sm font-black transition-all border-none outline-none bg-gray-50 rounded-2xl focus:ring-2 focus:ring-blue-500" required />
+                  <label className="field-label">Nama</label>
+                  <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Misal: Jajan Sore" className="field font-sans" required />
                 </div>
               </div>
 
               <div>
-                <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] px-1">Warna Identitas</label>
-                <div className="grid grid-cols-7 gap-3 px-1 mt-3">
+                <label className="field-label">Warna identitas</label>
+                <div className="mt-2 grid grid-cols-7 gap-2.5">
                   {colorOptions.map(color => (
-                    <button key={color} type="button" onClick={() => setFormData({ ...formData, color })} className={`aspect-square w-full rounded-full transition-all duration-300 ${formData.color === color ? 'scale-125 ring-4 ring-blue-100' : 'opacity-40 hover:opacity-100 hover:scale-110'}`} style={{ backgroundColor: color }} />
+                    <button key={color} type="button" onClick={() => setFormData({ ...formData, color })} className={`aspect-square w-full rounded-full transition-all duration-300 ${formData.color === color ? 'scale-110 ring-2 ring-accent ring-offset-2 ring-offset-surface' : 'opacity-50 hover:opacity-100 hover:scale-105'}`} style={{ backgroundColor: color }} />
                   ))}
                 </div>
               </div>
 
               {formData.type === 'pengeluaran' && (
-                <div className="animate-in fade-in slide-in-from-top-2">
-                  <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] px-1">Budget Bulanan</label>
-                  <div className="relative">
-                    <input type="text" value={displayBudget} onChange={(e) => {
-                      const val = formatRupiah(e.target.value);
-                      setDisplayBudget(val);
-                      setFormData({ ...formData, budget: parseNumber(val) });
-                    }} placeholder="Rp 0" className="w-full p-4 mt-2 text-sm font-black transition-all border-none outline-none bg-gray-50 rounded-2xl focus:ring-2 focus:ring-blue-500" />
-                  </div>
+                <div>
+                  <label className="field-label">Budget bulanan</label>
+                  <input type="text" value={displayBudget} onChange={(e) => {
+                    const val = formatRupiah(e.target.value);
+                    setDisplayBudget(val);
+                    setFormData({ ...formData, budget: parseNumber(val) });
+                  }} placeholder="Rp 0" className="field font-sans" />
                 </div>
               )}
 
-              <button type="submit" className="flex items-center justify-center w-full gap-2 py-5 mt-4 font-black tracking-widest text-white uppercase transition-all bg-blue-600 shadow-xl shadow-blue-100 rounded-2xl active:scale-95">
-                <Icon.CheckCircle2 size={18} strokeWidth={3} />
-                Simpan Kategori
+              <button type="submit" className="btn btn-primary w-full">
+                <Icon.CheckCircle2 size={18} strokeWidth={2.5} />
+                Simpan kategori
               </button>
             </form>
           </div>
@@ -194,18 +191,18 @@ export default function CategoryTab({
 
       {/* MODAL DELETE KATEGORI */}
       {deleteId && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-xs p-8 text-center bg-white border border-gray-100 shadow-2xl rounded-4xl">
-            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 text-red-500 rounded-full bg-red-50">
-              <Icon.Trash2 size={32} strokeWidth={2.5} />
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-5 animate-in fade-in">
+          <div className="w-full max-w-xs border border-line bg-surface p-6 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-surface-alt text-danger">
+              <Icon.Trash2 size={26} strokeWidth={2} />
             </div>
-            <h3 className="mb-2 text-xl italic font-black tracking-tight text-gray-800 uppercase">Hapus Kategori?</h3>
-            <p className="mb-8 text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed">
+            <h3 className="mb-2 font-serif text-xl font-semibold text-ink">Hapus kategori?</h3>
+            <p className="mb-6 font-mono text-[10px] uppercase leading-relaxed tracking-[0.06em] text-muted">
               Akan disembunyikan dari daftar,<br/>ges.
             </p>
-            <div className="flex gap-3">
-              <button onClick={() => setDeleteId(null)} className="flex-1 py-4 text-[10px] font-black text-gray-400 bg-gray-50 rounded-2xl active:scale-95 transition-transform">Batal</button>
-              <button onClick={handleDeleteCategory} className="flex-1 py-4 text-[10px] font-black text-white bg-red-500 rounded-2xl shadow-lg active:scale-95 transition-transform">Hapus</button>
+            <div className="flex gap-2.5">
+              <button type="button" onClick={() => setDeleteId(null)} className="btn flex-1 text-xs">Batal</button>
+              <button type="button" onClick={handleDeleteCategory} className="btn btn-danger flex-1 text-xs">Hapus</button>
             </div>
           </div>
         </div>

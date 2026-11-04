@@ -16,8 +16,8 @@ export default defineConfig({
         name: 'Duitku Apps',
         short_name: 'Duitku',
         description: 'Catat cuan harian makin asik dan rapi',
-        theme_color: '#2563eb', // Warna biru branding kamu
-        background_color: '#f9fafb',
+        theme_color: '#f6f3ec',
+        background_color: '#f6f3ec',
         display: 'standalone',
         scope: '/',
         start_url: '/',

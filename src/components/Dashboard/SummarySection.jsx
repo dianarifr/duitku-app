@@ -3,52 +3,47 @@ import * as Icon from '../../lib/icons';
 export default function SummarySection({ hasInputToday, loading, income, expense, onInputClick, formatNominal }) {
   return (
     <>
-      <div className="px-6 mt-6">
+      <div className="mt-4 px-5">
         {!loading && !hasInputToday && (
-          <div className="relative flex items-center justify-between p-4 transition-all duration-1000 ease-out bg-white border-2 shadow-xl group rounded-2xl border-indigo-50 animate-in fade-in slide-in-from-right-8 hover:shadow-indigo-100/50 animate-mini-jump">
-
-            <div className="absolute top-0 bottom-0 left-0 w-1.5 bg-indigo-500 rounded-l-2xl animate-pulse"></div>
-
-            <div className="flex items-center gap-4 ml-2">
-              <div className="flex items-center justify-center w-10 h-10 transition-transform icon-box bg-indigo-50 rounded-xl group-hover:rotate-12">
-                <Icon.SquarePen size={20} strokeWidth={3} className="text-indigo-600" />
+          <div className="panel animate-mini-jump relative flex items-center justify-between gap-3 overflow-hidden p-4 motion-reduce:animate-none">
+            <span
+              aria-hidden="true"
+              className="animate-pulse absolute inset-y-0 left-0 w-0.5 bg-accent motion-reduce:animate-none"
+            />
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="icon-box h-10 w-10 shrink-0">
+                <Icon.SquarePen size={18} strokeWidth={2} className="text-accent" />
               </div>
-              <div>
-                <p className="text-[9px] font-black text-indigo-400 uppercase tracking-widest leading-none mb-1">
-                  Self-Check
-                </p>
-                <p className="text-xs italic font-black tracking-tight text-slate-700">
+              <div className="min-w-0">
+                <p className="section-label leading-none">Self-check</p>
+                <p className="mt-1 truncate text-xs font-medium text-ink-soft">
                   Belum ada catatan hari ini, ges.
                 </p>
               </div>
             </div>
 
-            <button
-              onClick={onInputClick}
-              className="flex items-center gap-2 px-4 py-2 text-[10px] font-black text-white uppercase transition-all bg-indigo-600 shadow-lg rounded-xl
-                        active:scale-90 hover:bg-indigo-700 shadow-indigo-100"
-            >
+            <button type="button" onClick={onInputClick} className="btn btn-primary min-h-9 shrink-0 px-3 text-xs">
               Catat
-              <Icon.Plus size={14} strokeWidth={3} />
+              <Icon.Plus size={13} strokeWidth={2.5} />
             </button>
           </div>
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4 px-5 mt-4">
-        <div className="p-4 bg-white border border-gray-100 shadow-sm rounded-2xl">
-          <div className="flex items-center justify-center gap-1.5 mb-1">
-            <Icon.ArrowDownLeft size={12} strokeWidth={3} className="text-green-500" />
-            <p className="text-[9px] font-black text-gray-400 uppercase">Masuk</p>
+      <div className="mt-3 grid grid-cols-2 gap-3 px-5">
+        <div className="panel p-4">
+          <div className="mb-1 flex items-center gap-1.5">
+            <Icon.ArrowDownLeft size={12} strokeWidth={2.5} className="text-pos" />
+            <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted">Masuk</p>
           </div>
-          <p className="text-sm font-black text-center text-green-600">+ {formatNominal(income)}</p>
+          <p className="font-mono text-sm font-medium text-pos tabular-nums">+ {formatNominal(income)}</p>
         </div>
-        <div className="p-4 bg-white border border-gray-100 shadow-sm rounded-2xl">
-          <div className="flex items-center justify-center gap-1.5 mb-1">
-            <Icon.ArrowUpRight size={12} strokeWidth={3} className="text-red-500" />
-            <p className="text-[9px] font-black text-gray-400 uppercase">Keluar</p>
+        <div className="panel p-4">
+          <div className="mb-1 flex items-center gap-1.5">
+            <Icon.ArrowUpRight size={12} strokeWidth={2.5} className="text-neg" />
+            <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted">Keluar</p>
           </div>
-          <p className="text-sm font-black text-center text-red-600">- {formatNominal(expense)}</p>
+          <p className="font-mono text-sm font-medium text-neg tabular-nums">- {formatNominal(expense)}</p>
         </div>
       </div>
     </>

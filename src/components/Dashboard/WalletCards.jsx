@@ -2,23 +2,21 @@ import * as Icon from '../../lib/icons';
 
 export default function WalletCards({ wallet, formatNominal }) {
   return (
-    <div className="relative z-30 grid grid-cols-2 gap-4 px-5 -mt-8">
-      {/* CARD DOMPET */}
-      <div className="flex flex-col gap-1 p-4 bg-white border shadow-xl rounded-4xl border-orange-50">
-        <div className="flex items-center gap-2 mb-1">
-          <Icon.Wallet size={14} strokeWidth={3} className="text-orange-600" />
-          <span className="text-[9px] font-black text-orange-600 uppercase tracking-widest">Cash</span>
+    <div className="grid grid-cols-2 gap-3 px-5 pt-5">
+      <div className="panel flex flex-col gap-1 p-4">
+        <div className="mb-1 flex items-center gap-2">
+          <Icon.Wallet size={14} strokeWidth={2} className="text-accent" />
+          <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted">Cash</span>
         </div>
-        <p className="text-sm font-black text-gray-800">{formatNominal(wallet.dompet)}</p>
+        <p className="font-mono text-sm font-medium text-ink tabular-nums">{formatNominal(wallet.dompet)}</p>
       </div>
 
-      {/* CARD BANK */}
-      <div className="flex flex-col gap-1 p-4 bg-white border shadow-xl rounded-4xl border-blue-50">
-        <div className="flex items-center gap-2 mb-1">
-          <Icon.Landmark size={14} strokeWidth={3} className="text-blue-600" />
-          <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest">Bank</span>
+      <div className="panel flex flex-col gap-1 p-4">
+        <div className="mb-1 flex items-center gap-2">
+          <Icon.Landmark size={14} strokeWidth={2} className="text-focus" />
+          <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted">Bank</span>
         </div>
-        <p className="text-sm font-black text-gray-800">{formatNominal(wallet.bank)}</p>
+        <p className="font-mono text-sm font-medium text-ink tabular-nums">{formatNominal(wallet.bank)}</p>
       </div>
     </div>
   );

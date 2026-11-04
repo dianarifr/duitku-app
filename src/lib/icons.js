@@ -38,4 +38,8 @@ export {
   Zap,            // ⚡ Hint / Quick Action
   ChevronDown,    // ▼ Dropdown Payday
   Send,           // 📤 Kirim Pesan / Chat
+
+  // --- Tema ---
+  Sun,            // ☀️ Mode terang
+  Moon,           // 🌙 Mode gelap
 } from 'lucide-react';

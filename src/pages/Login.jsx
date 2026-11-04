@@ -1,5 +1,5 @@
 import { supabase } from '../supabaseClient';
-import * as Icon from '../lib/icons'; // Import dari lib ikon lo
+import * as Icon from '../lib/icons';
 
 function Login() {
   const handleLogin = async () => {
@@ -17,49 +17,50 @@ function Login() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 font-sans bg-gray-50">
-      <div className="max-w-md w-full bg-white rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-10 space-y-10 border border-gray-100">
-
-        <div className="space-y-4 text-center">
-          {/* Logo Box menggunakan Ikon Wallet */}
-          <div className="flex items-center justify-center w-20 h-20 mx-auto mb-4 text-white bg-blue-600 shadow-xl rounded-3xl shadow-blue-100">
-            <Icon.Wallet size={40} strokeWidth={2.5} />
+    <div className="flex min-h-screen flex-col items-center justify-center bg-paper p-5 font-sans">
+      <div className="w-full max-w-md border border-line bg-surface p-8 sm:p-10">
+        <div className="mb-8 border-b border-line pb-6">
+          <div className="mb-5 flex items-baseline gap-2">
+            <span className="font-serif text-[21px] font-semibold tracking-tight text-ink">Duitku</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted">cashflow</span>
           </div>
 
-          <div className="space-y-2">
-            <h1 className="text-4xl italic font-black tracking-tighter text-gray-800 uppercase">
-              Duitku
-            </h1>
-            <p className="px-4 text-xs font-bold leading-relaxed tracking-widest text-gray-400 uppercase">
-              Pantau <span className="text-blue-500">cashflow</span> & <span className="text-blue-500">budget</span> <br/>
-              biar gaji gak cuma numpang lewat
-            </p>
-          </div>
-        </div>
-
-        <div className="pt-2">
-          <button
-            onClick={handleLogin}
-            className="flex items-center justify-center w-full gap-3 px-4 py-4 text-sm font-black text-gray-700 uppercase transition-all duration-200 bg-white border-2 border-gray-100 shadow-sm rounded-2xl hover:bg-gray-50 hover:border-blue-100 focus:ring-4 focus:ring-blue-50/50 active:scale-95"
-          >
-            <img
-              src="https://www.svgrepo.com/show/475656/google-color.svg"
-              alt="Google Icon"
-              className="w-5 h-5"
-            />
-            Masuk dengan Google
-          </button>
-        </div>
-
-        <div className="flex flex-col items-center gap-2 text-center">
-          <div className="flex items-center gap-2 px-4 py-2 border border-gray-100 rounded-full bg-gray-50">
-            <Icon.CheckCircle2 size={12} strokeWidth={3} className="text-green-500" />
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">
-              Secured by <span className="text-gray-600">Supabase Auth</span>
-            </p>
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xs border border-line bg-surface-alt text-accent">
+              <Icon.Wallet size={26} strokeWidth={2} />
+            </div>
+            <div>
+              <h1 className="font-serif text-2xl font-semibold tracking-tight text-ink">
+                Masuk ke Duitku
+              </h1>
+              <p className="mt-1 font-mono text-[10px] uppercase leading-relaxed tracking-[0.08em] text-muted">
+                Pantau cashflow &amp; budget
+                <br />
+                biar gaji gak cuma numpang lewat
+              </p>
+            </div>
           </div>
         </div>
 
+        <button
+          type="button"
+          onClick={handleLogin}
+          className="btn w-full gap-3 text-sm"
+        >
+          <img
+            src="https://www.svgrepo.com/show/475656/google-color.svg"
+            alt="Google Icon"
+            className="h-5 w-5"
+          />
+          Masuk dengan Google
+        </button>
+
+        <div className="mt-6 flex items-center justify-center">
+          <span className="badge">
+            <Icon.CheckCircle2 size={12} strokeWidth={2} className="text-pos" />
+            Secured by Supabase Auth
+          </span>
+        </div>
       </div>
     </div>
   );

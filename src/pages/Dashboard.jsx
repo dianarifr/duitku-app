@@ -120,7 +120,7 @@ function Dashboard({ session, setCurrentPage, setEditData, onCategoryDeepDive, o
   };
 
   return (
-    <div className="min-h-screen pb-32 font-sans bg-gray-50">
+    <div className="min-h-screen bg-paper pb-8 font-sans">
       <DashboardHeader
         userName={userName}
         avatarUrl={avatarUrl}

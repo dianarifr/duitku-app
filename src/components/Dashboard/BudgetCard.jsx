@@ -9,63 +9,60 @@ const Card = ({ category, onDeepDive }) => {
   return (
     <div
       onDoubleClick={() => onDeepDive(category.id)}
-      className="flex flex-col justify-between h-full p-5 transition-all bg-white border border-gray-100 shadow-sm cursor-pointer rounded-2xl active:scale-95 hover:border-blue-300 hover:shadow-md group"
+      className="panel flex h-full cursor-pointer flex-col justify-between p-4 transition-colors hover:border-line-strong active:scale-[0.99]"
     >
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between gap-2">
         <div
-          className="flex items-center icon-box"
+          className="icon-box"
           style={{ backgroundColor: `${category.color}15`, color: category.color }}
         >
           {category.icon}
         </div>
 
         {hasBudget ? (
-          <span className={`text-[9px] font-black px-2.5 py-1 rounded-xl uppercase tracking-tighter ${isOverBudget ? 'bg-red-50 text-red-500' : 'bg-blue-50 text-blue-600'}`}>
+          <span className={`badge border-0 px-2 py-1 text-[9px] ${isOverBudget ? 'bg-neg/10 text-neg' : 'bg-surface-alt text-ink-soft'}`}>
             {isOverBudget ? 'Over' : `${Math.round(percentage)}%`}
           </span>
         ) : (
-          <span className="text-[7px] font-black px-2 py-1 rounded-lg uppercase bg-gray-50 text-gray-300 tracking-widest">
+          <span className="font-mono text-[8px] uppercase tracking-[0.1em] text-muted">
             Limitless
           </span>
         )}
       </div>
 
       <div>
-        <h4 className="text-[11px] font-black text-gray-800 uppercase tracking-tight truncate mb-1">
+        <h4 className="mb-1 truncate text-[11px] font-semibold uppercase tracking-tight text-ink">
           {category.name}
         </h4>
 
-        <div className="flex flex-col mb-3">
-          {/* Nominal Terpakai Menggunakan formatNominal */}
-          <span className={`text-xs font-black ${hasBudget && isOverBudget ? 'text-red-600' : 'text-gray-900'}`}>
+        <div className="mb-3 flex flex-col">
+          <span className={`font-mono text-xs font-medium tabular-nums ${isOverBudget ? 'text-neg' : 'text-ink'}`}>
             {formatNominal(category.used)}
           </span>
 
-          {hasBudget && (
-            <span className="text-[8px] font-bold text-gray-300 uppercase tracking-widest">
+          {hasBudget ? (
+            <span className="font-mono text-[8px] uppercase tracking-[0.08em] text-muted">
               Limit: {formatNominal(category.budget)}
             </span>
-          )}
-
-          {!hasBudget && (
-            <span className="text-[8px] font-bold text-gray-300 uppercase tracking-widest">
-              Total Terpakai
+          ) : (
+            <span className="font-mono text-[8px] uppercase tracking-[0.08em] text-muted">
+              Total terpakai
             </span>
           )}
         </div>
 
         {hasBudget ? (
-          <div className="w-full h-2 overflow-hidden bg-gray-100 rounded-full">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-alt">
             <div
-              className={`h-full transition-all duration-1000 rounded-full`}
+              className="h-full rounded-full transition-all duration-1000"
               style={{
                 width: `${percentage}%`,
-                backgroundColor: isOverBudget ? '#ef4444' : (Math.round(percentage) > 80 ? '#f59e0b' : category.color)
+                backgroundColor: isOverBudget ? '#b34a32' : (Math.round(percentage) > 80 ? '#b07a2a' : category.color)
               }}
             />
           </div>
         ) : (
-          <div className="w-full h-2 bg-transparent"></div>
+          <div className="h-1.5 w-full"></div>
         )}
       </div>
     </div>
@@ -74,33 +71,30 @@ const Card = ({ category, onDeepDive }) => {
 
 // KOMPONEN UTAMA
 export default function BudgetSection({ loading, budgetMonitoring, onCategoryDeepDive }) {
-  // Filter kategori yang hanya memiliki pengeluaran (used > 0)
   const activeCategories = budgetMonitoring.filter(cat => cat.used > 0);
 
   return (
-    <div className="px-6 mt-10">
-      <div className="flex items-center justify-between px-1 mb-5">
-        <h3 className="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">
-          Monitoring Budget
-        </h3>
+    <div className="mt-9 px-5">
+      <div className="mb-4 flex items-center justify-between px-0.5">
+        <h3 className="section-label">Monitoring budget</h3>
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           {[...Array(2)].map((_, i) => (
-            <div key={i} className="h-40 bg-white border border-gray-100 rounded-2xl animate-pulse"></div>
+            <div key={i} className="h-36 animate-pulse border border-line bg-surface"></div>
           ))}
         </div>
       ) : activeCategories.length > 0 ? (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           {activeCategories.map((cat) => (
             <Card key={cat.id} category={cat} onDeepDive={onCategoryDeepDive} />
           ))}
         </div>
       ) : (
-        <div className="p-12 text-center border-2 border-gray-200 border-dashed rounded-2xl bg-white/50">
-          <div className="mb-3 text-3xl">🛡️</div>
-          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-relaxed">
+        <div className="border border-dashed border-line-strong bg-surface/60 p-10 text-center">
+          <div className="mb-2 font-serif text-2xl text-muted">—</div>
+          <p className="font-mono text-[10px] uppercase leading-relaxed tracking-[0.08em] text-muted">
             Belum ada pengeluaran.<br />Dompet aman terkendali!
           </p>
         </div>

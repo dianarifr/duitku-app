@@ -27,90 +27,75 @@ export default function PaydayProgressBar({ payday }) {
   const getStatus = () => {
     if (progress < 20) return {
       msg: "Bensin full, ges! Gaspol tapi rem dijaga. 🔥",
-      color: "bg-green-500",
-      text: "text-green-500",
-      icon: <Icon.Zap size={14} strokeWidth={3} />
+      color: "bg-pos",
+      text: "text-pos",
+      icon: <Icon.Zap size={14} strokeWidth={2.5} />
     };
     if (progress < 60) return {
       msg: "Setengah jalan. Ritme jajan jangan kendor! ☕",
-      color: "bg-blue-500",
-      text: "text-blue-500",
-      icon: <Icon.TrendingUp size={14} strokeWidth={3} />
+      color: "bg-focus",
+      text: "text-focus",
+      icon: <Icon.TrendingUp size={14} strokeWidth={2.5} />
     };
     if (daysLeft <= 7) return {
       msg: "Mode Survival! Hawa Inunaki mulai terasa... 💀",
-      color: "bg-red-500",
-      text: "text-red-500",
-      icon: <Icon.TrendingDown size={14} strokeWidth={3} />
+      color: "bg-neg",
+      text: "text-neg",
+      icon: <Icon.TrendingDown size={14} strokeWidth={2.5} />
     };
     return {
       msg: "Dikit lagi gajian, ges. Bertahanlah! 🏁",
-      color: "bg-yellow-500",
-      text: "text-yellow-500",
-      icon: <Icon.Sparkles size={14} strokeWidth={3} />
+      color: "bg-accent",
+      text: "text-accent",
+      icon: <Icon.Sparkles size={14} strokeWidth={2.5} />
     };
   };
 
   const status = getStatus();
 
   return (
-    <div className="px-5 mt-6 transition-all duration-300">
-      {/* HEADER SECTION */}
-      <div className="flex items-center justify-between px-1 mb-2">
-        <h3 className="text-[10px] font-black tracking-widest text-gray-400 uppercase">Survival Gauge</h3>
-        <div className="flex items-center gap-1 text-[8px] font-black text-blue-400 uppercase tracking-tighter italic">
-          <Icon.Calendar size={10} strokeWidth={3} />
+    <div className="mt-6 px-5">
+      <div className="mb-2 flex items-center justify-between px-0.5">
+        <h3 className="section-label">Survival gauge</h3>
+        <div className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-[0.06em] text-muted">
+          <Icon.Calendar size={10} strokeWidth={2} />
           Target: {endCycle.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
         </div>
       </div>
 
-      {/* MAIN CARD */}
-      <div className="relative p-5 overflow-hidden bg-white border-2 shadow-sm border-blue-50 rounded-2xl group">
-        <div className="absolute top-0 right-0 p-4 text-blue-600 transition-transform opacity-10 group-hover:rotate-12">
-          <Icon.Calendar size={48} strokeWidth={2} />
+      <div className="panel p-5">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className={`${status.text}`}>{status.icon}</span>
+            <span className={`text-[10px] font-medium uppercase tracking-[0.06em] ${status.text}`}>
+              {status.msg}
+            </span>
+          </div>
+          <div className="flex shrink-0 flex-col items-end">
+            <span className="font-serif text-2xl font-semibold leading-none text-ink tabular-nums">{daysLeft}</span>
+            <span className="font-mono text-[8px] uppercase tracking-[0.12em] text-muted">Hari lagi</span>
+          </div>
         </div>
 
-        <div className="relative z-10">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <span className={`text-[9px] font-black uppercase tracking-widest italic ${status.text}`}>
-                {status.msg}
-              </span>
-            </div>
-            <div className="flex flex-col items-end">
-              <span className="text-xl font-black leading-none text-gray-800">{daysLeft}</span>
-              <span className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">Hari Lagi</span>
-            </div>
-          </div>
+        <div className="relative h-2 w-full overflow-hidden rounded-full border border-line bg-surface-alt">
+          <div
+            className={`h-full rounded-full transition-all duration-1000 ease-out ${status.color}`}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
 
-          {/* Progress Bar */}
-          <div className="relative w-full h-3 overflow-hidden border border-gray-100 rounded-full shadow-inner bg-gray-50">
-            <div
-              className={`h-full transition-all duration-1000 ease-out rounded-full ${status.color}`}
-              style={{ width: `${progress}%` }}
-            />
-            {/* Glow effect on the tip */}
-            <div
-              className="absolute top-0 bottom-0 flex items-center justify-center transition-all duration-1000"
-              style={{ left: `calc(${progress}% - 10px)` }}
-            >
-              <Icon.Sparkles size={8} className="text-white/60 animate-pulse" />
-            </div>
+        <div className="mt-3 flex justify-between px-0.5">
+          <div className="flex flex-col">
+            <span className="font-mono text-[7px] uppercase tracking-[0.12em] text-muted">Start cycle</span>
+            <span className="font-mono text-[9px] text-ink-soft">
+              {startCycle.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+            </span>
           </div>
-
-          <div className="flex justify-between mt-3 px-0.5">
-            <div className="flex flex-col">
-              <span className="text-[7px] font-black text-gray-300 uppercase tracking-widest">Start Cycle</span>
-              <span className="text-[8px] font-bold text-gray-500">
-                {startCycle.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
-              </span>
-            </div>
-            <div className="flex flex-col items-end">
-              <span className="text-[7px] font-black text-gray-300 uppercase tracking-widest">Payday Goal</span>
-              <span className="text-[8px] font-bold text-gray-500">
-                {endCycle.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
-              </span>
-            </div>
+          <div className="flex flex-col items-end">
+            <span className="font-mono text-[7px] uppercase tracking-[0.12em] text-muted">Payday goal</span>
+            <span className="font-mono text-[9px] text-ink-soft">
+              {endCycle.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+            </span>
           </div>
         </div>
       </div>

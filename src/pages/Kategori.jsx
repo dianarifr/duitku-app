@@ -61,53 +61,59 @@ export default function Kategori({ session, setCurrentPage }) {
   const filteredRecurring = recurringData.filter(r => r.note.toLowerCase().includes(searchTerm.toLowerCase()) || r.category?.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
-    <div className="min-h-screen pb-24 font-sans text-gray-900 bg-gray-50">
+    <div className="min-h-screen bg-paper pb-28 font-sans text-ink">
       {/* HEADER */}
-      <div className="sticky top-0 z-40 px-6 pt-12 pb-4 bg-white shadow-sm rounded-b-4xl">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
+      <div className="sticky top-0 z-40 border-b border-line bg-paper px-5 pb-4 pt-8">
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             <button
+              type="button"
               onClick={() => setCurrentPage('dashboard')}
-              className="flex items-center justify-center w-10 h-10 text-gray-500 bg-gray-100 rounded-2xl active:scale-90"
+              className="btn btn-icon shrink-0"
+              aria-label="Kembali"
             >
-              <Icon.ArrowLeft size={20} strokeWidth={3} />
+              <Icon.ArrowLeft size={18} strokeWidth={2.5} />
             </button>
-            <h1 className="text-xl font-black tracking-tight uppercase">Pengaturan</h1>
+            <h1 className="truncate font-serif text-xl font-semibold tracking-tight text-ink">Pengaturan</h1>
           </div>
           <button
+            type="button"
             onClick={() => activeTab === 'list' ? kategoriHook.openAddModal() : recurringHook.openAddRecModal()}
-            className="flex items-center justify-center w-10 h-10 text-white bg-blue-600 shadow-md rounded-xl active:scale-90"
+            className="btn btn-primary min-h-10 w-10 shrink-0 px-0"
+            aria-label="Tambah"
           >
-            <Icon.Plus size={24} strokeWidth={3} />
+            <Icon.Plus size={20} strokeWidth={2.5} />
           </button>
         </div>
 
-        <div className="relative mb-4">
+        <div className="relative">
           <input
             type="text"
             placeholder="Cari..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full p-4 pl-12 text-sm font-bold bg-gray-100 border-none outline-none rounded-xl focus:ring-2 focus:ring-blue-500"
+            className="field pl-10"
           />
-          <span className="absolute text-gray-900 -translate-y-1/2 left-4 top-1/2 opacity-30">
-            <Icon.Search size={18} strokeWidth={3} />
+          <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted">
+            <Icon.Search size={16} strokeWidth={2} />
           </span>
         </div>
 
-        <div className="flex p-1.5 bg-gray-100 rounded-2xl">
+        <div className="mt-3 flex border border-line bg-surface p-1">
           <button
+            type="button"
             onClick={() => setActiveTab('list')}
-            className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all flex items-center justify-center gap-2 ${activeTab === 'list' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400'}`}
+            className={`flex flex-1 items-center justify-center gap-2 py-2.5 font-mono text-[10px] uppercase tracking-[0.08em] transition-colors ${activeTab === 'list' ? 'bg-ink text-paper' : 'text-muted hover:text-ink'}`}
           >
-            <Icon.LayoutGrid size={14} strokeWidth={3} />
+            <Icon.LayoutGrid size={13} strokeWidth={2.5} />
             Kategori
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('recurring')}
-            className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all flex items-center justify-center gap-2 ${activeTab === 'recurring' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400'}`}
+            className={`flex flex-1 items-center justify-center gap-2 py-2.5 font-mono text-[10px] uppercase tracking-[0.08em] transition-colors ${activeTab === 'recurring' ? 'bg-ink text-paper' : 'text-muted hover:text-ink'}`}
           >
-            <Icon.Repeat size={14} strokeWidth={3} />
+            <Icon.Repeat size={13} strokeWidth={2.5} />
             Rutin
           </button>
         </div>

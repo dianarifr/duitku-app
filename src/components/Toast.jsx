@@ -21,13 +21,13 @@ export default function Toast({ message, type = 'success', onClose }) {
     };
   }, [onClose]);
 
-  const bgColor = type === 'success' ? 'bg-gray-900' : 'bg-red-600';
+  const bgColor = type === 'success' ? 'bg-ink text-paper' : 'bg-danger text-danger-ink';
 
   // Memilih ikon berdasarkan tipe dari referensi centralized
   const renderIcon = type === 'success' ? (
-    <Icon.CheckCircle2 size={18} strokeWidth={3} className="text-green-400" />
+    <Icon.CheckCircle2 size={18} strokeWidth={2.5} className="text-pos" />
   ) : (
-    <Icon.Zap size={18} strokeWidth={3} className="text-white" />
+    <Icon.Zap size={18} strokeWidth={2.5} className="text-danger-ink" />
   );
 
   return (
@@ -45,16 +45,16 @@ export default function Toast({ message, type = 'success', onClose }) {
         .animate-toast-out { animation: toast-out 0.3s ease-in forwards; }
       ` }} />
 
-      <div className={`fixed top-10 left-1/2 z-[9999] w-max max-w-[90vw] ${visible ? 'animate-toast-in' : 'animate-toast-out'}`}>
-        <div className={`${bgColor} text-white px-6 py-4 rounded-[1.8rem] shadow-[0_25px_60px_rgba(0,0,0,0.5)] flex items-center gap-4 border border-white/10 ring-4 ring-black/10`}>
-          <div className="flex items-center justify-center rounded-full shadow-inner w-9 h-9 bg-white/15">
+      <div className={`fixed left-1/2 top-8 z-[9999] w-max max-w-[90vw] ${visible ? 'animate-toast-in' : 'animate-toast-out'}`}>
+        <div className={`${bgColor} flex items-center gap-3 border border-line px-5 py-3.5 shadow-lg`}>
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-paper/10">
             {renderIcon}
           </div>
           <div className="flex flex-col text-left">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] leading-none mb-1 text-white/50">
+            <p className="mb-0.5 font-mono text-[9px] uppercase leading-none tracking-[0.14em] opacity-50">
               {type === 'success' ? 'Notification' : 'Warning'}
             </p>
-            <p className="text-[12px] font-black leading-tight uppercase tracking-wide">
+            <p className="text-[11px] font-semibold leading-tight uppercase tracking-wide">
               {message}
             </p>
           </div>

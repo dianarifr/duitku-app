@@ -1,47 +1,55 @@
 import * as Icon from '../../lib/icons';
+import ThemeToggle from '../ThemeToggle';
 
 export default function DashboardHeader({ userName, avatarUrl, totalBalance, periodLabel, onLogout, formatNominal }) {
   return (
-    <div className="relative px-6 pt-12 overflow-hidden text-white bg-blue-600 shadow-lg pb-14 rounded-b-4xl">
-      {/* Ornamen */}
-      <div className="absolute w-40 h-40 rounded-full -top-5 -right-5 bg-white/10 blur-3xl"></div>
+    <header className="border-b border-line px-5 pb-6 pt-8">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-baseline gap-2">
+            <span className="font-serif text-[21px] font-semibold tracking-tight text-ink">Duitku</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted">cashflow</span>
+          </div>
 
-      <div className="relative z-10 flex items-center justify-between mb-8">
-        <div className="flex items-center gap-3">
-          <img src={avatarUrl} alt="Profile" className="object-cover w-12 h-12 border-2 border-blue-400 rounded-full shadow-sm" />
-          <div>
-            <div className="flex items-center gap-1 opacity-80">
-              <Icon.UserCircle size={10} strokeWidth={3} className="text-blue-100" />
-              <p className="text-[10px] font-black tracking-[0.2em] text-blue-100 uppercase">Halo, bosku!</p>
+          <div className="mt-4 flex items-center gap-3">
+            <img
+              src={avatarUrl}
+              alt="Profile"
+              className="h-9 w-9 rounded-full border border-line object-cover"
+            />
+            <div className="min-w-0">
+              <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted">Halo, bosku</p>
+              <p className="max-w-44 truncate text-sm font-semibold capitalize text-ink">{userName}</p>
             </div>
-            <h2 className="text-lg font-black tracking-tight capitalize truncate w-44">{userName}</h2>
           </div>
         </div>
-        <button
-          onClick={onLogout}
-          className="flex items-center gap-2 px-3 py-1.5 bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform"
-        >
-          <Icon.LogOut size={12} strokeWidth={3} />
-          Logout
-        </button>
-      </div>
 
-      <div className="relative z-10 py-2 text-center">
-        <p className="mb-1 text-[10px] font-black uppercase tracking-[0.3em] text-blue-100 opacity-70">Saldo Keseluruhan</p>
-        {/* Nominal besar dengan format standard */}
-        <h1 className="text-4xl font-black tracking-tighter">
-          {formatNominal(totalBalance)}
-        </h1>
-      </div>
-
-      <div className="flex justify-center mt-3">
-        <div className="flex items-center gap-2 px-3 py-1 border rounded-full bg-black/10 border-white/5">
-          <Icon.Calendar size={10} strokeWidth={3} className="text-white/70" />
-          <p className="text-[9px] font-black text-white/70 uppercase tracking-widest">
-            Periode: {periodLabel}
-          </p>
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <button
+            type="button"
+            onClick={onLogout}
+            className="btn btn-quiet min-h-9 gap-1.5 px-2.5"
+            title="Logout"
+          >
+            <Icon.LogOut size={15} strokeWidth={2} />
+            <span className="hidden font-mono text-[10px] uppercase tracking-[0.08em] sm:inline">Logout</span>
+          </button>
         </div>
       </div>
-    </div>
+
+      <div className="mt-7">
+        <p className="section-label">Saldo keseluruhan</p>
+        <h1 className="mt-1.5 font-serif text-4xl font-semibold tracking-tight text-ink tabular-nums">
+          {formatNominal(totalBalance)}
+        </h1>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="badge">
+            <Icon.Calendar size={11} strokeWidth={2} />
+            Periode: {periodLabel}
+          </span>
+        </div>
+      </div>
+    </header>
   );
 }

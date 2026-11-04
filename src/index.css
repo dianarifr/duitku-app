@@ -1,20 +1,435 @@
 @import "tailwindcss";
-@layer components {
-  .icon-box {
-    @apply flex items-center justify-center w-10 h-10 text-xl transition-all shadow-sm rounded-2xl;
+
+/* =========================================================
+   Duitku — tema kertas hangat + tinta + satu aksen rust.
+   Token ini dipakai bersama oleh utility Tailwind (bg-paper,
+   text-ink, border-line, dst) dan class komponen di bawah.
+   ========================================================= */
+
+@theme {
+  --color-paper: #f6f3ec;
+  --color-surface: #fffdf8;
+  --color-surface-alt: #efeae0;
+  --color-ink: #17150f;
+  --color-ink-soft: #3d382e;
+  --color-muted: #6a6152;
+  --color-line: #d9d2c2;
+  --color-line-strong: #b9b0a0;
+  --color-accent: #a83c1d;
+  --color-accent-hover: #8d3016;
+  --color-accent-ink: #fffdf8;
+  --color-focus: #1f5f8b;
+  --color-danger: #8f2413;
+  --color-danger-ink: #fffdf8;
+  --color-pos: #3f6b4a;
+  --color-neg: #9b3520;
+  --color-mut: #1f5f8b;
+
+  --font-serif: ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+:root[data-theme="dark"] {
+  --color-paper: #14130f;
+  --color-surface: #1c1a15;
+  --color-surface-alt: #24211a;
+  --color-ink: #ece6d8;
+  --color-ink-soft: #cdc5b3;
+  --color-muted: #9c9382;
+  --color-line: #37322a;
+  --color-line-strong: #4d4739;
+  --color-accent: #e47a4b;
+  --color-accent-hover: #f08a5c;
+  --color-accent-ink: #1a1813;
+  --color-focus: #7fb8dd;
+  --color-danger: #e88470;
+  --color-danger-ink: #1a1813;
+  --color-pos: #8fc79a;
+  --color-neg: #e88470;
+  --color-mut: #7fb8dd;
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  a {
+    color: var(--color-accent);
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
   }
 }
-/* Definisi Animasi Lompat */
+
+/* Animasi kartu Self-check (versi asli) */
 @keyframes mini-jump {
   0%, 100% {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-8px); /* Jarak lompat yang lebih 'smooth' */
+    transform: translateY(-8px);
   }
 }
 
-/* Class untuk dipakai di Tailwind */
 .animate-mini-jump {
   animation: mini-jump 1.5s ease-in-out infinite;
+}
+
+@layer components {
+  .panel {
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: 2px;
+  }
+
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .panel-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .panel-body {
+    padding: 16px;
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    background: var(--color-surface-alt);
+    border: 1px solid var(--color-line);
+    border-radius: 2px;
+  }
+
+  /* ---------- Tombol ---------- */
+  .btn {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 16px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--color-ink);
+    background: var(--color-surface);
+    border: 1px solid var(--color-line-strong);
+    border-radius: 2px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+
+  .btn:hover:not(:disabled) {
+    background: var(--color-surface-alt);
+    border-color: var(--color-ink-soft);
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-accent-ink);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+  }
+
+  .btn-danger {
+    background: var(--color-danger);
+    border-color: var(--color-danger);
+    color: var(--color-danger-ink);
+  }
+
+  .btn-danger:hover:not(:disabled) {
+    filter: brightness(1.06);
+    background: var(--color-danger);
+    border-color: var(--color-danger);
+  }
+
+  .btn-quiet {
+    border-color: transparent;
+    background: transparent;
+    color: var(--color-muted);
+    min-height: 36px;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+
+  .btn-quiet:hover:not(:disabled) {
+    background: var(--color-surface-alt);
+    border-color: transparent;
+    color: var(--color-ink);
+  }
+
+  .btn-icon {
+    width: 40px;
+    min-height: 40px;
+    padding: 0;
+    border-color: var(--color-line);
+    color: var(--color-muted);
+    background: transparent;
+  }
+
+  .btn-icon:hover:not(:disabled) {
+    color: var(--color-ink);
+  }
+
+  /* ---------- Form ---------- */
+  .field {
+    width: 100%;
+    min-height: 44px;
+    padding: 0 12px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--color-ink);
+    background: var(--color-surface);
+    border: 1px solid var(--color-line-strong);
+    border-radius: 2px;
+  }
+
+  .field::placeholder {
+    color: var(--color-muted);
+    opacity: 0.85;
+  }
+
+  .field:focus {
+    outline: none;
+    border-color: var(--color-focus);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-focus) 18%, transparent);
+  }
+
+  .field-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    margin-bottom: 6px;
+  }
+
+  .field-hint {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--color-muted);
+  }
+
+  /* ---------- Ikon ---------- */
+  .icon-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    line-height: 1;
+    border-radius: 2px;
+    background: var(--color-surface-alt);
+  }
+
+  /* ---------- Sheet / modal ---------- */
+  .sheet {
+    width: 100%;
+    max-width: 28rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-bottom: 0;
+    border-radius: 2px 2px 0 0;
+    padding: 24px;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+
+  .sheet-handle {
+    width: 36px;
+    height: 3px;
+    margin: 0 auto 20px;
+    border-radius: 999px;
+    background: var(--color-line-strong);
+  }
+
+  /* ---------- Scrollbar ---------- */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--color-line-strong);
+    border-radius: 999px;
+  }
+
+  /* ---------- Dock bawah ---------- */
+  .dock {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    z-index: 100;
+    width: 100%;
+    max-width: 28rem;
+    transform: translateX(-50%);
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-bottom: 0;
+  }
+
+  .dock-inner {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 8px env(safe-area-inset-bottom);
+  }
+
+  .dock-item {
+    position: relative;
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 62px;
+    padding: 8px 4px;
+    color: var(--color-muted);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    transition: color 0.12s ease;
+  }
+
+  .dock-item:hover {
+    color: var(--color-ink);
+  }
+
+  .dock-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .dock-item.is-active {
+    color: var(--color-ink);
+  }
+
+  .dock-item.is-active .dock-label {
+    color: var(--color-accent);
+  }
+
+  .dock-item.is-active::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 24px;
+    height: 2px;
+    background: var(--color-accent);
+  }
+
+  .dock-primary {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 62px;
+    padding: 8px 4px;
+    color: var(--color-muted);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .dock-primary-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    color: var(--color-accent-ink);
+    background: var(--color-accent);
+    border-radius: 2px;
+  }
 }

@@ -84,7 +84,7 @@ export default function Laporan({ session, setCurrentPage, setEditData, tempCate
   });
 
   return (
-    <div className="min-h-screen pb-10 font-sans text-gray-900 bg-gray-50">
+    <div className="min-h-screen bg-paper pb-10 font-sans text-ink">
       <LaporanHeader
         onBack={() => setCurrentPage('dashboard')}
         filter={filter}

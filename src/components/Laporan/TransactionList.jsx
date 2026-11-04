@@ -5,22 +5,22 @@ export default function TransactionList({ loading, transactions, onEdit, hook })
   // Ambil confirmDelete dari hook untuk handle hapus sepasang mutasi
   const { deleteId, setDeleteId, handleDeleteTransaction, confirmDelete } = hook;
 
-  if (loading) return <p className="py-10 text-xs font-black text-center text-gray-300 uppercase animate-pulse">Lagi Nyari Data...</p>;
+  if (loading) return <p className="py-10 text-center font-mono text-[10px] uppercase tracking-[0.1em] text-muted animate-pulse">Lagi nyari data...</p>;
 
   if (transactions.length === 0) return (
-    <div className="text-center py-20 mx-6 mt-8 bg-white rounded-2xl border-2 border-dashed border-gray-100 text-gray-400 font-bold uppercase text-[10px] flex flex-col items-center justify-center gap-3">
-      <Icon.Search size={32} strokeWidth={3} className="opacity-20" />
-      Kaga ada datanya ges
+    <div className="mx-5 mt-5 flex flex-col items-center justify-center gap-3 border border-dashed border-line-strong bg-surface/60 py-16 text-center">
+      <Icon.Search size={28} strokeWidth={2} className="text-muted opacity-40" />
+      <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted">Kaga ada datanya ges</p>
     </div>
   );
 
   return (
     <>
-      <div className="px-6 pb-24 mt-4 space-y-4">
+      <div className="mt-4 space-y-3 px-5 pb-24">
         <div className="flex flex-col">
-          <div className="flex items-center gap-1.5 text-[8px] font-bold text-blue-400 uppercase italic animate-pulse">
-            <Icon.Zap size={10} strokeWidth={3} />
-            <span>Double Click buat edit</span>
+          <div className="flex items-center gap-1.5 font-mono text-[8px] uppercase tracking-[0.1em] text-muted">
+            <Icon.Zap size={10} strokeWidth={2.5} />
+            <span>Double click buat edit</span>
           </div>
         </div>
 
@@ -32,41 +32,39 @@ export default function TransactionList({ loading, transactions, onEdit, hook })
             <div
               key={t.id}
               onDoubleClick={() => onEdit(t)}
-              className="bg-white p-5 rounded-2xl border border-gray-50 shadow-sm flex flex-col gap-4 active:scale-[0.98] transition-transform select-none cursor-pointer hover:border-blue-300 hover:shadow-md group"
+              className="panel flex cursor-pointer select-none flex-col gap-3.5 p-4 transition-colors hover:border-line-strong active:scale-[0.99]"
             >
-              <div className="flex items-start justify-between">
-                <div className="flex gap-4">
-                  {/* Gunakan class .icon-box dan warna Indigo jika Mutasi */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 gap-3">
                   <div
-                    className="icon-box"
+                    className="icon-box shrink-0"
                     style={{
                       backgroundColor: isMutation ? '#4f46e515' : `${t.category?.color}15`,
                       color: isMutation ? '#4f46e5' : t.category?.color
                     }}
                   >
-                    {isMutation ? <Icon.ArrowLeftRight size={18} strokeWidth={3} /> : t.category?.icon}
+                    {isMutation ? <Icon.ArrowLeftRight size={18} strokeWidth={2} /> : t.category?.icon}
                   </div>
-                  <div>
-                    <h4 className="text-sm font-black leading-tight text-gray-800 uppercase">
-                      {isMutation ? 'Mutasi Saldo' : t.category?.name}
+                  <div className="min-w-0">
+                    <h4 className="truncate text-sm font-semibold leading-tight text-ink uppercase">
+                      {isMutation ? 'Mutasi saldo' : t.category?.name}
                     </h4>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <Icon.Calendar size={10} strokeWidth={3} className="text-gray-300" />
-                      <p className="text-[10px] font-bold text-gray-400 uppercase">
+                    <div className="mt-0.5 flex items-center gap-1.5">
+                      <Icon.Calendar size={10} strokeWidth={2} className="text-muted" />
+                      <p className="font-mono text-[9px] uppercase tracking-[0.04em] text-muted">
                         {new Date(t.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </p>
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  {/* Nominal dengan warna Indigo untuk mutasi */}
-                  <p className={`text-base font-black ${
-                    isMutation ? 'text-indigo-600' : isIncome ? 'text-green-500' : 'text-red-500'
+                <div className="shrink-0 text-right">
+                  <p className={`font-mono text-base font-medium tabular-nums ${
+                    isMutation ? 'text-mut' : isIncome ? 'text-pos' : 'text-neg'
                   }`}>
                     {isIncome || (isMutation && t.note?.includes('[MASUK]')) ? '+' : '-'} {formatNominal(t.amount).replace('Rp', '').trim()}
                   </p>
-                  <span className={`text-[8px] font-black px-2 py-0.5 rounded-lg border uppercase ${
-                    isMutation ? 'bg-indigo-50 text-indigo-400 border-indigo-100' : 'bg-gray-50 text-gray-400 border-gray-100'
+                  <span className={`mt-0.5 inline-block border px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-[0.06em] ${
+                    isMutation ? 'border-line bg-surface-alt text-mut' : 'border-line bg-surface-alt text-muted'
                   }`}>
                     {t.payment_method}
                   </span>
@@ -74,21 +72,22 @@ export default function TransactionList({ loading, transactions, onEdit, hook })
               </div>
 
               {t.note && (
-                <div className={`px-4 py-3 border-l-4 rounded-2xl ${isMutation ? 'border-indigo-400 bg-indigo-50/30' : 'border-blue-400 bg-gray-50'}`}>
-                  <p className="text-[11px] font-bold text-gray-600 italic leading-relaxed text-left">"{t.note}"</p>
+                <div className={`rounded-xs border-l-2 px-3 py-2.5 ${isMutation ? 'border-mut bg-surface-alt/60' : 'border-accent bg-surface-alt/60'}`}>
+                  <p className="text-left text-[11px] font-medium leading-relaxed text-ink-soft">"{t.note}"</p>
                 </div>
               )}
 
-              <div className="pt-2 border-t border-gray-50">
+              <div className="border-t border-line pt-3">
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     confirmDelete(t); // Panggil helper dari hook untuk cek related_id
                   }}
-                  className="w-full py-3 bg-red-50 text-red-400 text-[10px] font-black uppercase rounded-xl active:scale-95 transition-all flex items-center justify-center gap-2 hover:bg-red-100"
+                  className="flex w-full items-center justify-center gap-2 border border-line py-2.5 font-mono text-[9px] uppercase tracking-[0.08em] text-danger transition-colors hover:bg-surface-alt active:scale-[0.99]"
                 >
-                  <Icon.Trash2 size={12} strokeWidth={3} />
-                  Hapus Transaksi
+                  <Icon.Trash2 size={12} strokeWidth={2.5} />
+                  Hapus transaksi
                 </button>
               </div>
             </div>
@@ -98,18 +97,18 @@ export default function TransactionList({ loading, transactions, onEdit, hook })
 
       {/* MODAL DELETE TRANSAKSI */}
       {deleteId && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-xs p-8 text-center bg-white shadow-2xl rounded-[2.5rem]">
-            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 text-red-500 rounded-full bg-red-50">
-              <Icon.Trash2 size={32} strokeWidth={2.5} />
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-5 animate-in fade-in">
+          <div className="w-full max-w-xs border border-line bg-surface p-6 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-surface-alt text-danger">
+              <Icon.Trash2 size={26} strokeWidth={2} />
             </div>
-            <h3 className="mb-2 text-xl font-black tracking-tight text-gray-800 uppercase">Hapus Transaksi?</h3>
-            <p className="mb-8 text-[10px] font-bold text-gray-400 uppercase leading-relaxed">
+            <h3 className="mb-2 font-serif text-xl font-semibold text-ink">Hapus transaksi?</h3>
+            <p className="mb-6 font-mono text-[10px] uppercase leading-relaxed tracking-[0.04em] text-muted">
               Catatan ini bakal hilang dari riwayat, ges. Tindakan ini tidak bisa dibatalkan.
             </p>
-            <div className="flex gap-3">
-              <button onClick={() => setDeleteId(null)} className="flex-1 py-4 text-[10px] font-black text-gray-400 bg-gray-50 rounded-2xl active:scale-95 transition-transform">Batal</button>
-              <button onClick={handleDeleteTransaction} className="flex-1 py-4 text-[10px] font-black text-white bg-red-500 rounded-2xl shadow-lg active:scale-95 transition-transform">Hapus</button>
+            <div className="flex gap-2.5">
+              <button type="button" onClick={() => setDeleteId(null)} className="btn flex-1 text-xs">Batal</button>
+              <button type="button" onClick={handleDeleteTransaction} className="btn btn-danger flex-1 text-xs">Hapus</button>
             </div>
           </div>
         </div>

@@ -5,41 +5,33 @@ export default function LaporanSummary({ income, expense, mutation = 0 }) {
   const netto = income - expense;
 
   return (
-    <div className="px-6 mt-6">
-      <div className="relative p-8 overflow-hidden text-center text-white bg-blue-600 shadow-xl shadow-blue-100/50 rounded-4xl">
-        {/* Ornamen Latar */}
-        <div className="absolute top-0 right-0 w-32 h-32 -mt-16 -mr-16 rounded-full bg-white/5 blur-2xl"></div>
+    <div className="mt-5 px-5">
+      <div className="panel p-6 text-center">
+        <p className="section-label">Netto periode ini</p>
+        <h2 className="mb-6 mt-1.5 font-serif text-3xl font-semibold tracking-tight text-ink tabular-nums">
+          {formatNominal(netto)}
+        </h2>
 
-        <div className="relative z-10">
-          <p className="text-[10px] font-black uppercase opacity-70 tracking-[0.3em] mb-1">
-            Netto Periode Ini
-          </p>
-          <h2 className="mb-6 text-3xl font-black tracking-tighter">
-            {formatNominal(netto)}
-          </h2>
+        <div className="grid grid-cols-3 gap-2 border-t border-line pt-5">
+          <div>
+            <p className="mb-1 font-mono text-[8px] uppercase tracking-[0.1em] text-muted">Masuk</p>
+            <p className="font-mono text-[11px] font-medium text-pos tabular-nums">
+              +{formatNominal(income).replace('Rp', '').trim()}
+            </p>
+          </div>
 
-          <div className="grid grid-cols-3 gap-2 pt-6 border-t border-white/10">
-            <div>
-              <p className="text-[8px] font-black uppercase opacity-60 tracking-widest mb-1">Masuk</p>
-              <p className="text-[11px] font-black text-green-300 italic">
-                +{formatNominal(income).replace('Rp', '').trim()}
-              </p>
-            </div>
+          <div className="border-x border-line">
+            <p className="mb-1 font-mono text-[8px] uppercase tracking-[0.1em] text-muted">Keluar</p>
+            <p className="font-mono text-[11px] font-medium text-neg tabular-nums">
+              -{formatNominal(expense).replace('Rp', '').trim()}
+            </p>
+          </div>
 
-            {/* Divider Virtual */}
-            <div className="border-x border-white/10">
-              <p className="text-[8px] font-black uppercase opacity-60 tracking-widest mb-1">Keluar</p>
-              <p className="text-[11px] font-black text-red-300 italic">
-                -{formatNominal(expense).replace('Rp', '').trim()}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-[8px] font-black uppercase opacity-60 tracking-widest mb-1">Mutasi</p>
-              <p className="text-[11px] font-black text-indigo-200 italic">
-                {formatNominal(mutation).replace('Rp', '').trim()}
-              </p>
-            </div>
+          <div>
+            <p className="mb-1 font-mono text-[8px] uppercase tracking-[0.1em] text-muted">Mutasi</p>
+            <p className="font-mono text-[11px] font-medium text-mut tabular-nums">
+              {formatNominal(mutation).replace('Rp', '').trim()}
+            </p>
           </div>
         </div>
       </div>

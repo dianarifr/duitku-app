@@ -70,8 +70,8 @@ function App() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen text-xs font-black tracking-widest text-gray-400 uppercase bg-gray-50">
-        Memuat Duit... 💸
+      <div className="flex min-h-screen items-center justify-center bg-paper font-mono text-[11px] uppercase tracking-[0.18em] text-muted">
+        Memuat Duit...
       </div>
     );
   }
@@ -84,10 +84,10 @@ function App() {
       {!session ? (
         <Login />
       ) : (
-        <div className="relative min-h-screen bg-gray-50">
+        <div className="relative min-h-screen bg-paper text-ink">
 
           {/* AREA KONTEN UTAMA */}
-          <main className="h-full max-w-md pb-10 mx-auto">
+          <main className="mx-auto h-full max-w-md pb-28">
 
             {currentPage === 'dashboard' && (
               <Dashboard
@@ -147,7 +147,7 @@ function App() {
             }}
           />
 
-          {/* 5. NAVIGASI MELAYANG */}
+          {/* 5. NAVIGASI BAWAH (docked) */}
           {!isInputPage && (
             <BottomNav
               currentPage={currentPage}
@@ -155,9 +155,6 @@ function App() {
               onActionClick={() => setShowActionMenu(true)}
             />
           )}
-
-          {/* Ornamen Background */}
-          <div className="fixed top-0 left-0 w-full h-64 bg-gradient-to-b from-blue-50/50 to-transparent -z-10"></div>
         </div>
       )}
     </AlertProvider>

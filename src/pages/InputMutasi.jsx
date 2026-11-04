@@ -9,126 +9,120 @@ export default function InputMutasi({ session, setCurrentPage, editData, setEdit
   } = useInputMutasi(session, setCurrentPage, editData, setEditData); // Kirim ke hook
 
   return (
-    <div className="min-h-screen pb-10 font-sans bg-white">
+    <div className="min-h-screen bg-paper pb-10 font-sans">
       {/* HEADER & NOMINAL SECTION */}
-      <div className="p-6 pt-12 text-white bg-indigo-600 shadow-lg rounded-b-4xl shadow-indigo-100">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
+      <div className="border-b border-line border-t-2 border-t-focus bg-surface px-5 pb-6 pt-8">
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             <button
-                onClick={() => {
+              type="button"
+              onClick={() => {
                 if (typeof setEditData === 'function') setEditData(null); // Proteksi biar gak crash
-                  setCurrentPage('laporan');
-                }}
-                className="flex items-center justify-center w-10 h-10 font-bold bg-white/20 rounded-2xl active:scale-90"
+                setCurrentPage('laporan');
+              }}
+              className="btn btn-icon shrink-0"
+              aria-label="Kembali"
             >
-                <Icon.ArrowLeft size={20} strokeWidth={3} />
+              <Icon.ArrowLeft size={18} strokeWidth={2.5} />
             </button>
-            <div className="flex items-center gap-2">
-              <Icon.ArrowLeftRight size={18} strokeWidth={3} className="text-indigo-200" />
-              <h1 className="text-xl italic font-black tracking-tight uppercase">
-                  {editData ? 'Koreksi Mutasi' : 'Pindah Kantong'}
+            <div className="flex min-w-0 items-center gap-2">
+              <Icon.ArrowLeftRight size={16} strokeWidth={2} className="shrink-0 text-mut" />
+              <h1 className="truncate font-serif text-xl font-semibold tracking-tight text-ink">
+                {editData ? 'Koreksi mutasi' : 'Pindah kantong'}
               </h1>
             </div>
           </div>
 
           {/* Toggle Button: Sekarang otomatis terpilih kalau mode edit */}
-          <div className="relative flex h-10 p-1 overflow-hidden border bg-white/20 backdrop-blur-md rounded-xl w-44 border-white/10">
-            <div
-              className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-xl shadow-sm transition-all duration-300 ease-in-out ${
-                formData.source === 'cash' ? 'translate-x-full' : 'translate-x-0'
-              }`}
-            />
+          <div className="relative flex h-9 w-40 shrink-0 overflow-hidden border border-line bg-surface-alt p-1">
+            <div className={`absolute bottom-1 top-1 w-[calc(50%-4px)] bg-surface transition-all duration-300 ease-in-out ${formData.source === 'cash' ? 'translate-x-full' : 'translate-x-0'}`} />
 
             <button
               type="button"
               onClick={() => setFormData(prev => ({...prev, source: 'transfer'}))}
-              className={`flex-1 text-[9px] font-black z-10 transition-colors flex items-center justify-center gap-1 ${
-                formData.source === 'transfer' ? 'text-indigo-600' : 'text-white'
-              }`}
+              className={`relative z-10 flex flex-1 items-center justify-center gap-1 font-mono text-[9px] uppercase tracking-[0.04em] transition-colors ${formData.source === 'transfer' ? 'text-focus' : 'text-muted'}`}
             >
-              <Icon.Landmark size={10} strokeWidth={3} />
-              BANK
+              <Icon.Landmark size={10} strokeWidth={2.5} />
+              Bank
             </button>
 
             <button
               type="button"
               onClick={() => setFormData(prev => ({...prev, source: 'cash'}))}
-              className={`flex-1 text-[9px] font-black z-10 transition-colors flex items-center justify-center gap-1 ${
-                formData.source === 'cash' ? 'text-indigo-600' : 'text-white'
-              }`}
+              className={`relative z-10 flex flex-1 items-center justify-center gap-1 font-mono text-[9px] uppercase tracking-[0.04em] transition-colors ${formData.source === 'cash' ? 'text-focus' : 'text-muted'}`}
             >
-              <Icon.Wallet size={10} strokeWidth={3} />
-              CASH
+              <Icon.Wallet size={10} strokeWidth={2.5} />
+              Cash
             </button>
           </div>
         </div>
 
-        <div className="px-2 mt-4">
-          <p className="mb-1 text-[10px] font-black tracking-widest uppercase text-white/70">Nominal Pindah</p>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl font-black opacity-80">Rp</span>
+        <div className="px-0.5">
+          <p className="field-label">Nominal pindah</p>
+          <div className="flex items-baseline gap-2">
+            <span className="font-serif text-xl font-semibold text-muted">Rp</span>
             <input
-                type="text"
-                placeholder="0"
-                value={displayAmount}
-                onChange={(e) => handleAmountChange(e.target.value)}
-                className="w-full text-4xl font-black bg-transparent outline-none placeholder:text-white/40"
-                autoFocus
+              type="text"
+              placeholder="0"
+              value={displayAmount}
+              onChange={(e) => handleAmountChange(e.target.value)}
+              className="w-full bg-transparent font-serif text-4xl font-semibold tracking-tight text-ink outline-none placeholder:text-muted/50"
+              autoFocus
             />
           </div>
         </div>
       </div>
 
-      <form onSubmit={handleSave} className="p-8 space-y-8">
+      <form onSubmit={handleSave} className="space-y-7 p-5 pt-6">
         {/* CATEGORY SELECTOR */}
-        <div className="space-y-3">
-          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Pilih Kategori</label>
-          <div className="grid grid-cols-4 gap-3 p-1 overflow-y-auto max-h-64 custom-scrollbar">
+        <div className="space-y-2.5">
+          <label className="field-label ml-0.5">Pilih kategori</label>
+          <div className="custom-scrollbar grid max-h-64 grid-cols-4 gap-2.5 overflow-y-auto p-0.5">
             {categories.map((cat) => (
               <button
                 key={cat.id}
                 type="button"
                 onClick={() => setFormData({...formData, category_id: cat.id})}
-                className={`flex flex-col items-center gap-2 py-4 rounded-xl transition-all border-2 ${formData.category_id === cat.id ? 'border-indigo-500 bg-indigo-50 scale-[1.05]' : 'border-transparent bg-gray-50'}`}
+                className={`flex flex-col items-center gap-2 border py-3.5 transition-all ${formData.category_id === cat.id ? 'border-focus bg-surface-alt' : 'border-line bg-surface hover:bg-surface-alt'}`}
               >
                 <span className="text-2xl">{cat.icon}</span>
-                <span className={`text-[8px] font-black uppercase truncate w-full px-2 text-center ${formData.category_id === cat.id ? 'text-indigo-600' : 'text-gray-500'}`}>{cat.name}</span>
+                <span className={`w-full truncate px-1.5 text-center font-mono text-[8px] uppercase tracking-[0.04em] ${formData.category_id === cat.id ? 'text-ink' : 'text-muted'}`}>{cat.name}</span>
               </button>
             ))}
           </div>
         </div>
 
         {/* DATE & NOTE SECTION */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div>
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Tanggal</label>
-            <div className="relative mt-1">
+            <label className="field-label">Tanggal</label>
+            <div className="relative">
               <input
                 type="date"
                 value={formData.date}
                 onClick={(e) => e.target.showPicker()}
                 onChange={(e) => setFormData({...formData, date: e.target.value})}
-                className="w-full p-4 font-bold text-gray-700 border-none outline-none bg-gray-50 rounded-xl focus:ring-2 focus:ring-blue-500"
+                className="field pr-11"
               />
-              <span className="absolute top-0 bottom-0 right-0 flex items-center justify-center w-12 text-indigo-400 pointer-events-none bg-gray-50 rounded-r-xl">
-                <Icon.Calendar size={18} strokeWidth={3} />
+              <span className="pointer-events-none absolute bottom-0 right-0 top-0 flex w-10 items-center justify-center border-l border-line text-muted">
+                <Icon.Calendar size={16} strokeWidth={2} />
               </span>
             </div>
           </div>
         </div>
 
-        <div className="relative text-left">
-          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Catatan</label>
-          <input type="text" placeholder="Setor tunai / Tarik tunai?" value={formData.note} onChange={(e) => setFormData({...formData, note: e.target.value})} className="w-full p-4 mt-1 text-sm font-bold text-gray-700 border-none outline-none bg-gray-50 rounded-xl focus:ring-2 focus:ring-indigo-500" />
+        <div className="text-left">
+          <label className="field-label">Catatan</label>
+          <input type="text" placeholder="Setor tunai / Tarik tunai?" value={formData.note} onChange={(e) => setFormData({...formData, note: e.target.value})} className="field font-sans" />
         </div>
 
-        <button disabled={loading} className={`w-full py-5 rounded-xl text-white font-black text-lg shadow-xl active:scale-95 transition-all mt-6 bg-indigo-600 shadow-indigo-100 flex items-center justify-center gap-3 ${loading ? 'opacity-50' : ''}`}>
+        <button disabled={loading} className={`btn mt-2 w-full border-0 bg-focus py-4 text-base font-semibold text-accent-ink hover:bg-focus active:scale-[0.99] ${loading ? 'opacity-50' : ''}`}>
           {loading ? (
             'MEMPROSES...'
           ) : (
             <>
-              <Icon.CheckCircle2 size={20} strokeWidth={3} />
-              {editData ? 'UPDATE MUTASI' : 'KONFIRMASI MUTASI'}
+              <Icon.CheckCircle2 size={20} strokeWidth={2.5} />
+              {editData ? 'Update mutasi' : 'Konfirmasi mutasi'}
             </>
           )}
         </button>
