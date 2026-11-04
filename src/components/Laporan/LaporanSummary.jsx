@@ -1,7 +1,7 @@
 import { formatNominal } from '../../utils/formatters';
 
 export default function LaporanSummary({ income, expense, mutation = 0 }) {
-  // Netto tetap Income - Expense karena Mutasi tidak mengubah kekayaan bersih
+  // Mutasi tidak mengubah kekayaan bersih, jadi netto hanya dari pemasukan dikurangi pengeluaran.
   const netto = income - expense;
 
   return (

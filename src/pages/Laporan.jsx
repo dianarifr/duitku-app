@@ -16,7 +16,6 @@ export default function Laporan({ session, setCurrentPage, setEditData, tempCate
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedMethod, setSelectedMethod] = useState('all');
 
-  // State summary sekarang menampung mutation untuk sinkronisasi LaporanSummary
   const [summary, setSummary] = useState({ income: 0, expense: 0, mutation: 0 });
   const [filter, setFilter] = useState({ start: '', end: '' });
 
@@ -28,13 +27,10 @@ export default function Laporan({ session, setCurrentPage, setEditData, tempCate
       .order('date', { ascending: false }).order('created_at', { ascending: false });
 
     if (!error) {
-      // Hitung pemasukan
       const inc = data?.filter(t => t.type === 'pemasukan').reduce((sum, t) => sum + t.amount, 0) || 0;
-
-      // Hitung pengeluaran
       const exp = data?.filter(t => t.type === 'pengeluaran').reduce((sum, t) => sum + t.amount, 0) || 0;
 
-      // Hitung mutasi (ambil satu sisi saja agar total nominal tidak double)
+      // Mutasi hanya dihitung dari sisi keluar agar nominal tidak terhitung dua kali.
       const mut = data?.filter(t => t.type === 'mutasi' && t.note?.includes('[KELUAR]'))
                        .reduce((sum, t) => sum + t.amount, 0) || 0;
 
@@ -44,15 +40,19 @@ export default function Laporan({ session, setCurrentPage, setEditData, tempCate
     setLoading(false);
   };
 
-  // Alert sudah dihandle di dalam useLaporan sesuai request lo, Puh
   const laporanHook = useLaporan(session, fetchFilteredData);
+
+  const fetchCategories = async () => {
+    const { data } = await supabase.from('category').select('*').eq('user_id', session.user.id).is('deleted_at', null);
+    setCategories(data || []);
+  };
 
   useEffect(() => {
     if (tempCategoryFilter !== 'all') {
       setSelectedCategory(tempCategoryFilter);
       setTempCategoryFilter('all');
     }
-  }, [tempCategoryFilter]);
+  }, [tempCategoryFilter, setTempCategoryFilter]);
 
   useEffect(() => {
     const initFilter = async () => {
@@ -63,16 +63,13 @@ export default function Laporan({ session, setCurrentPage, setEditData, tempCate
     };
     initFilter();
     fetchCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (filter.start && filter.end) fetchFilteredData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
-
-  const fetchCategories = async () => {
-    const { data } = await supabase.from('category').select('*').eq('user_id', session.user.id).is('deleted_at', null);
-    setCategories(data || []);
-  };
 
   const filteredTransactions = transactions.filter(t => {
     const s = searchTerm.toLowerCase();
@@ -98,7 +95,6 @@ export default function Laporan({ session, setCurrentPage, setEditData, tempCate
         setSelectedMethod={setSelectedMethod}
       />
 
-      {/* LaporanSummary sekarang menerima prop mutation agar ringkasan di atas akurat */}
       <LaporanSummary
         income={summary.income}
         expense={summary.expense}
@@ -110,7 +106,6 @@ export default function Laporan({ session, setCurrentPage, setEditData, tempCate
         transactions={filteredTransactions}
         onEdit={(t) => {
             setEditData(t);
-            // Jika mutasi, dilempar ke page mutasi, jika jajan biasa ke input-transaksi
             setCurrentPage(t.type === 'mutasi' ? 'input-mutasi' : 'input-transaksi');
         }}
         hook={laporanHook}

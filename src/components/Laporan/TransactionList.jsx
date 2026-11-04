@@ -2,15 +2,14 @@ import { formatNominal } from '../../utils/formatters';
 import * as Icon from '../../lib/icons';
 
 export default function TransactionList({ loading, transactions, onEdit, hook }) {
-  // Ambil confirmDelete dari hook untuk handle hapus sepasang mutasi
   const { deleteId, setDeleteId, handleDeleteTransaction, confirmDelete } = hook;
 
-  if (loading) return <p className="py-10 text-center font-mono text-[10px] uppercase tracking-[0.1em] text-muted animate-pulse">Lagi nyari data...</p>;
+  if (loading) return <p className="py-10 text-center font-mono text-[10px] uppercase tracking-[0.1em] text-muted animate-pulse">Memuat data...</p>;
 
   if (transactions.length === 0) return (
     <div className="mx-5 mt-5 flex flex-col items-center justify-center gap-3 border border-dashed border-line-strong bg-surface/60 py-16 text-center">
       <Icon.Search size={28} strokeWidth={2} className="text-muted opacity-40" />
-      <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted">Kaga ada datanya ges</p>
+      <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted">Belum ada data.</p>
     </div>
   );
 
@@ -20,7 +19,7 @@ export default function TransactionList({ loading, transactions, onEdit, hook })
         <div className="flex flex-col">
           <div className="flex items-center gap-1.5 font-mono text-[8px] uppercase tracking-[0.1em] text-muted">
             <Icon.Zap size={10} strokeWidth={2.5} />
-            <span>Double click buat edit</span>
+            <span>Klik dua kali untuk mengedit</span>
           </div>
         </div>
 
@@ -82,7 +81,7 @@ export default function TransactionList({ loading, transactions, onEdit, hook })
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    confirmDelete(t); // Panggil helper dari hook untuk cek related_id
+                    confirmDelete(t);
                   }}
                   className="flex w-full items-center justify-center gap-2 border border-line py-2.5 font-mono text-[9px] uppercase tracking-[0.08em] text-danger transition-colors hover:bg-surface-alt active:scale-[0.99]"
                 >
@@ -95,7 +94,6 @@ export default function TransactionList({ loading, transactions, onEdit, hook })
         })}
       </div>
 
-      {/* MODAL DELETE TRANSAKSI */}
       {deleteId && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-5 animate-in fade-in">
           <div className="w-full max-w-xs border border-line bg-surface p-6 text-center">
@@ -104,7 +102,7 @@ export default function TransactionList({ loading, transactions, onEdit, hook })
             </div>
             <h3 className="mb-2 font-serif text-xl font-semibold text-ink">Hapus transaksi?</h3>
             <p className="mb-6 font-mono text-[10px] uppercase leading-relaxed tracking-[0.04em] text-muted">
-              Catatan ini bakal hilang dari riwayat, ges. Tindakan ini tidak bisa dibatalkan.
+              Catatan ini akan dihapus dari riwayat dan tidak dapat dibatalkan.
             </p>
             <div className="flex gap-2.5">
               <button type="button" onClick={() => setDeleteId(null)} className="btn flex-1 text-xs">Batal</button>

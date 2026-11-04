@@ -10,6 +10,7 @@ export function useStatistik(session) {
 
   useEffect(() => {
     fetchStatistik();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterType]);
 
   const fetchStatistik = async () => {
@@ -29,12 +30,11 @@ export function useStatistik(session) {
       .from('transaction')
       .select(`amount, type, date, category (name, color, icon)`)
       .is('deleted_at', null)
-      .eq('type', filterType) // Filter strictly by 'pengeluaran' or 'pemasukan'
+      .eq('type', filterType)
       .gte('date', start)
       .lte('date', end);
 
     if (!error && data) {
-      // Logic: Mutasi otomatis terfilter karena query hanya mengambil filterType
       const grouped = data.reduce((acc, curr) => {
         const catName = curr.category?.name || 'Lainnya';
         if (!acc[catName]) {
@@ -54,11 +54,8 @@ export function useStatistik(session) {
     setLoading(false);
   };
 
-  // Derived States (Calculations)
   const totalValue = chartData.reduce((acc, curr) => acc + curr.value, 0);
 
-  // Perbaikan Logika Rata-rata Harian:
-  // Menghitung hari yang sudah berlalu sejak tanggal gajian di periode ini
   const calculateDaysPassed = () => {
     const today = new Date();
     const { start } = getFinancialRange(paydayDate);
@@ -67,7 +64,7 @@ export function useStatistik(session) {
     const diffTime = Math.abs(today - startDate);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
 
-    // Jangan sampai pembagi lebih dari 31 atau kurang dari 1
+    // Pembagi dibatasi 1-31 agar rata-rata harian tetap wajar.
     return Math.min(Math.max(diffDays, 1), 31);
   };
 

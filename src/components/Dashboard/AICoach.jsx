@@ -1,4 +1,5 @@
 import * as Icon from '../../lib/icons';
+import { renderBold, stripBold } from '../../utils/formatBold';
 
 export default function AICoach({ aiAdvice, isAiLoading, isExpanded, onToggle }) {
   if (!aiAdvice && !isAiLoading) return null;
@@ -8,7 +9,7 @@ export default function AICoach({ aiAdvice, isAiLoading, isExpanded, onToggle })
       {isExpanded ? (
         <div>
           <div className="mb-2 flex items-center justify-between px-0.5">
-            <h3 className="section-label">Financial coach</h3>
+            <h3 className="section-label">Penasihat keuangan</h3>
             <button
               type="button"
               onClick={onToggle}
@@ -26,11 +27,11 @@ export default function AICoach({ aiAdvice, isAiLoading, isExpanded, onToggle })
                 AI Coach Duitku
               </span>
               {isAiLoading && (
-                <span className="font-mono text-[9px] uppercase tracking-[0.08em] text-muted">Lagi mikir...</span>
+                <span className="font-mono text-[9px] uppercase tracking-[0.08em] text-muted">Menyusun saran...</span>
               )}
             </div>
-            <p className="text-sm leading-relaxed text-ink-soft">
-              "{aiAdvice || 'Sabar Puh, lagi ngumpulin kata-kata pedas...'}"
+            <p className="whitespace-pre-line text-sm leading-relaxed text-ink-soft">
+              {renderBold(aiAdvice || 'Saran sedang disiapkan, mohon tunggu sebentar.')}
             </p>
           </div>
         </div>
@@ -46,10 +47,10 @@ export default function AICoach({ aiAdvice, isAiLoading, isExpanded, onToggle })
 
           <div className="flex-1 overflow-hidden">
             {isAiLoading ? (
-              <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted">Lagi mikir...</span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted">Menyusun saran...</span>
             ) : (
               <p className="truncate font-mono text-[10px] uppercase tracking-[0.06em] text-muted">
-                {aiAdvice ? `Saran: ${aiAdvice}` : 'Ada bisikan cuan buat lo hari ini, Puh...'}
+                {aiAdvice ? `Saran: ${stripBold(aiAdvice)}` : 'Saran keuangan belum tersedia untuk periode ini.'}
               </p>
             )}
           </div>

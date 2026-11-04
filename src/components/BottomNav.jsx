@@ -3,11 +3,11 @@ import * as Icon from '../lib/icons';
 
 export default function BottomNav({ currentPage, setCurrentPage, onActionClick }) {
   const menus = [
-    { id: 'dashboard', icon: Icon.Home, label: 'Home' },
+    { id: 'dashboard', icon: Icon.Home, label: 'Beranda' },
     { id: 'laporan', icon: Icon.FileText, label: 'Laporan' },
     { id: 'input', icon: Icon.Plus, label: 'Catat', primary: true },
-    { id: 'kategori', icon: Icon.LayoutGrid, label: 'Set' },
-    { id: 'statistik', icon: Icon.TrendingUp, label: 'Stats' },
+    { id: 'kategori', icon: Icon.LayoutGrid, label: 'Atur' },
+    { id: 'statistik', icon: Icon.TrendingUp, label: 'Statistik' },
   ];
 
   return (

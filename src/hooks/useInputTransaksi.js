@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { formatRupiah, parseNumber } from '../utils/formatters';
-import { useAlert } from '../context/AlertContext';
+import { useAlert } from '../context/alertStore';
 
 export function useInputTransaksi(session, editData, setEditData, setCurrentPage, initialType) {
   const { showAlert } = useAlert();
@@ -23,6 +23,11 @@ export function useInputTransaksi(session, editData, setEditData, setCurrentPage
     payment_method: 'cash',
   });
 
+  const fetchSuggestions = async () => {
+    const { data } = await supabase.from('transaction').select('note').eq('type', activeTab).eq('user_id', session.user.id).is('deleted_at', null).order('created_at', { ascending: false }).limit(50);
+    if (data) setSuggestions([...new Set(data.map(t => t.note))].filter(Boolean));
+  };
+
   useEffect(() => {
     if (editData) {
       setFormData({
@@ -37,12 +42,8 @@ export function useInputTransaksi(session, editData, setEditData, setCurrentPage
     }
     fetchCategories();
     fetchSuggestions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, editData]);
-
-  const fetchSuggestions = async () => {
-    const { data } = await supabase.from('transaction').select('note').eq('type', activeTab).eq('user_id', session.user.id).is('deleted_at', null).order('created_at', { ascending: false }).limit(50);
-    if (data) setSuggestions([...new Set(data.map(t => t.note))].filter(Boolean));
-  };
 
   const fetchCategories = async () => {
     const { data } = await supabase.from('category').select('*').eq('type', activeTab).is('deleted_at', null);
@@ -59,14 +60,14 @@ export function useInputTransaksi(session, editData, setEditData, setCurrentPage
     if (e) e.preventDefault();
 
     if (!formData.amount || formData.amount <= 0) {
-      showAlert('Kosong Nih?', 'Masukin nominalnya dulu dong! 💸', 'error');
+      showAlert('Nominal belum diisi', 'Lengkapi nominal transaksi terlebih dahulu.', 'error', null, 'amount');
       return;
     }
     if (!formData.category_id) {
-        setIsShaking(true);
-        setTimeout(() => setIsShaking(false), 500);
-        showAlert('Kategorinya Mana?', 'Pilih salah satu ikon kategori dulu ya! 📂', 'error');
-        return;
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
+      showAlert('Kategori belum dipilih', 'Pilih salah satu kategori terlebih dahulu.', 'error', null, 'category');
+      return;
     }
 
     setLoading(true);
@@ -82,22 +83,18 @@ export function useInputTransaksi(session, editData, setEditData, setCurrentPage
       : await supabase.from('transaction').insert([payload]);
 
     if (!error) {
-      // Kita pakai argument ke-4 (onConfirmExtra) untuk pindah halaman
       showAlert(
-        'Berhasil ges 👌',
-        editData ? 'Catatan berhasil diupdate! ✨' : 'Transaksi berhasil disimpan! 🚀',
+        editData ? 'Perubahan tersimpan' : 'Transaksi tersimpan',
+        editData ? 'Catatan transaksi berhasil diperbarui.' : 'Transaksi berhasil disimpan.',
         'success',
         () => {
           if (setEditData) setEditData(null);
           setCurrentPage(editData ? 'laporan' : 'dashboard');
-        }
+        },
+        editData ? 'edited' : 'saved'
       );
     } else {
-      showAlert(
-        'Aduh kenapa nih 🤔',
-        'Gagal simpan data, sistemnya lagi ngambek kayaknya ges! 😅',
-        'error'
-      );
+      showAlert('Gagal menyimpan transaksi', 'Terjadi kesalahan pada sistem. Silakan coba lagi.', 'error', null, 'error');
     }
     setLoading(false);
   };

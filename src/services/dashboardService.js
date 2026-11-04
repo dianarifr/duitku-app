@@ -1,15 +1,10 @@
 import { supabase } from '../supabaseClient';
 import { getFinancialRange } from '../utils/formatters';
 
-/**
- * Service untuk mengambil dan mengolah seluruh data Dashboard Duitku.
- * Dipisahkan agar Dashboard.jsx tetap clean.
- */
 export const fetchAllDashboardData = async (userId) => {
   const now = new Date();
   const today = now.toISOString().split('T')[0];
 
-  // 1. Ambil Profil (Payday)
   const { data: profile } = await supabase
     .from('profiles')
     .select('payday')
@@ -17,13 +12,10 @@ export const fetchAllDashboardData = async (userId) => {
     .single();
 
   const payday = profile?.payday || 1;
-
-  // 2. Setup Range Tanggal
   const currentRange = getFinancialRange(payday);
   const options = { day: 'numeric', month: 'short' };
   const periodLabel = `${new Date(currentRange.start).toLocaleDateString('id-ID', options)} - ${new Date(currentRange.end).toLocaleDateString('id-ID', options)}`;
 
-  // 3. Ambil Transaksi (Source of Truth)
   const { data: allTrans } = await supabase
     .from('transaction')
     .select('amount, type, date, payment_method, category_id, note')
@@ -34,7 +26,6 @@ export const fetchAllDashboardData = async (userId) => {
 
   const thisMonthTrans = allTrans || [];
 
-  // 4. Kalkulasi Summary & Wallet (Disesuaikan untuk Mutasi)
   let cashIn = 0, cashOut = 0, bankIn = 0, bankOut = 0, totalIncome = 0, totalExpense = 0;
 
   thisMonthTrans.forEach(t => {
@@ -46,6 +37,7 @@ export const fetchAllDashboardData = async (userId) => {
       totalExpense += amt;
       t.payment_method === 'transfer' ? bankOut += amt : cashOut += amt;
     } else if (t.type === 'mutasi') {
+      // Mutasi dicatat dari dua sisi; tiap sisi menggerakkan kantong sesuai arahnya.
       if (t.note.includes('[KELUAR]')) {
         t.payment_method === 'transfer' ? bankOut += amt : cashOut += amt;
       } else if (t.note.includes('[MASUK]')) {
@@ -54,7 +46,6 @@ export const fetchAllDashboardData = async (userId) => {
     }
   });
 
-  // 5. Monitoring Budget
   const { data: catData } = await supabase
     .from('category')
     .select('id, name, icon, color, budget')
@@ -78,7 +69,6 @@ export const fetchAllDashboardData = async (userId) => {
       .sort((a, b) => b.percent - a.percent);
   }
 
-  // 6. Cek Input Hari Ini
   const { data: todayData } = await supabase
     .from('transaction')
     .select('id')
@@ -87,7 +77,6 @@ export const fetchAllDashboardData = async (userId) => {
     .is('deleted_at', null)
     .limit(1);
 
-  // 7. Cek Tagihan Rutin (Recurring)
   const { data: recurringList } = await supabase
     .from('recurring_transactions')
     .select('*, category(name, icon)')
@@ -103,6 +92,7 @@ export const fetchAllDashboardData = async (userId) => {
       let targetYear = startCycle.getFullYear();
       let targetMonth = startCycle.getMonth();
 
+      // Tanggal tagihan sebelum tanggal gajian jatuh pada bulan berikutnya.
       if (rec.billing_date < payday) targetMonth += 1;
 
       const actualDueDate = new Date(targetYear, targetMonth, rec.billing_date);
@@ -115,7 +105,6 @@ export const fetchAllDashboardData = async (userId) => {
     });
   }
 
-  // Return semua data hasil olahan dalam satu objek
   return {
     payday,
     periodLabel,

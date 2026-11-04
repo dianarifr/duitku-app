@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { formatRupiah } from '../utils/formatters';
-import { useAlert } from '../context/AlertContext';
+import { useAlert } from '../context/alertStore';
 
 export function useRecurring(session, fetchData) {
   const { showAlert } = useAlert();
@@ -37,15 +37,11 @@ export function useRecurring(session, fetchData) {
       : await supabase.from('recurring_transactions').insert([payload]);
 
     if (!error) {
-      showAlert('Berhasil ges 👌', 'Tagihan rutin aman tersimpan! 🙌', 'success');
+      showAlert('Tagihan rutin tersimpan', 'Pengingat tagihan rutin berhasil disimpan.', 'success', null, 'saved');
       setIsRecModalOpen(false);
       fetchData();
     } else {
-      showAlert(
-        'Aduh kenapa nih 🤔',
-        'Gagal simpan tagihan rutin, sistemnya lagi ngambek kayaknya ges! 😅',
-        'error'
-      );
+      showAlert('Gagal menyimpan tagihan', 'Terjadi kesalahan pada sistem. Silakan coba lagi.', 'error', null, 'error');
     }
   };
 
@@ -53,15 +49,11 @@ export function useRecurring(session, fetchData) {
     const { error } = await supabase.from('recurring_transactions').delete().eq('id', deleteRecId).eq('user_id', session.user.id);
 
     if (!error) {
-      showAlert('Berhasil ges 👌', 'Tagihan rutin resmi dihapus! 🗑️', 'success');
+      showAlert('Tagihan rutin dihapus', 'Pengingat tagihan rutin telah dihapus.', 'success', null, 'deleted');
       setDeleteRecId(null);
       fetchData();
     } else {
-      showAlert(
-        'Aduh kenapa nih 🤔',
-        'Gagal hapus tagihan rutin, sistemnya lagi ngambek kayaknya ges! 😅',
-        'error'
-      );
+      showAlert('Gagal menghapus tagihan', 'Terjadi kesalahan pada sistem. Silakan coba lagi.', 'error', null, 'error');
     }
   };
 
@@ -71,7 +63,13 @@ export function useRecurring(session, fetchData) {
 
     if (!error) {
       fetchData();
-      showAlert('Berhasil ges 👌', newStatus ? 'Tagihan diaktifkan kembali! 🔥' : 'Tagihan dinonaktifkan sementara 🧊', 'success');
+      showAlert(
+        newStatus ? 'Tagihan diaktifkan' : 'Tagihan dinonaktifkan',
+        newStatus ? 'Pengingat tagihan rutin aktif kembali.' : 'Pengingat tagihan rutin dihentikan sementara.',
+        'success',
+        null,
+        newStatus ? 'reminder' : 'reminderOff'
+      );
     }
   };
 

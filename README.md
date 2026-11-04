@@ -1,89 +1,102 @@
-💸 Dompet Pro - Personal Finance PWA
+# Duitku - Pencatatan Keuangan Pribadi (PWA)
 
-Aplikasi pencatatan keuangan pribadi berbasis web yang fokus pada kecepatan input, pemantauan budget, dan pengelolaan transaksi rutin.
-🚀 Tech Stack
+Aplikasi pencatatan keuangan pribadi berbasis web yang berfokus pada kecepatan input, pemantauan anggaran, dan pengelolaan transaksi rutin.
 
-    Framework: React 18 (Vite)
+## Tech Stack
 
-    Database & Auth: Supabase (PostgreSQL)
+- **Framework:** React 19 (Vite 8)
+- **Database & Autentikasi:** Supabase (PostgreSQL)
+- **Styling:** Tailwind CSS 4
+- **PWA:** vite-plugin-pwa 2
+- **Manajemen State:** React Hooks (useState, useEffect, useRef)
 
-    Styling: Tailwind CSS
+## Skema Database (Supabase)
 
-    PWA: vite-plugin-pwa (Support Offline & Installable)
+### 1. `category`
 
-    State Management: React Hooks (useState, useEffect, useRef)
+| Kolom | Tipe | Keterangan |
+| --- | --- | --- |
+| `id` | uuid | Primary key |
+| `name` | text | Nama kategori |
+| `type` | text | `pemasukan` atau `pengeluaran` |
+| `icon` | text | Emoji ikon kategori |
+| `color` | text | Warna identitas |
+| `budget` | numeric | Batas anggaran bulanan |
+| `deleted_at` | timestamp | Nullable, penanda hapus lunak |
 
-🛠️ Database Schema (Supabase)
-1. category
+### 2. `transaction`
 
-    id (uuid, PK)
+| Kolom | Tipe | Keterangan |
+| --- | --- | --- |
+| `id` | uuid | Primary key |
+| `amount` | numeric | Nominal transaksi |
+| `category_id` | uuid | Foreign key ke `category` |
+| `note` | text | Catatan, nullable |
+| `date` | date | Tanggal transaksi |
+| `type` | text | `pemasukan`, `pengeluaran`, atau `mutasi` |
+| `payment_method` | text | `cash` atau `transfer` |
+| `related_id` | uuid | Penghubung dua sisi transaksi mutasi |
+| `deleted_at` | timestamp | Nullable, penanda hapus lunak |
 
-    name (text)
+### 3. `recurring_transactions`
 
-    type (text: 'pemasukan' / 'pengeluaran')
+| Kolom | Tipe | Keterangan |
+| --- | --- | --- |
+| `id` | uuid | Primary key |
+| `billing_date` | int | Tanggal tagihan, 1-31 |
+| `amount` | numeric | Nominal tagihan |
+| `note` | text | Nama tagihan |
+| `last_processed_at` | text | Format `YYYY-MM` |
 
-    icon (text)
+### 4. `profiles`
 
-    color (text)
+| Kolom | Tipe | Keterangan |
+| --- | --- | --- |
+| `id` | uuid | Primary key, terhubung ke pengguna Supabase |
+| `payday` | int | Tanggal gajian, 1-31 |
 
-    budget (numeric)
+## Fitur Utama
 
-    deleted_at (timestamp, nullable)
+- **Input transaksi terpadu:** Satu komponen menangani pencatatan dan pengubahan transaksi.
+- **Dashboard:** Ringkasan saldo, monitoring anggaran kritis, dan progres siklus gajian.
+- **Pengingat tagihan rutin:** Dialog otomatis untuk tagihan bulanan yang jatuh tempo.
+- **Laporan:** Filter rentang tanggal, kategori, metode pembayaran, dan pencarian catatan.
+- **Statistik:** Proporsi per kategori, rata-rata harian, dan kategori terbesar.
+- **Penasihat keuangan:** Saran otomatis berbasis anggaran kritis melalui Gemini API.
+- **Keamanan data:** Row Level Security Supabase memisahkan data antar pengguna.
 
-2. transaction
+## Instalasi
 
-    id (uuid, PK)
+```bash
+npm install
+```
 
-    amount (numeric)
+Buat berkas `.env.local` dan isi variabel berikut:
 
-    category_id (uuid, FK)
+```
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+VITE_APP_API_URL=
+```
 
-    note (text, nullable)
+Untuk fungsi penasihat keuangan, tambahkan juga pada environment server:
 
-    date (date)
+```
+GEMINI_API_KEY=
+GEMINI_API_URL=
+```
 
-    type (text)
+Jalankan aplikasi:
 
-    payment_method (text: 'cash' / 'transfer')
+```bash
+npm run dev
+```
 
-    deleted_at (timestamp, nullable)
+## Perintah Tersedia
 
-3. recurring_transactions
-
-    id (uuid, PK)
-
-    billing_date (int: 1-31)
-
-    amount (numeric)
-
-    note (text)
-
-    last_processed_at (text: YYYY-MM)
-
-✨ Core Features
-
-    [x] Single-Gate Transaction: Sistem input dan edit dalam satu komponen (DRY Principle).
-
-    [x] Smart Dashboard: Pantauan budget kritis (>70%) dan ringkasan saldo bank vs dompet.
-
-    [x] Recurring Alerts: Pop-up modal otomatis untuk tagihan bulanan (Netflix, Kos, dll).
-
-    [x] Pro Report: Filter preset tanggal (7 hari, bulan ini, bulan lalu) & Global Search berdasarkan catatan.
-
-    [x] Secure RLS: Row Level Security di Supabase untuk memastikan data antar user tidak bocor.
-
-📦 Installation
-
-    npm install
-
-    Buat file .env dan masukkan VITE_SUPABASE_URL & VITE_SUPABASE_ANON_KEY.
-
-    npm run dev
-
-Kenapa README ini penting menurut sepuh?
-
-    Database Tracking: Kalau lo mau bikin fitur baru, lo nggak perlu buka Dashboard Supabase cuma buat ngecek nama kolom.
-
-    Onboarding: Kalau suatu saat lo mau share kode ini atau kerja bareng orang lain, mereka langsung paham alur aplikasinya.
-
-    PWA Ready: Gue cantumkan info PWA biar lo inget kalau aplikasi ini bisa di-install di HP kayak aplikasi native.
+| Perintah | Fungsi |
+| --- | --- |
+| `npm run dev` | Menjalankan server pengembangan |
+| `npm run build` | Membuat bundel produksi |
+| `npm run preview` | Melihat hasil bundel produksi |
+| `npm run lint` | Menjalankan ESLint |

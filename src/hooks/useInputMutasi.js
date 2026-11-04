@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
-import { useAlert } from '../context/AlertContext';
+import { useAlert } from '../context/alertStore';
 
 export const useInputMutasi = (session, setCurrentPage, editData, setEditData) => {
   const { showAlert } = useAlert();
@@ -12,47 +12,32 @@ export const useInputMutasi = (session, setCurrentPage, editData, setEditData) =
     amount: 0,
     category_id: null,
     note: '',
-    source: 'transfer', // Default: Dari Bank
+    source: 'transfer',
     date: new Date().toISOString().split('T')[0]
   });
 
-  // SINKRONISASI EDIT DATA
   useEffect(() => {
     if (editData && editData.type === 'mutasi') {
-      // 1. Normalisasi string biar aman dari typo huruf besar/kecil
       const note = editData.note || '';
       const method = (editData.payment_method || 'transfer').toLowerCase();
 
-      // 2. Logika Penentuan Source (DARI MANA duitnya berasal)
-      const isKeluar = note.includes('[KELUAR]');
+      // Sisi [KELUAR] menyimpan kantong asal; sisi [MASUK] menyimpan kantong tujuan.
+      const finalSource = note.includes('[KELUAR]')
+        ? (method === 'cash' ? 'cash' : 'transfer')
+        : (method === 'cash' ? 'transfer' : 'cash');
 
-      let finalSource = 'transfer';
-      if (isKeluar) {
-        // Kalau yang diklik adalah sisi KELUAR, maka payment_method itu adalah ASAL-nya
-        finalSource = method === 'cash' ? 'cash' : 'transfer';
-      } else {
-        // Kalau yang diklik sisi MASUK (misal masuk ke Cash), berarti ASAL-nya dari BANK (transfer)
-        finalSource = method === 'cash' ? 'transfer' : 'cash';
-      }
-
-      // 3. Bersihkan Note
-      const cleanNote = note.replace('[KELUAR]', '').replace('[MASUK]', '').trim();
-
-      // 4. Update SEKALIGUS (Satu kali setFormData untuk semua field)
       setFormData({
         amount: editData.amount,
         category_id: editData.category_id,
-        note: cleanNote,
+        note: note.replace('[KELUAR]', '').replace('[MASUK]', '').trim(),
         source: finalSource,
         date: editData.date
       });
 
-      // 5. Update tampilan nominal (tanpa memicu setFormData lagi di sini)
       setDisplayAmount(editData.amount.toLocaleString('id-ID'));
     }
   }, [editData]);
 
-  // FETCH KATEGORI
   useEffect(() => {
     const fetchCategories = async () => {
       const { data, error } = await supabase
@@ -68,20 +53,23 @@ export const useInputMutasi = (session, setCurrentPage, editData, setEditData) =
     fetchCategories();
   }, [session.user.id]);
 
-  // HANDLE NOMINAL SAAT KETIK MANUAL
   const handleAmountChange = (value) => {
     const rawValue = value.replace(/\D/g, '');
     const numValue = parseFloat(rawValue) || 0;
 
-    // Gunakan functional update (prev) agar tidak menimpa field source/note
+    // Functional update agar source dan note tidak tertimpa.
     setFormData(prev => ({ ...prev, amount: numValue }));
     setDisplayAmount(rawValue ? numValue.toLocaleString('id-ID') : '');
   };
 
   const handleSave = async (e) => {
     if (e) e.preventDefault();
-    if (formData.amount <= 0) return showAlert("Nominal jangan kosong, Puh!", "error");
-    if (!formData.category_id) return showAlert("Pilih kategorinya dulu, Puh!", "error");
+    if (formData.amount <= 0) {
+      return showAlert('Nominal belum diisi', 'Lengkapi nominal mutasi terlebih dahulu.', 'error', null, 'amount');
+    }
+    if (!formData.category_id) {
+      return showAlert('Kategori belum dipilih', 'Pilih kategori mutasi terlebih dahulu.', 'error', null, 'category');
+    }
 
     setLoading(true);
 
@@ -89,7 +77,6 @@ export const useInputMutasi = (session, setCurrentPage, editData, setEditData) =
       const mutationId = editData?.related_id || crypto.randomUUID();
       const destination = formData.source === 'cash' ? 'transfer' : 'cash';
 
-      // Hapus data lama jika mode edit
       if (editData?.related_id) {
         const { error: delError } = await supabase
           .from('transaction')
@@ -124,13 +111,19 @@ export const useInputMutasi = (session, setCurrentPage, editData, setEditData) =
       const { error: insError } = await supabase.from('transaction').insert(entries);
       if (insError) throw insError;
 
-      showAlert(editData ? "Koreksi mutasi berhasil!" : "Saldo berhasil dipindahkan!", "success");
+      showAlert(
+        editData ? 'Perubahan tersimpan' : 'Mutasi berhasil',
+        editData ? 'Data mutasi berhasil diperbarui.' : 'Saldo berhasil dipindahkan antar kantong.',
+        'success',
+        null,
+        editData ? 'edited' : 'transfer'
+      );
 
       if (setEditData) setEditData(null);
       setCurrentPage('dashboard');
 
     } catch (error) {
-      showAlert("Gagal: " + error.message, "error");
+      showAlert('Gagal menyimpan mutasi', error.message, 'error', null, 'error');
     } finally {
       setLoading(false);
     }

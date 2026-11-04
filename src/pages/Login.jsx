@@ -6,13 +6,12 @@ function Login() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        // Otomatis balik ke mana pun asal kita saat ini
         redirectTo: window.location.origin,
       },
     });
 
     if (error) {
-      console.error('Waduh, gagal login:', error.message);
+      console.error('Gagal masuk:', error.message);
     }
   };
 
@@ -22,7 +21,7 @@ function Login() {
         <div className="mb-8 border-b border-line pb-6">
           <div className="mb-5 flex items-baseline gap-2">
             <span className="font-serif text-[21px] font-semibold tracking-tight text-ink">Duitku</span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted">cashflow</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted">arus kas</span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -34,9 +33,9 @@ function Login() {
                 Masuk ke Duitku
               </h1>
               <p className="mt-1 font-mono text-[10px] uppercase leading-relaxed tracking-[0.08em] text-muted">
-                Pantau cashflow &amp; budget
+                Pantau arus kas dan budget
                 <br />
-                biar gaji gak cuma numpang lewat
+                agar gaji terkelola dengan baik
               </p>
             </div>
           </div>
@@ -49,7 +48,7 @@ function Login() {
         >
           <img
             src="https://www.svgrepo.com/show/475656/google-color.svg"
-            alt="Google Icon"
+            alt="Google"
             className="h-5 w-5"
           />
           Masuk dengan Google
@@ -58,7 +57,7 @@ function Login() {
         <div className="mt-6 flex items-center justify-center">
           <span className="badge">
             <Icon.CheckCircle2 size={12} strokeWidth={2} className="text-pos" />
-            Secured by Supabase Auth
+            Dilindungi Supabase Auth
           </span>
         </div>
       </div>

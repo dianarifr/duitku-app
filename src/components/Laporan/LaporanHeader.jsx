@@ -17,7 +17,6 @@ export default function LaporanHeader({
 
   return (
     <div className="sticky top-0 z-30 border-b border-line bg-paper px-5 pb-4 pt-8">
-      {/* Baris 1: Judul & Back */}
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <button
@@ -31,13 +30,11 @@ export default function LaporanHeader({
           <h1 className="truncate font-serif text-xl font-semibold tracking-tight text-ink">Riwayat</h1>
         </div>
 
-        {/* Indikator Filter Aktif */}
         {(selectedCategory !== 'all' || selectedMethod !== 'all') && !isExpanded && (
           <span className="h-2 w-2 shrink-0 rounded-full bg-accent"></span>
         )}
       </div>
 
-      {/* Baris 2: Search & Toggle Button */}
       <div className="flex gap-2">
         <div className="relative flex-1">
           <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted">
@@ -65,11 +62,9 @@ export default function LaporanHeader({
         </button>
       </div>
 
-      {/* Baris 3: Advanced Filters (Collapsible) */}
       <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'mt-4 max-h-[320px] opacity-100' : 'max-h-0 opacity-0'}`}>
         <div className="space-y-4 border-t border-line pt-4">
 
-          {/* Filter Tanggal */}
           <div className="grid grid-cols-2 gap-2.5">
             <div>
               <label className="field-label">Mulai</label>
@@ -103,7 +98,6 @@ export default function LaporanHeader({
             </div>
           </div>
 
-          {/* Kategori & Metode */}
           <div className="flex gap-2.5">
             <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className="field flex-1 cursor-pointer appearance-none text-center text-[9px] uppercase tracking-[0.04em]">
               <option value="all">Kategori: Semua</option>
@@ -116,7 +110,6 @@ export default function LaporanHeader({
             </select>
           </div>
 
-          {/* Reset Action */}
           {(selectedCategory !== 'all' || selectedMethod !== 'all') && (
              <button
                type="button"
@@ -124,7 +117,7 @@ export default function LaporanHeader({
                className="btn btn-quiet w-full gap-2 font-mono text-[9px] uppercase tracking-[0.06em]"
              >
                <Icon.Repeat size={10} strokeWidth={2.5} />
-               Clear advanced filters
+               Reset filter
              </button>
           )}
         </div>

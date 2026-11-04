@@ -2,6 +2,8 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { useStatistik } from '../hooks/useStatistik';
 import { formatNominal } from '../utils/formatters';
 
+const typeLabel = { pengeluaran: 'pengeluaran', pemasukan: 'pemasukan' };
+
 export default function Statistik({ session, setCurrentPage }) {
   const {
     chartData,
@@ -15,7 +17,6 @@ export default function Statistik({ session, setCurrentPage }) {
 
   return (
     <div className="min-h-screen bg-paper pb-28 font-sans">
-      {/* Header Sticky */}
       <div className="sticky top-0 z-20 border-b border-line bg-paper px-5 pb-4 pt-8">
         <div className="mb-4 flex items-center gap-3">
           <button
@@ -26,7 +27,7 @@ export default function Statistik({ session, setCurrentPage }) {
           >
             <span className="text-base leading-none">←</span>
           </button>
-          <h1 className="flex-1 truncate font-serif text-xl font-semibold tracking-tight text-ink">Analisis cuan</h1>
+          <h1 className="flex-1 truncate font-serif text-xl font-semibold tracking-tight text-ink">Analisis keuangan</h1>
         </div>
 
         <div className="flex border border-line bg-surface p-1">
@@ -43,17 +44,16 @@ export default function Statistik({ session, setCurrentPage }) {
         </div>
       </div>
 
-      {/* Main Chart Card */}
       <div className="mt-5 px-5">
         <div className="panel flex flex-col items-center overflow-hidden p-6">
-          <h3 className="section-label mb-2">Proporsi {filterType}</h3>
+          <h3 className="section-label mb-2">Proporsi {typeLabel[filterType]}</h3>
 
           {loading ? (
             <div className="flex h-[300px] items-center justify-center font-mono text-[10px] uppercase tracking-[0.1em] text-muted animate-pulse">Menghitung data...</div>
           ) : chartData.length > 0 ? (
             <div className="relative h-[320px] w-full">
               <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center">
-                <span className="mb-1 font-mono text-[9px] uppercase tracking-[0.1em] text-muted">Bulan ini</span>
+                <span className="mb-1 font-mono text-[9px] uppercase tracking-[0.1em] text-muted">Periode ini</span>
                 <span className={`font-serif text-xl font-semibold tracking-tight tabular-nums ${filterType === 'pemasukan' ? 'text-pos' : 'text-neg'}`}>
                     {formatNominal(totalValue)}
                 </span>
@@ -96,13 +96,12 @@ export default function Statistik({ session, setCurrentPage }) {
           ) : (
             <div className="flex h-[300px] flex-col items-center justify-center text-center">
               <span className="mb-3 font-serif text-3xl text-muted">—</span>
-              <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted">Belum ada jejak transaksi, Puh</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted">Belum ada data transaksi.</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Quick Insight Cards */}
       <div className="mt-3 grid grid-cols-2 gap-3 px-5">
         <div className="panel flex flex-col justify-center p-5">
           <p className="section-label mb-1.5">Rata-rata / hari</p>
@@ -122,7 +121,7 @@ export default function Statistik({ session, setCurrentPage }) {
             {topCategory ? topCategory.icon : '—'}
           </div>
           <div className="min-w-0">
-            <p className="section-label mb-0.5">Top {filterType}</p>
+            <p className="section-label mb-0.5">Kategori terbesar</p>
             <p className="truncate text-[11px] font-semibold uppercase tracking-tight text-ink">
               {topCategory ? topCategory.name : '-'}
             </p>
@@ -130,7 +129,6 @@ export default function Statistik({ session, setCurrentPage }) {
         </div>
       </div>
 
-      {/* Intensity Bar & Breakdown List */}
       {chartData.length > 0 && (
         <div>
             <div className="mt-9 px-5">

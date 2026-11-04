@@ -1,23 +1,19 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
-import { getFinancialRange } from '../utils/formatters';
 import { formatNominal } from '../utils/formatters';
 import { fetchAllDashboardData } from '../services/dashboardService';
 
-// IMPORT KOMPONEN
 import DashboardHeader from '../components/Dashboard/DashboardHeader';
 import WalletCards from '../components/Dashboard/WalletCards';
 import SummarySection from '../components/Dashboard/SummarySection';
-import PaydayProgressBar from '../components/Dashboard/PaydayProgressBar'; // Komponen Baru
+import PaydayProgressBar from '../components/Dashboard/PaydayProgressBar';
 import AICoach from '../components/Dashboard/AICoach';
-import HistoryList from '../components/Dashboard/HistoryList';
 import RecurringModal from '../components/Dashboard/RecurringModal';
 import BudgetSection from '../components/Dashboard/BudgetCard';
 
-function Dashboard({ session, setCurrentPage, setEditData, onCategoryDeepDive, onOpenActionMenu }) {
+function Dashboard({ session, setCurrentPage, onCategoryDeepDive, onOpenActionMenu }) {
   const [summary, setSummary] = useState({ total: 0, income: 0, expense: 0 });
   const [wallet, setWallet] = useState({ dompet: 0, bank: 0 });
-  const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasInputToday, setHasInputToday] = useState(true);
   const [criticalBudgets, setCriticalBudgets] = useState([]);
@@ -25,7 +21,7 @@ function Dashboard({ session, setCurrentPage, setEditData, onCategoryDeepDive, o
   const [showRecurringModal, setShowRecurringModal] = useState(false);
   const [periodLabel, setPeriodLabel] = useState('');
   const [budgetMonitoring, setBudgetMonitoring] = useState([]);
-  const [payday, setPayday] = useState(1); // State untuk menyimpan tanggal gajian
+  const [payday, setPayday] = useState(1);
 
   const [aiAdvice, setAiAdvice] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
@@ -60,7 +56,7 @@ function Dashboard({ session, setCurrentPage, setEditData, onCategoryDeepDive, o
         localStorage.setItem('ai_budget_hash', JSON.stringify(budgets.map(b => ({ id: b.id, p: Math.round(b.percent) }))));
       }
     } catch (error) {
-      console.error("AI Coach pundung:", error);
+      console.error("Gagal memuat saran penasihat keuangan:", error);
     } finally {
       setIsAiLoading(false);
     }
@@ -68,6 +64,7 @@ function Dashboard({ session, setCurrentPage, setEditData, onCategoryDeepDive, o
 
   useEffect(() => {
     fetchDashboardData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -81,6 +78,7 @@ function Dashboard({ session, setCurrentPage, setEditData, onCategoryDeepDive, o
         setAiAdvice(cachedAdvice);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [criticalBudgets, loading]);
 
   const fetchDashboardData = async () => {
@@ -99,7 +97,7 @@ function Dashboard({ session, setCurrentPage, setEditData, onCategoryDeepDive, o
 
       if (data.pendingRecurring.length > 0) setShowRecurringModal(true);
     } catch (err) {
-      console.error("Gagal ambil data dashboard:", err);
+      console.error("Gagal memuat data dashboard:", err);
     } finally {
       setLoading(false);
     }
@@ -144,7 +142,6 @@ function Dashboard({ session, setCurrentPage, setEditData, onCategoryDeepDive, o
         formatNominal={formatNominal}
       />
 
-      {/* Payday Progress Bar disisipkan di atas AI Coach agar layout tetap simetris */}
       <PaydayProgressBar payday={payday} />
 
       <AICoach

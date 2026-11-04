@@ -2,7 +2,6 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
-import pkg from './package.json';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -15,7 +14,7 @@ export default defineConfig({
       manifest: {
         name: 'Duitku Apps',
         short_name: 'Duitku',
-        description: 'Catat cuan harian makin asik dan rapi',
+        description: 'Pencatatan keuangan harian yang rapi dan teratur',
         theme_color: '#f6f3ec',
         background_color: '#f6f3ec',
         display: 'standalone',
@@ -41,7 +40,6 @@ export default defineConfig({
         ]
       },
       workbox: {
-        // Biar aset tailwind dan react ter-cache dengan baik
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
         cleanupOutdatedCaches: true,
       }

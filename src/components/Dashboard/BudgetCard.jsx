@@ -1,6 +1,5 @@
 import { formatNominal } from '../../utils/formatters';
 
-// Komponen Internal untuk tiap Kotak
 const Card = ({ category, onDeepDive }) => {
   const hasBudget = category.budget > 0;
   const percentage = hasBudget ? Math.min((category.used / category.budget) * 100, 100) : 0;
@@ -21,11 +20,11 @@ const Card = ({ category, onDeepDive }) => {
 
         {hasBudget ? (
           <span className={`badge border-0 px-2 py-1 text-[9px] ${isOverBudget ? 'bg-neg/10 text-neg' : 'bg-surface-alt text-ink-soft'}`}>
-            {isOverBudget ? 'Over' : `${Math.round(percentage)}%`}
+            {isOverBudget ? 'Melebihi' : `${Math.round(percentage)}%`}
           </span>
         ) : (
           <span className="font-mono text-[8px] uppercase tracking-[0.1em] text-muted">
-            Limitless
+            Tanpa batas
           </span>
         )}
       </div>
@@ -42,7 +41,7 @@ const Card = ({ category, onDeepDive }) => {
 
           {hasBudget ? (
             <span className="font-mono text-[8px] uppercase tracking-[0.08em] text-muted">
-              Limit: {formatNominal(category.budget)}
+              Batas: {formatNominal(category.budget)}
             </span>
           ) : (
             <span className="font-mono text-[8px] uppercase tracking-[0.08em] text-muted">
@@ -69,7 +68,6 @@ const Card = ({ category, onDeepDive }) => {
   );
 };
 
-// KOMPONEN UTAMA
 export default function BudgetSection({ loading, budgetMonitoring, onCategoryDeepDive }) {
   const activeCategories = budgetMonitoring.filter(cat => cat.used > 0);
 
@@ -95,7 +93,7 @@ export default function BudgetSection({ loading, budgetMonitoring, onCategoryDee
         <div className="border border-dashed border-line-strong bg-surface/60 p-10 text-center">
           <div className="mb-2 font-serif text-2xl text-muted">—</div>
           <p className="font-mono text-[10px] uppercase leading-relaxed tracking-[0.08em] text-muted">
-            Belum ada pengeluaran.<br />Dompet aman terkendali!
+            Belum ada pengeluaran.<br />Saldo aman.
           </p>
         </div>
       )}

@@ -13,25 +13,23 @@ import { useRegisterSW } from 'virtual:pwa-register/react';
 import { registerSW } from 'virtual:pwa-register';
 import { AlertProvider } from './context/AlertContext';
 
+const INPUT_PAGES = ['input', 'input-pengeluaran', 'input-pemasukan', 'input-transaksi', 'input-mutasi'];
+
 function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [editData, setEditData] = useState(null);
   const [tempCategoryFilter, setTempCategoryFilter] = useState('all');
-
-  // State untuk kontrol Menu Hub (Pilihan Masuk/Keluar/Mutasi)
   const [showActionMenu, setShowActionMenu] = useState(false);
 
-  // Register PWA Service Worker
   registerSW({ immediate: true });
   useRegisterSW({
-    onRegistered(r) { console.log('SW Registered'); },
+    onRegistered() { console.log('SW Registered'); },
     onRegisterError(error) { console.log('SW registration error', error); },
   });
 
   useEffect(() => {
-    // --- 1. LOGIKA AUTH (Supabase) ---
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
@@ -41,7 +39,6 @@ function App() {
       setSession(session);
     });
 
-    // --- 2. LOGIKA NAVIGASI (Fix Back Gesture) ---
     const handlePopState = (event) => {
       if (event.state && event.state.page) {
         setCurrentPage(event.state.page);
@@ -62,7 +59,6 @@ function App() {
     };
   }, []);
 
-  // --- 3. FUNGSI NAVIGASI ---
   const navigateTo = (page) => {
     setCurrentPage(page);
     window.history.pushState({ page }, '', '');
@@ -71,13 +67,12 @@ function App() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-paper font-mono text-[11px] uppercase tracking-[0.18em] text-muted">
-        Memuat Duit...
+        Memuat data...
       </div>
     );
   }
 
-  // Tentukan apakah halaman saat ini adalah form input (untuk menyembunyikan Navigasi Bawah)
-  const isInputPage = ['input', 'input-pengeluaran', 'input-pemasukan', 'input-transaksi', 'input-mutasi'].includes(currentPage);
+  const isInputPage = INPUT_PAGES.includes(currentPage);
 
   return (
     <AlertProvider>
@@ -85,16 +80,12 @@ function App() {
         <Login />
       ) : (
         <div className="relative min-h-screen bg-paper text-ink">
-
-          {/* AREA KONTEN UTAMA */}
           <main className="mx-auto h-full max-w-md pb-28">
-
             {currentPage === 'dashboard' && (
               <Dashboard
                 session={session}
                 setCurrentPage={navigateTo}
-                setEditData={setEditData}
-                onOpenActionMenu={() => setShowActionMenu(true)} // Biar tombol orange bisa buka ActionHub
+                onOpenActionMenu={() => setShowActionMenu(true)}
                 onCategoryDeepDive={(catId) => { setTempCategoryFilter(catId); setCurrentPage('laporan'); }}
               />
             )}
@@ -126,7 +117,7 @@ function App() {
               <Statistik session={session} setCurrentPage={navigateTo} />
             )}
 
-            {['input', 'input-pengeluaran', 'input-pemasukan', 'input-transaksi'].includes(currentPage) && (
+            {INPUT_PAGES.includes(currentPage) && currentPage !== 'input-mutasi' && (
               <InputTransaksi
                 session={session}
                 setCurrentPage={navigateTo}
@@ -137,7 +128,6 @@ function App() {
             )}
           </main>
 
-          {/* 4. ACTION HUB (Overlay Pilihan Transaksi) */}
           <ActionHub
             show={showActionMenu}
             onClose={() => setShowActionMenu(false)}
@@ -147,7 +137,6 @@ function App() {
             }}
           />
 
-          {/* 5. NAVIGASI BAWAH (docked) */}
           {!isInputPage && (
             <BottomNav
               currentPage={currentPage}

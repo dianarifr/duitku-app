@@ -1,4 +1,3 @@
-import React from 'react';
 import { formatRupiah, parseNumber, formatNominal } from '../../utils/formatters';
 import * as Icon from '../../lib/icons';
 
@@ -19,7 +18,6 @@ export default function CategoryTab({
 
   return (
     <>
-      {/* CARD SIKLUS GAJIAN */}
       <div className="mb-5">
         <div className="panel flex items-center justify-between gap-3 p-4">
           <div>
@@ -33,7 +31,7 @@ export default function CategoryTab({
               className="field min-h-9 w-28 cursor-pointer appearance-none pr-8 text-[11px]"
             >
               {[...Array(31)].map((_, i) => (
-                <option key={i+1} value={i+1} className="text-ink">Tgl {i+1}</option>
+                <option key={i+1} value={i+1} className="text-ink">Tanggal {i+1}</option>
               ))}
             </select>
             <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted">
@@ -47,14 +45,14 @@ export default function CategoryTab({
         <div className="flex flex-col">
           <div className="flex items-center gap-1.5 font-mono text-[8px] uppercase tracking-[0.1em] text-muted">
             <Icon.Zap size={10} strokeWidth={2.5} />
-            <span>Double click buat edit</span>
+            <span>Klik dua kali untuk mengedit</span>
           </div>
         </div>
 
         {categories.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 border border-dashed border-line-strong bg-surface/60 py-16 text-center">
             <Icon.Search size={28} strokeWidth={2} className="text-muted opacity-40" />
-            <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted">Kategori tidak ditemukan ges</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted">Kategori tidak ditemukan.</p>
           </div>
         ) : (
           categories.map((cat) => {
@@ -73,7 +71,7 @@ export default function CategoryTab({
                     <div className="min-w-0">
                       <h4 className="truncate text-sm font-semibold uppercase tracking-tight text-ink">{cat.name}</h4>
                       <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-muted">
-                        Limit: {formatNominal(cat.budget)}
+                        Batas: {formatNominal(cat.budget)}
                       </p>
                     </div>
                   </div>
@@ -122,7 +120,6 @@ export default function CategoryTab({
         )}
       </div>
 
-      {/* MODAL FORM KATEGORI */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[110] flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4">
           <div className="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-xs border border-line bg-surface p-6 animate-in slide-in-from-bottom-10 sm:rounded-xs">
@@ -130,7 +127,7 @@ export default function CategoryTab({
               <div className="flex items-center gap-2">
                 {editingId ? <Icon.Pencil size={18} strokeWidth={2} className="text-accent" /> : <Icon.Sparkles size={18} strokeWidth={2} className="text-accent" />}
                 <h2 className="font-serif text-xl font-semibold text-ink">
-                  {editingId ? 'Edit kategori' : 'Kategori baru'}
+                  {editingId ? 'Ubah kategori' : 'Kategori baru'}
                 </h2>
               </div>
               <button
@@ -156,7 +153,7 @@ export default function CategoryTab({
                 </div>
                 <div className="w-3/4">
                   <label className="field-label">Nama</label>
-                  <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Misal: Jajan Sore" className="field font-sans" required />
+                  <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Contoh: Makan siang" className="field font-sans" required />
                 </div>
               </div>
 
@@ -189,7 +186,6 @@ export default function CategoryTab({
         </div>
       )}
 
-      {/* MODAL DELETE KATEGORI */}
       {deleteId && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-5 animate-in fade-in">
           <div className="w-full max-w-xs border border-line bg-surface p-6 text-center">
@@ -198,7 +194,7 @@ export default function CategoryTab({
             </div>
             <h3 className="mb-2 font-serif text-xl font-semibold text-ink">Hapus kategori?</h3>
             <p className="mb-6 font-mono text-[10px] uppercase leading-relaxed tracking-[0.06em] text-muted">
-              Akan disembunyikan dari daftar,<br/>ges.
+              Kategori akan dihapus dari daftar.
             </p>
             <div className="flex gap-2.5">
               <button type="button" onClick={() => setDeleteId(null)} className="btn flex-1 text-xs">Batal</button>

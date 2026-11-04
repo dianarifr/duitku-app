@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { supabase } from '../supabaseClient';
-import { useAlert } from '../context/AlertContext';
+import { useAlert } from '../context/alertStore';
 
 export function useLaporan(session, fetchFilteredData) {
   const { showAlert } = useAlert();
   const [deleteId, setDeleteId] = useState(null);
-  const [targetRelatedId, setTargetRelatedId] = useState(null); // Tambahan untuk handle mutasi
+  const [targetRelatedId, setTargetRelatedId] = useState(null);
 
   const handleDeleteTransaction = async () => {
     let query = supabase
@@ -13,7 +13,7 @@ export function useLaporan(session, fetchFilteredData) {
       .update({ deleted_at: new Date().toISOString() })
       .eq('user_id', session.user.id);
 
-    // LOGIC: Jika ada related_id (Mutasi), hapus keduanya sekaligus
+    // Mutasi tersimpan sebagai dua baris; keduanya dihapus lewat related_id.
     if (targetRelatedId) {
       query = query.eq('related_id', targetRelatedId);
     } else {
@@ -24,25 +24,22 @@ export function useLaporan(session, fetchFilteredData) {
 
     if (!error) {
       showAlert(
-        'Berhasil ges 👌',
+        'Transaksi dihapus',
         targetRelatedId
-          ? 'Sepasang transaksi mutasi udah resmi kita lenyapin, ges! 🗑️'
-          : 'Satu jejak transaksi udah resmi kita lenyapin dari laporan, ges! 🗑️',
-        'success'
+          ? 'Kedua sisi transaksi mutasi telah dihapus.'
+          : 'Transaksi telah dihapus dari laporan.',
+        'success',
+        null,
+        'deleted'
       );
       setDeleteId(null);
       setTargetRelatedId(null);
       fetchFilteredData();
     } else {
-      showAlert(
-        'Aduh kenapa nih 🤔',
-        'Gagal hapus data, sistemnya lagi ngambek kayaknya ges! 😅',
-        'error'
-      );
+      showAlert('Gagal menghapus transaksi', 'Terjadi kesalahan pada sistem. Silakan coba lagi.', 'error', null, 'error');
     }
   };
 
-  // Fungsi helper untuk set delete dengan cek related_id
   const confirmDelete = (transaction) => {
     setDeleteId(transaction.id);
     setTargetRelatedId(transaction.related_id || null);

@@ -19,14 +19,14 @@ export default function RecurringTab({ recurringData, categories, hook }) {
         <div className="flex flex-col">
           <div className="flex items-center gap-1.5 font-mono text-[8px] uppercase tracking-[0.1em] text-muted">
             <Icon.Zap size={10} strokeWidth={2.5} />
-            <span>Double click buat edit</span>
+            <span>Klik dua kali untuk mengedit</span>
           </div>
         </div>
 
         {recurringData.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 border border-dashed border-line-strong bg-surface/60 py-16 text-center">
             <Icon.Search size={28} strokeWidth={2} className="text-muted opacity-40" />
-            <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted">Tagihan tidak ditemukan ges</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted">Tagihan tidak ditemukan.</p>
           </div>
         ) : (
           recurringData.map((rec) => (
@@ -51,7 +51,7 @@ export default function RecurringTab({ recurringData, categories, hook }) {
                       {rec.note}
                     </h4>
                     <p className="truncate font-mono text-[9px] uppercase tracking-[0.08em] text-muted">
-                      Tgl {rec.billing_date} • {rec.category?.name || 'Umum'}
+                      Tanggal {rec.billing_date} • {rec.category?.name || 'Umum'}
                     </p>
                   </div>
                 </div>
@@ -61,7 +61,7 @@ export default function RecurringTab({ recurringData, categories, hook }) {
                     type="button"
                     onClick={(e) => { e.stopPropagation(); handleToggleRecurringActive(rec.id, rec.is_active); }}
                     className={`relative h-5 w-10 rounded-full border transition-colors ${rec.is_active !== false ? 'border-accent bg-accent' : 'border-line bg-surface-alt'}`}
-                    aria-label="Aktifkan / nonaktifkan tagihan rutin"
+                    aria-label="Aktifkan atau nonaktifkan tagihan rutin"
                   >
                     <div className={`absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-paper transition-all ${rec.is_active !== false ? 'left-6' : 'left-1'}`} />
                   </button>
@@ -90,7 +90,6 @@ export default function RecurringTab({ recurringData, categories, hook }) {
         )}
       </div>
 
-      {/* MODAL FORM RECURRING */}
       {isRecModalOpen && (
         <div className="fixed inset-0 z-[110] flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4">
           <div className="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-xs border border-line bg-surface p-6 animate-in slide-in-from-bottom-10 sm:rounded-xs">
@@ -98,7 +97,7 @@ export default function RecurringTab({ recurringData, categories, hook }) {
               <div className="flex items-center gap-2">
                 {editingId ? <Icon.Pencil size={18} strokeWidth={2} className="text-accent" /> : <Icon.Sparkles size={18} strokeWidth={2} className="text-accent" />}
                 <h2 className="font-serif text-xl font-semibold text-ink">
-                  {editingId ? 'Edit rutin' : 'Tagihan rutin'}
+                  {editingId ? 'Ubah tagihan rutin' : 'Tagihan rutin'}
                 </h2>
               </div>
               <button
@@ -114,7 +113,7 @@ export default function RecurringTab({ recurringData, categories, hook }) {
             <form onSubmit={handleSaveRecurring} className="space-y-5 text-left">
               <div>
                 <label className="field-label">Nama tagihan</label>
-                <input type="text" value={recFormData.note} onChange={(e) => setRecFormData({ ...recFormData, note: e.target.value })} placeholder="Contoh: Netflix / Internet" className="field font-sans" required />
+                <input type="text" value={recFormData.note} onChange={(e) => setRecFormData({ ...recFormData, note: e.target.value })} placeholder="Contoh: Internet bulanan" className="field font-sans" required />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -128,7 +127,7 @@ export default function RecurringTab({ recurringData, categories, hook }) {
                 </div>
 
                 <div>
-                  <label className="field-label">Tgl tagihan</label>
+                  <label className="field-label">Tanggal tagihan</label>
                   <div className="relative">
                     <select
                       value={recFormData.billing_date}
@@ -189,15 +188,14 @@ export default function RecurringTab({ recurringData, categories, hook }) {
         </div>
       )}
 
-      {/* MODAL DELETE RECURRING */}
       {deleteRecId && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-5 animate-in fade-in">
           <div className="w-full max-w-xs border border-line bg-surface p-6 text-center">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-surface-alt text-danger">
               <Icon.Repeat size={26} strokeWidth={2} />
             </div>
-            <h3 className="mb-2 font-serif text-xl font-semibold text-ink">Hapus rutin?</h3>
-            <p className="mb-6 font-mono text-[10px] uppercase leading-relaxed tracking-[0.06em] text-muted">Gak diingetin lagi tiap bulan,<br/>ges.</p>
+            <h3 className="mb-2 font-serif text-xl font-semibold text-ink">Hapus tagihan rutin?</h3>
+            <p className="mb-6 font-mono text-[10px] uppercase leading-relaxed tracking-[0.06em] text-muted">Pengingat bulanan akan dihentikan.</p>
             <div className="flex gap-2.5">
               <button type="button" onClick={() => setDeleteRecId(null)} className="btn flex-1 text-xs">Batal</button>
               <button type="button" onClick={handleDeleteRecurring} className="btn btn-danger flex-1 text-xs">Hapus</button>

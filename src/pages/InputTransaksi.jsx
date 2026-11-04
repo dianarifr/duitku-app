@@ -25,10 +25,10 @@ export default function InputTransaksi({ session, setCurrentPage, type: initialT
   };
 
   const isIncome = activeTab === 'pemasukan';
+  const methodLabel = { cash: 'Cash', transfer: 'Transfer' };
 
   return (
     <div className="min-h-screen bg-paper pb-10 font-sans">
-      {/* HEADER & NOMINAL SECTION */}
       <div className={`border-b border-line bg-surface px-5 pb-6 pt-8 transition-colors duration-300 ${isIncome ? 'border-t-2 border-t-pos' : 'border-t-2 border-t-neg'}`}>
         <div className="mb-6 flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
@@ -41,7 +41,7 @@ export default function InputTransaksi({ session, setCurrentPage, type: initialT
               <Icon.ArrowLeft size={18} strokeWidth={2.5} />
             </button>
             <h1 className="truncate font-serif text-xl font-semibold tracking-tight text-ink">
-              {editData ? 'Ubah catatan' : `Catat ${activeTab}`}
+              {editData ? 'Ubah catatan' : activeTab === 'pemasukan' ? 'Catat pemasukan' : 'Catat pengeluaran'}
             </h1>
           </div>
           {!editData && (
@@ -75,7 +75,6 @@ export default function InputTransaksi({ session, setCurrentPage, type: initialT
       </div>
 
       <form onSubmit={handleSave} className="space-y-7 p-5 pt-6">
-        {/* CATEGORY SELECTOR */}
         <div className="space-y-2.5">
           <div className="flex items-center justify-between gap-2 px-0.5">
             <label className="field-label mb-0">Pilih kategori</label>
@@ -97,13 +96,12 @@ export default function InputTransaksi({ session, setCurrentPage, type: initialT
             ) : (
               <button type="button" onClick={() => setCurrentPage('kategori')} className="flex flex-col items-center border border-dashed border-line-strong bg-surface p-8 text-center transition-colors hover:bg-surface-alt active:scale-[0.99]">
                 <Icon.LayoutGrid size={30} strokeWidth={2} className="mb-2 text-muted" />
-                <p className="font-mono text-[10px] uppercase leading-relaxed tracking-[0.06em] text-muted">Belum ada kategori {activeTab}.<br/>Klik di sini untuk buat dulu!</p>
+                <p className="font-mono text-[10px] uppercase leading-relaxed tracking-[0.06em] text-muted">Belum ada kategori {activeTab}.<br/>Ketuk untuk membuat kategori.</p>
               </button>
             )}
           </div>
         </div>
 
-        {/* DATE & METHOD */}
         <div className="grid grid-cols-1 gap-5 text-left sm:grid-cols-2">
           <div>
             <label className="field-label">Tanggal</label>
@@ -125,17 +123,16 @@ export default function InputTransaksi({ session, setCurrentPage, type: initialT
             <div className="flex gap-2">
               {['cash', 'transfer'].map((method) => (
                 <button key={method} type="button" onClick={() => setFormData({ ...formData, payment_method: method })} className={`flex flex-1 items-center justify-center gap-2 border py-3 font-mono text-[10px] uppercase tracking-[0.06em] transition-colors ${formData.payment_method === method ? 'border-focus bg-surface-alt text-ink' : 'border-line bg-surface text-muted'}`}>
-                  {method === 'cash' ? <Icon.Wallet size={14} strokeWidth={2} /> : <Icon.Landmark size={14} strokeWidth={2} />} {method}
+                  {method === 'cash' ? <Icon.Wallet size={14} strokeWidth={2} /> : <Icon.Landmark size={14} strokeWidth={2} />} {methodLabel[method]}
                 </button>
               ))}
             </div>
           </div>
         </div>
 
-        {/* NOTE & SUGGESTIONS */}
         <div className="relative text-left">
           <label className="field-label">Catatan</label>
-          <input type="text" placeholder="Beli apa ges?" value={formData.note} onChange={handleNoteChange} onBlur={() => setTimeout(() => setShowSuggestions(false), 200)} className="field font-sans" />
+          <input type="text" placeholder="Contoh: makan siang" value={formData.note} onChange={handleNoteChange} onBlur={() => setTimeout(() => setShowSuggestions(false), 200)} className="field font-sans" />
           {showSuggestions && (
             <div className="absolute z-50 mt-1 w-full overflow-hidden border border-line bg-surface shadow-lg">
               {filteredSuggestions.map((suggestion, index) => (
@@ -147,12 +144,11 @@ export default function InputTransaksi({ session, setCurrentPage, type: initialT
           )}
         </div>
 
-        {/* SUBMIT BUTTON */}
         <button disabled={loading} className={`btn mt-2 w-full border-0 py-4 text-base font-semibold text-accent-ink active:scale-[0.99] ${isIncome ? 'bg-pos hover:bg-pos' : 'bg-neg hover:bg-neg'} ${loading ? 'opacity-50' : ''}`}>
-          {loading ? 'MENYIMPAN...' : (
+          {loading ? 'Menyimpan...' : (
             <>
               <Icon.CheckCircle2 size={20} strokeWidth={2.5} />
-              {editData ? `Update ${activeTab}` : `Simpan ${activeTab}`}
+              {editData ? 'Simpan perubahan' : activeTab === 'pemasukan' ? 'Simpan pemasukan' : 'Simpan pengeluaran'}
             </>
           )}
         </button>

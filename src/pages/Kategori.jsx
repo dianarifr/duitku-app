@@ -13,14 +13,12 @@ export default function Kategori({ session, setCurrentPage }) {
   const [categories, setCategories] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [recurringData, setRecurringData] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState({ payday: 1 });
 
   const [activeTab, setActiveTab] = useState('list');
   const [searchTerm, setSearchTerm] = useState('');
 
   const fetchData = async (pd) => {
-    setLoading(true);
     const payday = pd || userProfile.payday;
     const { start } = getFinancialRange(payday);
 
@@ -33,7 +31,6 @@ export default function Kategori({ session, setCurrentPage }) {
     setCategories(catRes.data || []);
     setTransactions(transRes.data || []);
     setRecurringData(recRes.data || []);
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -44,6 +41,7 @@ export default function Kategori({ session, setCurrentPage }) {
       fetchData(pd);
     };
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleUpdatePayday = async (val) => {
@@ -52,17 +50,14 @@ export default function Kategori({ session, setCurrentPage }) {
     fetchData(val);
   };
 
-  // INIT CUSTOM HOOKS
   const kategoriHook = useKategori(session, fetchData);
   const recurringHook = useRecurring(session, fetchData);
 
-  // Filters
   const filteredCategories = categories.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
   const filteredRecurring = recurringData.filter(r => r.note.toLowerCase().includes(searchTerm.toLowerCase()) || r.category?.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
     <div className="min-h-screen bg-paper pb-28 font-sans text-ink">
-      {/* HEADER */}
       <div className="sticky top-0 z-40 border-b border-line bg-paper px-5 pb-4 pt-8">
         <div className="mb-5 flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">

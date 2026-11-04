@@ -3,9 +3,9 @@ export default function HistoryList({ transactions, loading, onSeeAll, onEdit })
     <div className="mt-8 px-5">
       <div className="mb-3 flex items-end justify-between px-0.5">
         <div className="flex flex-col">
-          <h3 className="font-serif text-lg font-semibold leading-none text-ink">Riwayat cuan</h3>
+          <h3 className="font-serif text-lg font-semibold leading-none text-ink">Riwayat transaksi</h3>
           <span className="mt-1 font-mono text-[8px] uppercase tracking-[0.1em] text-muted">
-            Double click buat edit
+            Klik dua kali untuk mengedit
           </span>
         </div>
         <button type="button" onClick={onSeeAll} className="btn btn-quiet min-h-7 px-1 font-mono text-[10px] uppercase tracking-[0.08em]">
@@ -16,7 +16,7 @@ export default function HistoryList({ transactions, loading, onSeeAll, onEdit })
       <div className="space-y-2.5">
         {loading ? (
           <div className="py-10 text-center font-mono text-[10px] uppercase tracking-[0.1em] text-muted animate-pulse">
-            Lagi ngitung duit dulu
+            Memuat transaksi...
           </div>
         ) : transactions.length > 0 ? (
           transactions.map((t) => (
@@ -53,7 +53,7 @@ export default function HistoryList({ transactions, loading, onSeeAll, onEdit })
           ))
         ) : (
           <div className="py-10 text-center font-mono text-[10px] uppercase tracking-[0.1em] text-muted">
-            Belum ada cuan masuk/keluar ges
+            Belum ada transaksi.
           </div>
         )}
       </div>

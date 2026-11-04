@@ -15,9 +15,9 @@ export default function SummarySection({ hasInputToday, loading, income, expense
                 <Icon.SquarePen size={18} strokeWidth={2} className="text-accent" />
               </div>
               <div className="min-w-0">
-                <p className="section-label leading-none">Self-check</p>
+                <p className="section-label leading-none">Pengingat</p>
                 <p className="mt-1 truncate text-xs font-medium text-ink-soft">
-                  Belum ada catatan hari ini, ges.
+                  Belum ada catatan untuk hari ini.
                 </p>
               </div>
             </div>

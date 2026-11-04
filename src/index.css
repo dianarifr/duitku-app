@@ -106,7 +106,7 @@
   }
 }
 
-/* Animasi kartu Self-check (versi asli) */
+/* Animasi kartu pengingat harian */
 @keyframes mini-jump {
   0%, 100% {
     transform: translateY(0);
@@ -173,7 +173,7 @@
     border-radius: 2px;
   }
 
-  /* ---------- Tombol ---------- */
+  /* Tombol */
   .btn {
     appearance: none;
     display: inline-flex;
@@ -256,7 +256,7 @@
     color: var(--color-ink);
   }
 
-  /* ---------- Form ---------- */
+  /* Form */
   .field {
     width: 100%;
     min-height: 44px;
@@ -296,7 +296,7 @@
     color: var(--color-muted);
   }
 
-  /* ---------- Ikon ---------- */
+  /* Ikon */
   .icon-box {
     display: flex;
     align-items: center;
@@ -309,7 +309,7 @@
     background: var(--color-surface-alt);
   }
 
-  /* ---------- Sheet / modal ---------- */
+  /* Sheet dan modal */
   .sheet {
     width: 100%;
     max-width: 28rem;
@@ -329,7 +329,7 @@
     background: var(--color-line-strong);
   }
 
-  /* ---------- Scrollbar ---------- */
+  /* Scrollbar */
   .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
   }
@@ -339,7 +339,7 @@
     border-radius: 999px;
   }
 
-  /* ---------- Dock bawah ---------- */
+  /* Dock bawah */
   .dock {
     position: fixed;
     bottom: 0;
